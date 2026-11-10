@@ -453,7 +453,12 @@ def main() -> int:
     # missiles referenced by effect rows: their status modifiers ([code, value, millis] x2)
     missiles = {}
     missile_cc = {}
+    # DamageRepeatNum (ダメージ発生回数) + RepeatDamageDelayMillis (連続ダメージ発生遅延): every missile with
+    # a repeat count is described as (count + 1)連続 (20 of 20 stratagem missiles)
+    missile_repeat = {}
     for r in c.table("Missile.atb"):
+        if r["MissileID"] and r["DamageRepeatNum"]:
+            missile_repeat[r["MissileID"]] = [r["DamageRepeatNum"], r["RepeatDamageDelayMillis"]]
         mods = [[r[f"StatusModifierType{i}"], r[f"StatusEffectValue{i}"], r[f"DurationInMillis{i}"]] for i in (1, 2)
                 if r[f"StatusModifierType{i}"]]
         if r["MissileID"] and mods:
@@ -616,7 +621,7 @@ def main() -> int:
         if head and head["AbilityType"] == 6 and (r["AbilityTypeDetail"] if r["AbilityType"] else head["AbilityTypeDetail"]) == 7:
             if r["EffectValue"] in atext:
                 ability_names[r["EffectValue"]] = atext[r["EffectValue"]]
-    out.write_text(json.dumps({"ability_names": ability_names, "quest_types": quest_types, "target_sets": target_sets, "smt": smt, "attack_bonus": attack_bonus, "unit_effect": unit_effect,
+    out.write_text(json.dumps({"ability_names": ability_names, "quest_types": quest_types, "target_sets": target_sets, "smt": smt, "missile_repeat": missile_repeat, "attack_bonus": attack_bonus, "unit_effect": unit_effect,
                                "missiles": missiles, "missile_cc": missile_cc, "effect_tables": effect_tables, "labels": labels},
                               ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     by_vocab = collections.Counter(k.split(":")[0] for k in labels)

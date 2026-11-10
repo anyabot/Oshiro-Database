@@ -1,6 +1,6 @@
 # Effect sweep
 
-21256 of 21320 effect rows fully decoded (99.7%).
+21265 of 21320 effect rows fully decoded (99.7%).
 
 - **ability · ability type 6/5** — 17 abilities, 17 rows
     - #9536(card 536) フランドーナ・ガニョーレ — "Self: ability type 6/5 1, only at max giantification (最大化)" — 自身の射程内の敵の被ダメージが30%上昇 最大化時、自身の計略効果時間が10秒増加 敵の攻撃対象とならず、全マス間を移動可能
@@ -15,32 +15,19 @@
     - #7507(card 6922) 泰然自若 — "Self: Deploy Ki −85%, doesn't stack" — 40秒間自身の足止め数5増加､被ダメージを80%､最大化時更に 40%軽減｡特殊攻撃時の攻撃と効果が2倍､攻撃が標的と周囲 に2倍のダメージを与える｡水上以外の遠近マスに移動可 [AbilityLocationType=90]
     - #93004(card 3004) 丁字戦法 — "Ki +2 every 10s" — 全ての水城と軍船城娘の攻撃が100上昇 射程内の敵の防御が15%低下(同種効果と重複) 【水上】10秒毎に気が追加で2増加 [AbilityLocationType=9]
 - **enchant_set · stat 222** — 8 abilities, 8 rows
-    - gimmick#8219/ally 九字印・氷遁 — "Target: stat 222 set to 1" — 30秒間対象の射程が1.4倍、攻撃対象が1増加、攻撃速度 が少し低下、攻撃が1.4倍のダメージを与える術攻撃となり 攻撃した敵を5秒間｢氷結｣にする(自分のみ)
-    - gimmick#8220/ally 九字印・雷遁 — "Target: stat 222 set to 1" — 30秒間対象の射程が1.2倍、攻撃対象が2増加 攻撃速度が少し低下、3連続で0.8倍の術ダメージを 与える雷属性攻撃を行う(自分のみ)
-    - gimmick#8222/ally 九字秘印・氷遁 — "Target: stat 222 set to 1" — 30秒間対象の射程が1.5倍、攻撃対象が1増加、攻撃速度 が少し低下、攻撃が1.6倍のダメージを与える術攻撃となり 攻撃した敵を5秒間｢氷結｣にする(自分のみ)
+    - gimmick#8219/ally 九字印・氷遁 — "Target: stat 222: on" — 30秒間対象の射程が1.4倍、攻撃対象が1増加、攻撃速度 が少し低下、攻撃が1.4倍のダメージを与える術攻撃となり 攻撃した敵を5秒間｢氷結｣にする(自分のみ)
+    - gimmick#8220/ally 九字印・雷遁 — "Target: stat 222: on" — 30秒間対象の射程が1.2倍、攻撃対象が2増加 攻撃速度が少し低下、3連続で0.8倍の術ダメージを 与える雷属性攻撃を行う(自分のみ)
+    - gimmick#8222/ally 九字秘印・氷遁 — "Target: stat 222: on" — 30秒間対象の射程が1.5倍、攻撃対象が1増加、攻撃速度 が少し低下、攻撃が1.6倍のダメージを与える術攻撃となり 攻撃した敵を5秒間｢氷結｣にする(自分のみ)
 - **ability · stat 402** — 5 abilities, 5 rows
     - #93122(card 3122) 呑み取りの槍 — "Self: stat 402 set to 1" — 【配置】特殊能力解除中､自身を除く射程内城娘の攻撃に自身 の10%の値を加算｡最大化時､自身の配置特技効果1.5倍 射程内城娘の与ダメージ40%上昇､被ダメージ40%軽減
     - #94122(card 3122) 天下三名の日本号 — "Self: stat 402 set to 1" — 【配置】特殊能力解除中､自身を除く射程内城娘の攻撃に自身 の14%の値を加算｡最大化時､自身配置特技1.5倍｡射程内城娘 の攻撃後の隙50%短縮､与ダメ50%上昇､被ダメ50%軽減
     - #99212(card 9212) 彷徨う霊体 — "Self: stat 402 set to 1" — 攻撃する度に自身の攻撃が5%上昇(上限150%) 攻撃した敵の攻撃を3%ずつ低下させる(上限90%) 敵の攻撃を50％の確率で回避、全マス移動可能
-- **ability · stat 104** — 3 abilities, 3 rows
-    - #701(card 701) 謀計の毒刃 — "Field effect #8: damage ×2.5 ATK; inflicts Deadly Poison (20s); stat 104 +500%, doesn't stack, for 20s" — 大破時に射程内全ての敵に攻撃の2.5倍のダメージを与え 15秒間「猛毒」にする
-    - #7524(card 3049) 梟盧千擲 — "Self: Missile #4309: inflicts Deadly Poison (10s); stat 104 +500%, doesn't stack, for 10s; Move speed −70%, doesn't stack, for 1.8s" — 30秒間自身の攻撃対象2増加 攻撃した敵を10秒間「猛毒」状態にする｡自身を除く 射程内城娘と敵に継続的に術ダメージを与える
-    - #7524(card 16049) 梟盧千擲 — "Self: Missile #4309: inflicts Deadly Poison (10s); stat 104 +500%, doesn't stack, for 10s; Move speed −70%, doesn't stack, for 1.8s" — 30秒間自身の攻撃対象2増加 攻撃した敵を10秒間「猛毒」状態にする｡自身を除く 射程内城娘と敵に継続的に術ダメージを与える
-- **ability · stat 315** — 3 abilities, 3 rows
-    - #93122(card 3122) 呑み取りの槍 — "Self: stat 315: on" — 【配置】特殊能力解除中､自身を除く射程内城娘の攻撃に自身 の10%の値を加算｡最大化時､自身の配置特技効果1.5倍 射程内城娘の与ダメージ40%上昇､被ダメージ40%軽減
-    - #94122(card 3122) 天下三名の日本号 — "Self: stat 315: on" — 【配置】特殊能力解除中､自身を除く射程内城娘の攻撃に自身 の14%の値を加算｡最大化時､自身配置特技1.5倍｡射程内城娘 の攻撃後の隙50%短縮､与ダメ50%上昇､被ダメ50%軽減
-    - #99053(card 9053) 超高校級の文学少女 — "Self: stat 315: on" — 敵から狙われず継続攻撃を行う「ジェノサイダー翔」 になり、徐々に攻撃と攻撃速度と攻撃対象数が低下 「腐川冬子」の状態で徐々に低下した性能が回復
 - **enchant · stat 222** — 2 abilities, 2 rows
-    - gimmick#8218 九字印・火遁 — "Self: ATK +80%, doesn't stack, for 30s · Self: Attack attribute: fire, for 30s · Self: stat 222 set to 1, for 30s · Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s" — 30秒間対象の攻撃が1.8倍、攻撃速度が少し低下 2倍のダメージを与える火属性攻撃を行い 攻撃した敵を5秒間｢火傷(弱)｣にする(自分のみ)
-    - gimmick#8221 九字秘印・火遁 — "Self: ATK +80%, doesn't stack, for 30s · Self: Attack attribute: fire, for 30s · Self: stat 222 set to 1, for 30s · Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s" — 30秒間対象の攻撃が1.8倍、攻撃速度が少し低下、2.2倍 のダメージを与える火属性攻撃を行い5秒間｢火傷(弱)｣ にする。射程内の味方の攻撃が200上昇(自分のみ)
+    - gimmick#8218 九字印・火遁 — "Self: ATK +80%, doesn't stack, for 30s · Self: Attack attribute: fire, for 30s · Self: stat 222: on, for 30s · Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s" — 30秒間対象の攻撃が1.8倍、攻撃速度が少し低下 2倍のダメージを与える火属性攻撃を行い 攻撃した敵を5秒間｢火傷(弱)｣にする(自分のみ)
+    - gimmick#8221 九字秘印・火遁 — "Self: ATK +80%, doesn't stack, for 30s · Self: Attack attribute: fire, for 30s · Self: stat 222: on, for 30s · Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s" — 30秒間対象の攻撃が1.8倍、攻撃速度が少し低下、2.2倍 のダメージを与える火属性攻撃を行い5秒間｢火傷(弱)｣ にする。射程内の味方の攻撃が200上昇(自分のみ)
 - **ability · stat 222** — 2 abilities, 2 rows
-    - #7159(card 3010) アルキメディアン・スクリュー — "Self: stat 222 set to 1" — 指定方向の敵に6連続攻撃を行い少し後退させる｡ストック数で ダメージが上昇し､後退効果が上昇(最大2倍)｡ストック最大時 8連続攻撃となり射程と範囲が増加(射程：極長､自動で蓄積)
-    - #7162(card 3010) アルキメデスの鉤爪 — "Self: stat 222 set to 1" — 指定方向の敵に8連続攻撃を行い少し後退させる｡ストック数で ダメージが上昇し､後退効果が上昇(最大2倍)｡ストック最大時 9連続攻撃となり射程と範囲が増加(射程：極長､自動で蓄積)
-- **ability · stat 317** — 2 abilities, 2 rows
-    - #9991(card 991) めくるめく絶望 — "Self: stat 317: on" — 【配置】射程内の敵と味方を「絶望」状態にする 被攻撃時､自身と自身の伏兵が敵の攻撃の30%を反射 最大化時､射程内の「絶望」敵の与ダメが40%低下
-    - #10991(card 991) 希望と絶望の学園 — "Self: stat 317: on" — 【配置】射程内の敵と味方を「絶望」状態にする 被攻撃時､自身と自身の伏兵が敵の攻撃の40%を反射 最大化時､射程内の「絶望」敵の与ダメが50%低下
-- **enchant_set · stat 104** — 1 abilities, 1 rows
-    - gimmick#639/ally 穴太衆 — "Units in the target's range: stat 104 set to 500" — 20秒間対象と対象の射程内の蔵の回復が200上昇 (近接城娘が対象)
+    - #7159(card 3010) アルキメディアン・スクリュー — "Self: stat 222: on" — 指定方向の敵に6連続攻撃を行い少し後退させる｡ストック数で ダメージが上昇し､後退効果が上昇(最大2倍)｡ストック最大時 8連続攻撃となり射程と範囲が増加(射程：極長､自動で蓄積)
+    - #7162(card 3010) アルキメデスの鉤爪 — "Self: stat 222: on" — 指定方向の敵に8連続攻撃を行い少し後退させる｡ストック数で ダメージが上昇し､後退効果が上昇(最大2倍)｡ストック最大時 9連続攻撃となり射程と範囲が増加(射程：極長､自動で蓄積)
 - **ability · unused field AbilityEffectDetail** — 1 abilities, 1 rows
     - #94123(card 3123) 隠居城の花嫁修業 — "Self: ATK +8%, stacks" — 自身の攻撃45%上昇､自身を除く[花嫁衣装]城娘 1体につき攻撃がさらに8%ずつ上昇 射程内の[花嫁衣装]城娘の攻撃と防御が120上昇 [AbilityEffectDetail=9]
 - **ability · unused field LimitValue** — 1 abilities, 1 rows

@@ -260,6 +260,18 @@
   "225": {
    "name": "攻撃属性",
    "proof": "SMT 25/26/27 (ExpressionType 4 OR / 3 set / 5 AND-NOT) on status 225; bit n = column n of EnemyTable EnemyWeakAttribute.atb (無,炎,氷,水,雷,土,風,光,闇,毒,属性1-3 = 1,2,4,...): every row agrees with its text - value 2 on the 火属性攻撃 stratagems (九字印・火遁, 拒絶する焔), 16 on 雷属性 (九字印・雷遁, 雷纏鳴神)"
+  },
+  "104": {
+   "name": "RegenInterval",
+   "proof": "FUN_0050e710 reads the unit's 1xx status 104 (selector FUN_00ac9140, slot 0x310 via FUN_00ac72e0), converts it with FUN_0042ae40 (ms -> frames) and schedules a timer (FUN_00517880) whose callback FUN_00516e80 (vtable 0xc5e7c4 slot 2) heals the unit by status 103 Regeneration (FUN_00ac7280, slot 0x270) when it is above 0 and the no-heal flag is clear: 104 is the time between regeneration ticks"
+  },
+  "315": {
+   "name": "反転化 (reversal)",
+   "proof": "FUN_00546780 passes the unit's status 315 (FUN_0050d260 -> FUN_00acd050, slot 0x8f8) as the 3rd argument of the growth step FUN_00ae8ae0; when it is set, a growing entry whose EnableReverseEffect byte (+0x39; column name 反転化有効) is set adds -step instead of +step"
+  },
+  "317": {
+   "name": "Untargetable by allies in 「絶望」",
+   "proof": "FUN_0050d4e0(attacker), the untargetable test of every target-selection predicate, returns true when status 317 (FUN_00acd170, slot 0x438) is set, the attacker is in crowd-control state 9 絶望 (FUN_00529ed0(8)) and the attacker passes FUN_00551c00 (same-side test, as in ability condition kind 7)"
   }
  },
  "kinds": {
@@ -297,7 +309,7 @@
   },
   "317": {
    "kind": "bool",
-   "proof": "accessor FUN_00acd170 returns value > 0 (slot 0x438); callers only test it as a flag"
+   "proof": "FUN_0050d4e0 tests FUN_00acd170's result as a flag (char != 0)"
   },
   "308": {
    "kind": "bool",
@@ -317,7 +329,7 @@
   },
   "315": {
    "kind": "bool",
-   "proof": "accessor FUN_00acd050 returns value > 0 (slot 0x8f8); callers only test it as a flag"
+   "proof": "FUN_00acda20 clamps the value to [DAT_00cb60c0, DAT_00cb60bc]; FUN_00546780 passes it on as a flag (param_3 & 0xff)"
   },
   "320": {
    "kind": "bool",
@@ -334,6 +346,10 @@
   "225": {
    "kind": "bitmask",
    "proof": "SMT 25/26/27 (ExpressionType 4 OR / 3 set / 5 AND-NOT) on status 225; bit n = column n of EnemyTable EnemyWeakAttribute.atb (無,炎,氷,水,雷,土,風,光,闇,毒,属性1-3 = 1,2,4,...): every row agrees with its text - value 2 on the 火属性攻撃 stratagems (九字印・火遁, 拒絶する焔), 16 on 雷属性 (九字印・雷遁, 雷纏鳴神)"
+  },
+  "222": {
+   "kind": "bool",
+   "proof": "setter FUN_00ae06e0 clamps the value to 0..1. No reader in the client: the getter FUN_00adf7b0 / setter are only in the per-status vtable 0xcb5b64 of the registry FUN_00ae09b0, no code calls or references them or the handler object 0xd4688c, and no data table (SMT RefStatus, AttackBonusStatusEffect) names 222"
   }
  },
  "flagbits": {

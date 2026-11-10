@@ -21,6 +21,8 @@ export interface EffectDefs {
   effect_tables: Record<string, Record<string, RawRow>>;
   /** Missile.atb status modifiers: [code, value, millis] per slot. */
   missiles: Record<string, [number, number, number][]>;
+  /** Missile.atb DamageRepeatNum + RepeatDamageDelayMillis (repeat hits after the first). */
+  missile_repeat?: Record<string, [number, number]>;
   /** Missile.atb CrowdControlType + DurationInMillis1. */
   missile_cc?: Record<string, [number, number]>;
   /** EnchantTargetSet.atb: set id -> its 発動対象 target codes. */
@@ -448,9 +450,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const stat = word(`status:${b.StatusType}`, `stat ${b.StatusType}`);
     const op = defs.labels[`op:${b.ConditionOperator}`] ? word(`op:${b.ConditionOperator}`, "") : `op${b.ConditionOperator}`;
     const val = `${b.ConditionValue ?? 0}${b.ValueType === 2 ? "%" : ""}`;
-    const cond = b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
-    last = { key: "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: "×", v: v / 100, note: cond };
-    return `damage ×${fmt(v / 100)} ${cond}`;
+    // ≤ 100% of the maximum always holds: the bonus applies to every hit (e.g. 雷光王撃 「攻撃が0.5倍の術ダメージ」)
+    const always = b.ValueType === 2 && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≤" && Number(b.ConditionValue) >= 100;
+    const cond = always ? "" : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
+    last = { key: always ? "dmg:dealt" : "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: always ? "%" : "×",
+      v: always ? Math.abs(v - 100) : v / 100, ...(cond ? { note: cond } : {}) };
+    return `damage ×${fmt(v / 100)}${cond ? ` ${cond}` : ""}`;
   };
   /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */
   const damageRowFact = (table: string, row: RawRow, v: number) => {
@@ -502,7 +507,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const missile = (id: number): string => {
     const mods = defs.missiles[id] ?? [];
     const cc = defs.missile_cc?.[id];
+    const rep = defs.missile_repeat?.[id];
     const parts = mods.map(([code, v, ms]) => `${modifier(code, v)}${ms ? `, for ${fmt(ms / 1000)}s` : ""}`);
+    if (rep) parts.unshift(`hits ${rep[0] + 1} times${rep[1] ? `, ${fmt(rep[1] / 1000)}s apart` : ""}`);
     if (cc) parts.unshift(`inflicts ${ccName(cc[0])}${cc[1] ? ` (${fmt(cc[1] / 1000)}s)` : ""}`);
     if (!parts.length) return `missile #${id}`;
     return `missile #${id}: ${parts.join("; ")}`;
@@ -515,7 +522,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const parts: string[] = [];
     // AbilityTypeDetail 3 = a growing effect (FUN_00ae8ae0): each trigger counts, and once the count
     // reaches AbilityEffectDetail (0 = every trigger) EffectValue is added again, capped at LimitValue;
-    // EnableReverseEffect subtracts instead. AbilityType 19 triggers on a 1 s timer (FUN_005090b0,
+    // with EnableReverseEffect (反転化有効) it subtracts instead while the unit's status 315 反転化 is on
+    // (FUN_00546780 passes 315 as FUN_00ae8ae0's 3rd argument). AbilityType 19 triggers on a 1 s timer (FUN_005090b0,
     // 30 frames at DAT_00c6d97c = 30 fps), so its AbilityEffectDetail is seconds per step.
     // only ability types whose handler reads AbilityTypeDetail as a condition kind (FUN_00af8580 is
     // called for types 1, 2, 11-19, 23; type 10 runs the same kind loop in FUN_00af7830)
@@ -532,7 +540,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       const step = r.AbilityType === 19
         ? (n > 1 ? `every ${n}s` : "every second")
         : (n > 1 ? `every ${n} ${STEP_NOUN[Number(r.AbilityType)]?.[1] ?? "triggers"}` : `each ${STEP_NOUN[Number(r.AbilityType)]?.[0] ?? "trigger"}`);
-      parts.push(`${rev ? "shrinks" : "grows"} by that amount ${step}`);
+      parts.push(`grows by that amount ${step}${rev ? ` (shrinks instead while ${word("status:315", "status 315")} is on)` : ""}`);
     } else if (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && CONDITION[num("AbilityTypeDetail")]) {
       const c = CONDITION[num("AbilityTypeDetail")](num("AbilityEffectDetail"), (id) => word(`trait:${id}`, `trait ${id}`));
       if (c) parts.push(c);
