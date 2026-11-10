@@ -1,6 +1,6 @@
 // Stage / enemy data (tools/export_stages.py) and how deliberations (審議) change each enemy.
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
-import { describeRow, sideOfTarget, type BuffFact, type EffectDefs } from "./effects";
+import { describeRow, sideOfTarget, targetJp, type BuffFact, type EffectDefs } from "./effects";
 import { tagEN } from "./labels";
 import type { RawRow } from "./types";
 
@@ -139,6 +139,8 @@ export function withTargets(rows: RawRow[]): RawRow[] {
 
 /** Does a target code select this enemy? null = the code tests something else (a state, a unit kind). */
 export function hits(e: Enemy, code: number, targets: Record<string, EnemyTarget>): boolean | null {
+  // 14 in a map effect = the opposing side's castle girls (「難攻不落: 敵城娘の被ダメージが減少」): EnemyType 101 敵城娘
+  if (code === 14) return e.types.includes(101);
   const t = targets[String(code)];
   if (!t) return null;
   if (t.all) return true;
@@ -170,8 +172,8 @@ export function modsFor(e: Enemy, options: SingiOption[], defs: EffectDefs, targ
 
 /** Does a MapEffect row target enemies? (its TargetType's name: 敵, an enemy type, …) */
 export function rowIsEnemySide(r: RawRow, defs: EffectDefs): boolean {
-  return sideOfTarget(defs.labels[`otarget:${r.TargetType}`]?.jp ?? defs.labels[`target:${r.TargetType}`]?.jp) === "enemy"
-    && !!r.TargetType;
+  // map effects belong to the player's side: owner-relative codes read from it (14 = 敵城娘)
+  return !!r.TargetType && sideOfTarget(targetJp(defs, Number(r.TargetType), true)) === "enemy";
 }
 
 // PreBattleEffectType, named from the deliberation texts whose rows use it: 1 基礎攻撃…低下 (20009, 20014,
