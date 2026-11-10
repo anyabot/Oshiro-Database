@@ -33,4 +33,4 @@
 - **ability · unused field LimitValue** — 1 abilities, 1 rows
     - #94149(card 3149) 欠けたるものの美しさ — "Ki +2 every 5s" — 【配置】城娘の能力値が徐々に上昇｡攻撃/防御:600､回復:60 平城と地獄城は効果1.6倍､地獄/平城は2.2倍｡時間経過で気が徐々 に増加｡最大化時､射程内の敵に対して「火傷」 [LimitValue=600]
 - **ability · ability type 15** — 1 abilities, 1 rows
-    - #69266(card 9264) 【川熊娘】イオクラス特技ナタ変身 — "Self: Direct-hit bonus +300, doesn't stack (ability type 15)" — 
+    - #69266(card 9264) 【川熊娘】イオクラス特技ナタ変身 — "Self: Direct-hit bonus +300%, doesn't stack (ability type 15)" — 

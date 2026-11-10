@@ -142,6 +142,68 @@ for (const it of items) {
   if (missing.length) report.push({ item: it, missing, sentences, absent: itemAbsent });
 }
 
+// Unit check: a number the page prints as "%" that the description only prints flat (or the reverse).
+// Only numbers whose form is unambiguous on both sides count: the description must print n in one
+// form only (n% vs bare n) and so must the page.
+type Form = "pct" | "flat";
+const sentenceForms = (s: string): [number, Form][] => {
+  const out: [number, Form][] = [];
+  for (const m of s.matchAll(/(×)?(\d+(?:\.\d+)?)(%|s\b|×)?/g)) {
+    const before = s.slice(Math.max(0, m.index! - 1), m.index!);
+    if (m[1] || m[3] === "s" || m[3] === "×" || before === "#" || before === "★") continue;
+    out.push([Number(m[2]), m[3] === "%" ? "pct" : "flat"]);
+  }
+  return out;
+};
+const descForms = (d: string): [number, Form][] => {
+  const out: [number, Form][] = [];
+  for (const m of d.matchAll(/(\d+(?:\.\d+)?)(%|％|倍|秒|回|体|段階|人|つ|連|マス|度|個|分|ヶ所|箇所|種|撃|発|名|割)?/g)) {
+    const before = d.slice(Math.max(0, m.index! - 1), m.index!);
+    if (before === "★" || before === "☆" || before === "[" || (m[2] && m[2] !== "%" && m[2] !== "％")) continue;
+    out.push([Number(m[1]), m[2] ? "pct" : "flat"]);
+  }
+  return out;
+};
+const unitIssues: { item: Item; n: number; page: Form; sentences: string[]; codes: string[] }[] = [];
+let unitChecked = 0;
+for (const it of items) {
+  const sentences: string[] = [];
+  for (const g of it.groups) g.rows.forEach((r, i) => {
+    sentences.push(...describeRow(r, g.kind, defs, g.links?.[String(i)], rowBases(g.rows)[i]).text);
+  });
+  const page = sentences.flatMap(sentenceForms);
+  const desc = descForms(it.description);
+  for (const n of new Set(desc.map(([v]) => v))) {
+    const dForms = new Set(desc.filter(([v]) => near(v, n)).map(([, f]) => f));
+    const pForms = new Set(page.filter(([v]) => near(v, n)).map(([, f]) => f));
+    if (dForms.size !== 1 || pForms.size !== 1) continue;
+    unitChecked++;
+    const [df] = dForms, [pf] = pForms;
+    if (df === pf) continue;
+    // the rows that carry n: their modifier / effect code, to group the disagreements
+    const codes = it.groups.flatMap((g) => g.rows).filter((r) => [r.EffectValue, r.LimitValue].some((x) => typeof x === "number" && near(x, n)))
+      .map((r) => r.StatusModifierType != null ? `smt:${r.StatusModifierType}${typeof r.LimitValue === "number" && near(r.LimitValue, n) ? " limit" : ""}`
+        : `type:${r.AbilityType ?? "?"}/${r.AbilityTypeDetail ?? r.EnchantEffectType ?? r.EffectType ?? "?"}`);
+    unitIssues.push({ item: it, n, page: pf, codes, sentences: sentences.filter((s) => sentenceForms(s).some(([v]) => near(v, n))) });
+  }
+}
+{
+  const lines = [
+    `# Percent vs flat`,
+    ``,
+    `Numbers printed in one form on both the description and the page: ${unitChecked}. Disagreeing: ${unitIssues.length}.`,
+    ``,
+    ...unitIssues.flatMap(({ item, n, page, sentences, codes }) => [
+      `## card ${item.card} · ${item.label} ${item.key} ${item.name}: ${n} is ${page === "pct" ? "% on the page, flat in the text" : "flat on the page, % in the text"} [${[...new Set(codes)].join(", ")}]`,
+      "```", item.description, "```",
+      ...sentences.map((s) => `  > ${s}`),
+      ``,
+    ]),
+  ];
+  fs.writeFileSync(path.join(root, "tools/out/units.md"), lines.join("\n"));
+  console.log(`percent vs flat: ${unitChecked} checked, ${unitIssues.length} disagree (tools/out/units.md)`);
+}
+
 report.sort((a, b) => b.absent - a.absent || b.missing.length - a.missing.length);
 const pct = (n: number, d: number) => `${((100 * n) / d).toFixed(1)}%`;
 const head = [

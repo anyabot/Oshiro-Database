@@ -23,6 +23,8 @@ export interface EffectDefs {
   missiles: Record<string, [number, number, number][]>;
   /** Missile.atb DamageRepeatNum + RepeatDamageDelayMillis (repeat hits after the first). */
   missile_repeat?: Record<string, [number, number]>;
+  /** Missile.atb DealDamageEffectID + DealDamageEffectValue + DealDamageEffectDurationInMillis. */
+  missile_dde?: Record<string, [number, number, number]>;
   /** Missile.atb CrowdControlType + DurationInMillis1. */
   missile_cc?: Record<string, [number, number]>;
   /** EnchantTargetSet.atb: set id -> its 発動対象 target codes. */
@@ -110,12 +112,15 @@ const EFFECT_FLAGS: Record<string, string> = {
 
 // a row that lists every damage kind (物理/術/貫通) and both melee and ranged applies to all damage
 const DAMAGE_KINDS = ["PhysicalDamage", "MagicDamage", "TrueDamage"];
+// melee + ranged (+ ambush units) is every attacker: 「被ダメージが10%上昇」 rows set all three
 const ATTACK_KINDS = ["MeleeAttack", "RangedAttack"];
+const ATTACKERS = ["MeleeAttack", "RangedAttack", "AmbushAttack"];
 /** The row's switches as words, leaving out complete sets (= no restriction). */
 function restriction(row: RawRow): string[] {
   const all = (ks: string[]) => ks.every((k) => row[k]);
   return Object.keys(EFFECT_FLAGS).filter((k) => row[k])
-    .filter((k) => !(DAMAGE_KINDS.includes(k) && all(DAMAGE_KINDS)) && !(ATTACK_KINDS.includes(k) && all(ATTACK_KINDS)))
+    .filter((k) => !(DAMAGE_KINDS.includes(k) && all(DAMAGE_KINDS)) && !(ATTACK_KINDS.includes(k) && all(ATTACK_KINDS))
+      && !(ATTACKERS.includes(k) && all(ATTACKERS)))
     .map((k) => EFFECT_FLAGS[k]);
 }
 
@@ -174,9 +179,14 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       if (row.OGDEffectType === 2) return `damage dealt${on} −${v}${unit}`;
       return `when dealing damage: effect type ${row.OGDEffectType} ${v} (value type ${row.ValueType}${tags ? `; ${tags}` : ""})`;
     }
-    case "ImmunityEffect":
-      return `immune to ${modifierText(Number(row.StatusModifierID ?? 0), Number(row.ImmunityValue ?? 0))}`
+    case "ImmunityEffect": {
+      // value 0: immune to every such change (「攻撃上昇効果無効」), else to changes up to the value
+      const val = Number(row.ImmunityValue ?? 0);
+      let what = modifierText(Number(row.StatusModifierID ?? 0), val);
+      if (!val) what = what.replace(/ ([+−])0%?(, (?:doesn't )?stacks?)?$/, (_m, s: string) => (s === "+" ? " increases" : " decreases"));
+      return `immune to ${what}`
         + (row.ConditionOperator ? ` (condition op${row.ConditionOperator} ${row.ConditionValue ?? 0})` : "");
+    }
   }
   return `${table} ${v}`;
 }
@@ -336,6 +346,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const facts: BuffFact[] = [];
   // the last stat change modifier() worded; take() files it under the sentence about to be pushed
   let last: Omit<BuffFact, "who" | "side" | "line"> | null = null;
+  // unit of the row's amount, for its LimitValue cap (same scale as EffectValue, FUN_00ae8700)
+  let limitUnit = "";
   const take = (who: string, side: "ally" | "enemy", note = "") => {
     // a change can carry its own condition (attack bonus: "while own ATK ≥ 10000"); it leads the note
     const n = [last?.note, note.replace(/^, /, "")].filter(Boolean).join(", ");
@@ -425,13 +437,17 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const w = defs.labels[`smt:${code}`];
     const dir = expr === 1 || expr === 2 ? (w?.dir ?? (expr === 1 ? "+" : "-")) : "";
     const sign = dir === "+" ? "+" : dir === "-" ? "−" : "";
+    // statuses that hold a percentage (防御を20%無視): their flat amounts print as % (statunit, mined)
+    const pctStatus = vt === 1 && (defs.labels[`statunit:${status}`]?.unit === "%" || /%\s*(\(|$)/.test(defs.labels[`status:${status}`]?.jp ?? ""));
+    limitUnit = w?.unit === "秒" || w?.unit === "倍" ? "" : vt === 2 || vt === 4 || pctStatus ? "%" : "";
     let amount: string;
-    if (expr === 3) amount = `set to ${v}`;
+    if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
     else if (w?.unit === "倍" && w.form === "mul") amount = `×${fmt(v / 100)}`;
     else if (w?.unit === "秒") amount = `${sign}${w.form === "milli" ? fmt(v / 1000) : v}s`;
-    else if (vt === 1) amount = `${sign}${v}`;
-    else if (vt === 2 || vt === 4) amount = `${sign}${v}%`;
+    else if (vt === 1) amount = `${sign}${v}${pctStatus ? "%" : ""}`;
+    // 3 and 5 are the % kinds that stack (their texts: 「耐久が50％低下」 with ValueType 5)
+    else if (vt === 2 || vt === 3 || vt === 4 || vt === 5) amount = `${sign}${v}%`;
     // ValueType 6 = v% of another status. A count status (505 special-attack stock: +StockValue each time
     // the gauge fills, FUN_00508050) reads as "+v/100 per stock": 50000 on 505 = +500 while 1 stock is held
     else if (vt === 6 && COUNT_STATUS[ref]) amount = `${sign}${fmt(v / 100)} per ${COUNT_STATUS[ref]}`;
@@ -440,8 +456,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const stack = vt === 1 && (expr === 1 || expr === 2) ? (FLAT_MAX_STATUS.has(status) ? "doesn't stack" : "stacks")
       : expr === 1 || expr === 2 ? STACKING[vt] : undefined;
     // only amounts the sentence states plainly (not "% of another stat" or an unnamed value type)
-    if (dir && (vt === 1 || vt === 2 || vt === 4 || (w?.unit && vt !== 6))) {
-      const unit = w?.unit === "倍" ? "×" : w?.unit === "秒" ? "s" : vt === 2 || vt === 4 ? "%" : "";
+    if (dir && ((vt >= 1 && vt <= 5) || (w?.unit && vt !== 6))) {
+      const unit = w?.unit === "倍" ? "×" : w?.unit === "秒" ? "s" : (vt >= 2 && vt <= 5) || pctStatus ? "%" : "";
       const val = w?.unit === "秒" && w.form === "milli" ? v / 1000
         : w?.unit === "倍" ? (w.form === "mul" ? v / 100 : dir === "-" ? 1 - v / 100 : 1 + v / 100) : v;
       last = { key: `status:${status}`, dir: dir as "+" | "-", unit, v: val, ...(stack ? { stack } : {}) };
@@ -520,6 +536,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const rep = defs.missile_repeat?.[id];
     const parts = mods.map(([code, v, ms]) => `${modifier(code, v)}${ms ? `, for ${fmt(ms / 1000)}s` : ""}`);
     if (rep) parts.unshift(`hits ${rep[0] + 1} times${rep[1] ? `, ${fmt(rep[1] / 1000)}s apart` : ""}`);
+    const dde = defs.missile_dde?.[id];
+    const ddeRow = dde ? defs.effect_tables?.DealDamageEffect?.[dde[0]] : undefined;
+    if (dde && ddeRow) parts.push(`${effectRow("DealDamageEffect", ddeRow, dde[1], modifier, ccName)}${dde[2] ? `, for ${fmt(dde[2] / 1000)}s` : ""}`);
     if (cc) parts.unshift(`inflicts ${ccName(cc[0])}${cc[1] ? ` (${fmt(cc[1] / 1000)}s)` : ""}`);
     if (!parts.length) return `missile #${id}`;
     return `missile #${id}: ${parts.join("; ")}`;
@@ -538,6 +557,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // only ability types whose handler reads AbilityTypeDetail as a condition kind (FUN_00af8580 is
     // called for types 1, 2, 11-19, 23; type 10 runs the same kind loop in FUN_00af7830)
     const KIND_TYPES = new Set([1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23]);
+    // (type 10 only for TypeDetail 3: FUN_00af7830 sends 1 to damage, 2 to a heal record)
     // FUN_00ae8ae0 runs only when the same source re-applies a still-active status set, and clamps the
     // grown value to LimitValue (min(value, limit); limit 0 clamps to 0), so rows without a LimitValue
     // never grow: all 281 such rows (type 10 Great Magic, type 1 auras) describe a fixed amount, all
@@ -551,7 +571,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         ? (n > 1 ? `every ${n}s` : "every second")
         : (n > 1 ? `every ${n} ${STEP_NOUN[Number(r.AbilityType)]?.[1] ?? "triggers"}` : `each ${STEP_NOUN[Number(r.AbilityType)]?.[0] ?? "trigger"}`);
       parts.push(`grows by that amount ${step}${rev ? ` (shrinks instead while ${word("status:315", "status 315")} is on)` : ""}`);
-    } else if (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && CONDITION[num("AbilityTypeDetail")]) {
+    } else if (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && !(r.AbilityType === 10 && r.AbilityTypeDetail !== 3) && CONDITION[num("AbilityTypeDetail")]) {
       const c = CONDITION[num("AbilityTypeDetail")](num("AbilityEffectDetail"), (id) => word(`trait:${id}`, `trait ${id}`));
       if (c) parts.push(c);
     } else {
@@ -572,7 +592,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const p = num("ProbabilityOfActivation");
     if (p) parts.push(`${p}% chance`);
     const lim = num("LimitValue");
-    if (lim) parts.push(`up to ${lim}`);
+    if (lim) parts.push(`up to ${lim}${limitUnit}`);
     if (lim > 0 && (growing || (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && PER_COUNT.has(Number(r.AbilityTypeDetail))))) rowMax = lim;
     // Ability.atb bool columns, worded from their own header names (tools/data/column_names.json)
     if (num("GrowUpLimitOnly")) parts.push("only at max giantification (最大化)");

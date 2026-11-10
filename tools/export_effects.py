@@ -384,6 +384,43 @@ _TYPE_MARKERS = ("攻撃した敵", "大魔法", "特殊攻撃", "攻撃する�
 _FLAG_WORDS = ("防御無視", "防御を無視", "飛行", "妖怪", "術", "連続", "貫通", "周囲", "後退", "地上", "標的", "半減")
 
 
+def mine_status_units(c: GameCache, smt: dict, labels: dict, unit_effect: dict) -> dict[str, dict]:
+    """statunit:<StatusType> = "%" for statuses whose flat (ValueType 1) amounts the descriptions print
+    with % (防御を20%無視, 再配置時間が40%短縮): the status itself holds a percentage. Counted per row
+    whose EffectValue appears in its ability's text: "20%" vs a bare "20" (not 20倍 / 20秒)."""
+    groups = group_rows(c.table(ABILITY_ARC, "Ability.atb"), "AbilityID")
+    texts = first_by(c.table(ABILITY_ARC, "AbilityText.atb"), "AbilityID")
+    tally: dict[int, collections.Counter] = collections.defaultdict(collections.Counter)
+    for aid, rows in groups.items():
+        desc = clean_text(texts.get(aid, {}).get("Description", ""))
+        if not desc:
+            continue
+        for r in rows:
+            m = smt.get(r.get("StatusModifierType"))
+            v = r.get("EffectValue")
+            if not m or m[2] != 1 or m[1] not in (1, 2, 3) or not v:
+                continue
+            pct = re.search(rf"(?<![\d.]){v}[%％]", desc)
+            flat = re.search(rf"(?<![\d.]){v}(?![\d.%％倍秒])", desc)
+            if pct and not flat:
+                tally[m[0]]["%"] += 1
+            elif flat and not pct:
+                tally[m[0]]["flat"] += 1
+    # formation rows: ounit:<EffectType> (the unit their clauses print) via UnitEffect type 1 -> modifier
+    for key, lab in labels.items():
+        if not key.startswith("ounit:") or lab.get("unit") not in ("%", ""):
+            continue
+        ue = unit_effect.get(int(key.split(":")[1]))
+        m = smt.get(ue[1]) if ue and ue[0] == 1 else None
+        if m and m[2] == 1 and m[1] in (1, 2, 3):
+            tally[m[0]]["%" if lab["unit"] == "%" else "flat"] += lab["n"]
+    out = {}
+    for st, cnt in tally.items():
+        if cnt["%"] >= 2 and cnt["%"] >= 5 * cnt["flat"]:
+            out[f"statunit:{st}"] = {"jp": "%", "unit": "%", "n": cnt["%"], "of": cnt["%"] + cnt["flat"], "ex": []}
+    return out
+
+
 def mine_row_markers(c: GameCache, attack_bonus: dict) -> dict[str, dict]:
     """Codes named by a marker word in their ability's description.
 
@@ -456,7 +493,11 @@ def main() -> int:
     # DamageRepeatNum (ダメージ発生回数) + RepeatDamageDelayMillis (連続ダメージ発生遅延): every missile with
     # a repeat count is described as (count + 1)連続 (20 of 20 stratagem missiles)
     missile_repeat = {}
+    # DealDamageEffectID (ダメージ発生効果) + value + duration: the damage a missile's hit leaves behind
+    missile_dde = {}
     for r in c.table("Missile.atb"):
+        if r["MissileID"] and r["DealDamageEffectID"]:
+            missile_dde[r["MissileID"]] = [r["DealDamageEffectID"], r["DealDamageEffectValue"], r["DealDamageEffectDurationInMillis"]]
         if r["MissileID"] and r["DamageRepeatNum"]:
             missile_repeat[r["MissileID"]] = [r["DamageRepeatNum"], r["RepeatDamageDelayMillis"]]
         mods = [[r[f"StatusModifierType{i}"], r[f"StatusEffectValue{i}"], r[f"DurationInMillis{i}"]] for i in (1, 2)
@@ -574,7 +615,14 @@ def main() -> int:
                                        "ex": [f"EnemyWeakAttribute.atb column {i + 1} ({f.name_en}); status 225 bit {1 << i}"]}
     for key, d in st.get("abilitytypes", {}).items():
         prev = labels.get(f"abilitytype:{key}", {})
-        labels[f"abilitytype:{key}"] = {**prev, "jp": d["name"], "n": 0, "of": 0, "ex": [d["proof"]], "src": "item"}
+        lab = {**prev, "jp": d["name"], "n": 0, "of": 0, "ex": [d["proof"]], "src": "item"}
+        # the item text quoted in the proof ('獲得金が15%上昇') gives the unit and direction
+        m = re.search(r"'[^']*?\d+(%|％)?(上昇|増加|低下|減少|短縮|軽減)[^']*'", d["proof"])
+        if m:
+            lab["dir"] = "+" if m[2] in _UP else "-"
+            if m[1]:
+                lab["unit"] = "%"
+        labels[f"abilitytype:{key}"] = lab
     cct = st.get("cctypes", {})
     for code, d in cct.items():
         labels[f"cc:{code}"] = {"jp": d["name"], "n": 0, "of": 0, "src": "item", "ex": [d["proof"]]}
@@ -592,10 +640,27 @@ def main() -> int:
     for code, d in st.get("kinds", {}).items():
         labels[f"statuskind:{code}"] = {"jp": d["kind"], "n": 0, "of": 0, "ex": [d["proof"]], "src": "exe"}
 
+    labels.update(mine_status_units(c, smt, labels, unit_effect))
+    # AbilityType 10/2: FUN_00af7830 sends TypeDetail 1 rows to damage (FUN_00aaa920), 2 to its own effect
+    # record (FUN_00af2a50(1, .., EffectValue)), only 3 to the modifier/condition path. Every text with a
+    # 10/2 row says 耐久が最大のN%回復 with N = EffectValue (counted here); the word-miner had matched 射程.
+    groups = group_rows(c.table(ABILITY_ARC, "Ability.atb"), "AbilityID")
+    texts = first_by(c.table(ABILITY_ARC, "AbilityText.atb"), "AbilityID")
+    heal = total = 0
+    for aid, rows in groups.items():
+        desc = clean_text(texts.get(aid, {}).get("Description", "")).replace("\n", "")
+        for r in rows:
+            if r.get("AbilityType") == 10 and r.get("AbilityTypeDetail") == 2:
+                total += 1
+                heal += bool(re.search(rf"最大(?:耐久)?の{r.get('EffectValue')}%回復", desc))
+    if total and heal * 2 > total:
+        labels["abilitytype:10/2"] = {"jp": "最大耐久の%回復", "dir": "+", "unit": "%", "n": heal, "of": total, "src": "text",
+                                      "ex": ["FUN_00af7830: TypeDetail 2 -> FUN_00af2a50 effect record; text 耐久が最大のN%回復"]}
     out = Path(args.out) / "data" / "effects.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     for key, lab in mine_row_markers(c, attack_bonus).items():
         labels[key] = lab
+
 
     # UnitEffect targets: rows whose own column names say what they do
     effect_tables = {}
@@ -621,7 +686,7 @@ def main() -> int:
         if head and head["AbilityType"] == 6 and (r["AbilityTypeDetail"] if r["AbilityType"] else head["AbilityTypeDetail"]) == 7:
             if r["EffectValue"] in atext:
                 ability_names[r["EffectValue"]] = atext[r["EffectValue"]]
-    out.write_text(json.dumps({"ability_names": ability_names, "quest_types": quest_types, "target_sets": target_sets, "smt": smt, "missile_repeat": missile_repeat, "attack_bonus": attack_bonus, "unit_effect": unit_effect,
+    out.write_text(json.dumps({"ability_names": ability_names, "quest_types": quest_types, "target_sets": target_sets, "smt": smt, "missile_dde": missile_dde, "missile_repeat": missile_repeat, "attack_bonus": attack_bonus, "unit_effect": unit_effect,
                                "missiles": missiles, "missile_cc": missile_cc, "effect_tables": effect_tables, "labels": labels},
                               ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     by_vocab = collections.Counter(k.split(":")[0] for k in labels)

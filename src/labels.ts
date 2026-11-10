@@ -81,6 +81,7 @@ export const JP_EN: Record<string, string> = {
   獲得殿EXP: "Lord EXP gain",
   獲得金と蔵からの入手金: "Gold gain (incl. storehouses)",
   要石の入手数: "Keystone drops",
+  "最大耐久の%回復": "Heal (% of max HP)",
   城娘合成時の獲得経験値: "EXP from fusion",
   暴雨: "Downpour", 豪雪: "Heavy Snow", 瘴気: "Miasma", 轟雷: "Thunder", 暴風: "Gale", 濃霧: "Dense Fog",
   虚夜: "Void Night", 幻霧: "Phantom Fog",
