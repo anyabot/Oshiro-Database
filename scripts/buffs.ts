@@ -109,8 +109,13 @@ for (const entry of index) {
     }
     // ambush units (伏兵) a stratagem places: their own abilities buff and debuff too
     for (const s of f.stratagems ?? []) {
-      if (s.token?.ability) ability(u.id, f.tier, "token", s.token.ability);
-      if (s.token?.general_ability) ability(u.id, f.tier, "token", s.token.general_ability);
+      if (s.token) {
+        // TokenConfig.DeployLimit: how many can be out at once (matches every 「(N体まで)」 text, 154 of 154;
+        // tokens without it never state a cap)
+        const lim = Number(s.token.config?.DeployLimit) || 0;
+        const tag = `${s.token.name} (伏兵) · ${lim ? `max ${lim} placed at once` : "no placement limit"} · from ${s.name}`;
+        for (const a of [s.token.ability, s.token.general_ability]) if (a && !a.missing) ability(u.id, f.tier, "token", { ...a, name: `${tag} · ${a.name}` });
+      }
     }
   }
   ability(u.id, -1, "class", u.class_ability);
