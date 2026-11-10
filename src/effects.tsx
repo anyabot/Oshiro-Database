@@ -89,6 +89,11 @@ export function sideOfTarget(jp: string | undefined): "ally" | "enemy" {
 // ValueType 3/4/5 entries are summed. Flat values (1) are summed too, except for the statuses in
 // FLAT_MAX_STATUS, which also keep only the strongest.
 const STACKING: Record<number, string> = { 4: "stacks", 5: "stacks", 3: "stacks", 2: "doesn't stack" };
+/** Statuses that hold a count, not an amount: "% of" them reads as "per". */
+const COUNT_STATUS: Record<number, string> = {
+  505: "special-attack stock (1 stock = a full gauge)",
+};
+
 const FLAT_MAX_STATUS = new Set([105, 106, 108, 111, 113, 203, 210, 211, 212, 213, 214, 215, 216, 219, 220, 223,
   10107, 10201, 10206, 10405, 10452, 10454]);
 
@@ -427,6 +432,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     else if (w?.unit === "秒") amount = `${sign}${w.form === "milli" ? fmt(v / 1000) : v}s`;
     else if (vt === 1) amount = `${sign}${v}`;
     else if (vt === 2 || vt === 4) amount = `${sign}${v}%`;
+    // ValueType 6 = v% of another status. A count status (505 special-attack stock: +StockValue each time
+    // the gauge fills, FUN_00508050) reads as "+v/100 per stock": 50000 on 505 = +500 while 1 stock is held
+    else if (vt === 6 && COUNT_STATUS[ref]) amount = `${sign}${fmt(v / 100)} per ${COUNT_STATUS[ref]}`;
     else if (vt === 6) amount = `${sign}${v}% of ${refSender ? "the giver's " : ""}${word(`status:${ref}`, `stat ${ref}`)}`;
     else amount = `${sign}${v} (value type ${vt})`;
     const stack = vt === 1 && (expr === 1 || expr === 2) ? (FLAT_MAX_STATUS.has(status) ? "doesn't stack" : "stacks")
