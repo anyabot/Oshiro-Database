@@ -500,8 +500,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // ≤ 100% of the maximum always holds: the bonus applies to every hit (e.g. 雷光王撃 「攻撃が0.5倍の術ダメージ」)
     const always = b.ValueType === 2 && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≤" && Number(b.ConditionValue) >= 100;
     const cond = always ? "" : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
-    last = { key: always ? "dmg:dealt" : "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: always ? "%" : "×",
-      v: always ? Math.abs(v - 100) : v / 100, ...(cond ? { note: cond } : {}) };
+    // an AttackBonus row is its own damage multiplier, not an OnGiveDamage (与ダメージ) modifier: ranked
+    // apart from "damage dealt %" even when its condition always holds
+    last = { key: "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: "×", v: v / 100, note: cond || "every hit" };
     return `damage dealt ×${fmt(v / 100)}${cond ? ` ${cond}` : ""}`;
   };
   /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */

@@ -179,10 +179,12 @@ export default function Buffs() {
     const m = new Map<string, BuffRow[]>();
     for (const r of list) m.set(r.sl, [...(m.get(r.sl) || []), r]);
     return SOURCES.filter((s) => m.has(s.value)).map((s) => {
-      const seen = new Set<number>();
+      // one row per castle girl and receiver: a narrower buff (only Plain castle girls) isn't hidden by her
+      // stronger one for everyone
+      const seen = new Set<string>();
       const ranked = [...m.get(s.value)!]
         .sort((a, b) => (lower ? score(a) - score(b) : score(b) - score(a)) || b.v - a.v)
-        .filter((r) => !seen.has(r.u) && !!seen.add(r.u));
+        .filter((r) => !seen.has(`${r.u}|${r.w}`) && !!seen.add(`${r.u}|${r.w}`));
       return { sl: s.value, ranked };
     });
   }, [keys, key, byValue]);
@@ -192,7 +194,7 @@ export default function Buffs() {
   return (
     <div className="page buffs-page">
       <PageHeader title="Buff ranking"
-        subtitle="Who gives the biggest effect, by stat, source and receiver. One row per castle girl (her best), ranked within each source." />
+        subtitle="Who gives the biggest effect, by stat, source and receiver. One row per castle girl and receiver (her best for it), ranked within each source." />
       <details className="stack-help">
         <summary>How effects stack</summary>
         <ul className="small">
@@ -246,7 +248,7 @@ export default function Buffs() {
           return (
             <GroupCard key={sl} className="buff-group"
               title={`${effectLabel(key, names)} · ${SOURCE_LABEL[sl]}`}
-              count={`${ranked.length} castle girls`}
+              count={`${new Set(ranked.map((r) => r.u)).size} castle girls`}
               note={SOURCE_NOTE[sl]}>
               <table className="hub-table hub-table--stack buff-table">
                 <thead><tr><th>#</th><th>Value</th><th>Castle girl</th><th>Receiver</th><th>Conditions</th></tr></thead>

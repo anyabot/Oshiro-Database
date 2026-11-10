@@ -40,7 +40,7 @@ const keyNames = new Map<string, string>();
 function statName(key: string): string {
   if (key === "dmg:dealt") return "Damage dealt";
   if (key === "dmg:taken") return "Damage taken";
-  if (key === "dmg:bonus") return "Damage (conditional)";
+  if (key === "dmg:bonus") return "Damage multiplier (attack bonus)";
   if (key === "ki:natural") return "Natural Ki gain";
   const jp = defs.labels[key]?.jp;
   if (!jp) return key;
