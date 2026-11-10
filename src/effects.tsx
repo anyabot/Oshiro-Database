@@ -743,8 +743,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         if (!known) used.delete("UnitEffectID");
         const body = unitEffect(id, v) ?? `unit effect ${id} ${v}`;
         const tl = tail();
-        file(tl);
-        text.push(`${lead}${body}${tl}`);
+        file(tl, perGrowUp.slice(2));
+        text.push(`${lead}${body}${perGrowUp}${tl}`);
       }
     } else if (at === 6 && (atd === 2 || atd === 4)) {
       // class-ability types 6/2 and 6/4: EffectValue is a Missile.atb id (every such row)
@@ -754,7 +754,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // (all 35 ids in the data are DealDamageEffect rows; e.g. 1028 = magic, ATK, every 2s = 2秒毎に攻撃の
       // 0.5倍の術ダメージ with EffectValue 50), EffectValue = amount (FUN_00aedeb0)
       const row = defs.effect_tables.DealDamageEffect[atd];
-      text.push(`${lead}${effectRow("DealDamageEffect", row, v, modifier, ccName)}${tail()}`);
+      text.push(`${lead}${effectRow("DealDamageEffect", row, v, modifier, ccName)}${perGrowUp}${tail()}`);
     } else if (at === 8 && (atd === 1 || atd === 2)) {
       // AbilityType 8 handler FUN_00af5bb0: OnGiveDamage of type = AbilityTypeDetail with ValueType 1 (%)
       // (FUN_00af2310(type, 1, ...)); it never reads StatusModifierType
@@ -771,8 +771,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       num("Effect");
       const vt = [4, 5, 9, 10, 11].includes(atd) ? 2 : 1;
       const tl = tail();
-      if (atd === 6 || atd === 7) { damageFact("taken", atd === 7 ? "+" : "-", "%", v); file(tl); }
-      text.push(`${lead}${effectRow("OnTakeDamageEffect", { OTDEffectType: atd, ValueType: vt }, v, modifier, ccName)}${tl}`);
+      if (atd === 6 || atd === 7) { damageFact("taken", atd === 7 ? "+" : "-", "%", v); file(tl, perGrowUp.slice(2)); }
+      text.push(`${lead}${effectRow("OnTakeDamageEffect", { OTDEffectType: atd, ValueType: vt }, v, modifier, ccName)}${perGrowUp}${tl}`);
     } else if (at === 6 && CLASS_ABILITY[atd]) {
       const name = atd === 7 ? defs.ability_names?.[v] : undefined;
       text.push(`${lead}${CLASS_ABILITY[atd](v, num("AbilityEffectDetail"))}${name ? ` 「${name}」` : ""}${tail()}`);
@@ -791,8 +791,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     } else if (at === 22 && atd && defs.attack_bonus[atd]) {
       // AbilityTypeDetail = AttackBonusStatusEffectID (operators as the descriptions word them: 以下 ≤, 以上 ≥)
       const body = attackBonus(defs.attack_bonus[atd], v), tl = tail();
-      file(tl);
-      text.push(`${lead}${body}${tl}`);
+      file(tl, perGrowUp.slice(2));
+      text.push(`${lead}${body}${perGrowUp}${tl}`);
     } else if (smt) {
       const how = at > 1 && !trigger && at !== 22 && !(at === 19 && atd === 3) ? ` (ability type ${at}${atd ? `/${atd}` : ""})` : "";
       const m = modifier(smt, v), tl = tail();
