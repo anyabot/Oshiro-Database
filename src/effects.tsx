@@ -40,7 +40,7 @@ const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data
 export const useEffectDefs = () => useJson<EffectDefs>(loader, "effects");
 
 /** Which table a row came from; decides which code vocabulary its fields use. */
-export type RowKind = "ability" | "organized" | "always" | "quest" | "potential" | "enchant" | "enchant_set" | "other";
+export type RowKind = "ability" | "organized" | "always" | "quest" | "potential" | "enchant" | "enchant_set" | "special_attack" | "other";
 
 export interface Sentence {
   /** Plain sentences, one per effect on the row. */
@@ -140,10 +140,12 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       // FUN_00564cb0 registers type 1 -> FUN_00563700 (hit kind 11: independent damage, ATK clamped to the
       // global limits) and type 2 -> FUN_005638c0 (hit kind 4: an attack carrying the source's status set).
       // FUN_00564f20 picks the base by ValueType (1 ATK, 2 flat, 3 current HP, 4 max HP); FUN_00aedf40:
-      // damage = value x base / 100, at least MinDamage. Type 1 reads HP from the unit hit, type 2 from the source.
+      // damage = value x base / 100, at least MinDamage. FUN_00564f20 reads ATK from its 2nd argument and
+      // HP from its 3rd; both handlers pass the unit hit ([rec+4]) as the 3rd (type 2 swaps in the attacker
+      // [rec] only for ValueType 1), so 3/4 are always the hit unit's HP: every text says 敵の現在耐久 / 最大耐久.
       const own = row.DealDamageEffectType === 2;
       const base: Record<number, string> = {
-        1: "ATK", 3: own ? "own current HP" : "the target's current HP", 4: own ? "own max HP" : "the target's max HP",
+        1: "ATK", 3: "the target's current HP", 4: "the target's max HP",
       };
       const vt = Number(row.ValueType);
       const amount = vt === 2 ? `${v}` : base[vt] ? `${fmt(v / 100)}× ${base[vt]}` : `${v} (value type ${vt})`;
@@ -763,6 +765,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (kind === "quest") last = null;
     take(factWho, factSide, tl);
     text.push(`${lead}${resolved}${tl}`);
+  } else if (kind === "special_attack") {
+    // SpecialAttack.atb row: the special attack fires its MissileID (ミサイル) / SpreadMissileID (拡散ミサイル);
+    // their DealDamageEffect / modifiers are the hit's extra effects (e.g. 敵の現在耐久の10%のダメージ)
+    for (const f of ["MissileID", "SpreadMissileID"]) {
+      const id = num(f);
+      if (id) text.push(`Special attack ${missile(id)}`);
+    }
   } else if (kind === "enchant") {
     const secs = num("DurationInSeconds");
     const dur = secs ? `, for ${fmt(secs)}s` : "";

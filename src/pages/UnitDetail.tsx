@@ -152,7 +152,7 @@ function SpecialAttackBlock({ sa, defs, from }: { sa: SpecialAttack; defs?: Effe
         <span className="ability__id">#{sa.id}</span>
       </div>
       <Text>{sa.ability?.description}</Text>
-      {sa.raw && <RawRows title="SpecialAttack row" rows={[sa.raw]} />}
+      {sa.raw && <EffectList title="SpecialAttack row" rows={[sa.raw]} kind="special_attack" defs={defs} />}
       {sa.ability?.effects && <EffectList title="effect rows" rows={sa.ability.effects} kind="ability" defs={defs} />}
     </div>
   );
