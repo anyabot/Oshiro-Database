@@ -8,6 +8,7 @@ import {
   traitLabel, traitTitle, useMeta, useUnits, weaponLabel,
 } from "../data";
 import type { UnitIndexEntry } from "../types";
+import { unitName } from "../labels";
 
 /** Card.MaxRenovationCount values as filter options. */
 const RENOVATION_OPTS = [
@@ -98,7 +99,7 @@ export default function UnitList() {
       if (terrainF.length && !terrainParts(meta, u.terrain).some((t) => terrainF.includes(t.slug))) return false;
       if (kaiF.length && !has(kaiF, u.renovation)) return false;
       if (term) {
-        const hay = `${u.id} ${u.name} ${u.ruby || ""}`.toLowerCase();
+        const hay = `${u.id} ${u.name} ${u.name_en || ""} ${u.ruby || ""}`.toLowerCase();
         if (!hay.includes(term)) return false;
       }
       return true;
@@ -160,8 +161,8 @@ export default function UnitList() {
             renderLink={renderLink}
             className="unit-tile"
             icon={u.face ? <img src={iconUrl(u.face)} alt="" width={60} height={60} loading="lazy" /> : <span className="icon-missing" />}
-            title={u.name || "(unnamed)"}
-            subtitle={`#${u.id} · ${rarityLabel(meta, u.rarity)} · ${weaponLabel(meta, u.weapon)}${u.terrain ? ` · ${terrainLabel(meta, u.terrain)}` : ""}${u.region ? ` · ${regionLabel(meta, u.region)}` : ""}`}
+            title={unitName(u) || "(unnamed)"}
+            subtitle={`${u.name_en ? `${u.name} · ` : ""}#${u.id} · ${rarityLabel(meta, u.rarity)} · ${weaponLabel(meta, u.weapon)}${u.terrain ? ` · ${terrainLabel(meta, u.terrain)}` : ""}${u.region ? ` · ${regionLabel(meta, u.region)}` : ""}`}
             badges={(u.traits?.length || u.dup_of || u.transform_of || u.npc || u.renovation === 2) ? (
               <>
                 {u.renovation === 2 && <span className="hub-badge hub-badge--accent" title="Has a 改弐 (Kai Ni) renovation">Kai Ni</span>}

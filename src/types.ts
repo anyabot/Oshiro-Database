@@ -3,6 +3,8 @@
 export interface UnitIndexEntry {
   id: number;
   name: string;
+  /** English name (tools/data/unit_names_en.json); null when not translated. */
+  name_en?: string | null;
   ruby: string | null;
   rarity: number;
   weapon: number | null;
@@ -149,6 +151,7 @@ export interface Transformed {
 export interface UnitDetail {
   id: number;
   name: string;
+  name_en?: string | null;
   ruby: string | null;
   rarity: number;
   card_type: number;

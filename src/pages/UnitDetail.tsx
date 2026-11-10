@@ -8,6 +8,7 @@ import {
   useMeta, useUnit, useUnits, weaponLabel,
 } from "../data";
 import { DEFAULT_META } from "../meta";
+import { unitName } from "../labels";
 import { usePageMeta } from "../usePageMeta";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
 import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
@@ -102,6 +103,7 @@ function AbilityBlock({ label, a, kind = "ability", defs, from }: {
 }
 
 function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; from?: string }) {
+  const { data: index } = useUnits();
   // EnchantEffect.TargetType 2 = 自分のみ: the effect sets' "target" is the user herself
   const setCtx: RowContext = { selfOnly: !!s.effect && defs?.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ" };
   if (s.missing) {
@@ -127,7 +129,7 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
       {s.token && (
         <div className="nested">
           <p className="switch-line">
-            Places <b>{s.token.name || `card #${s.token.card_id}`}</b>
+            Places <b>{unitName(index?.find((x) => x.id === s.token!.card_id)) || s.token.name || `card #${s.token.card_id}`}</b>
             {typeof s.token.config.DeployLimit === "number" ? ` (up to ${s.token.config.DeployLimit})` : ""}
           </p>
           {s.token.ability && <AbilityBlock label="Placed unit's ability" a={s.token.ability} defs={defs} />}
@@ -310,8 +312,8 @@ export default function UnitDetail() {
   usePageMeta(
     u
       ? {
-          title: u.name,
-          description: `${u.name} (${rarityLabel(meta, u.rarity)} ${u.weapon.name ?? ""}) in Shiro Project:RE: stats, specialty, formation specialty, stratagem${u.forms.length > 1 ? ", renovation tiers" : ""} and profile.`,
+          title: unitName(u),
+          description: `${unitName(u)}${u.name_en ? ` (${u.name})` : ""} (${rarityLabel(meta, u.rarity)} ${u.weapon.name ?? ""}) in Shiro Project:RE: stats, specialty, formation specialty, stratagem${u.forms.length > 1 ? ", renovation tiers" : ""} and profile.`,
         }
       : error || !valid ? { title: "Castle girl not found", description: DEFAULT_META.description, noindex: true } : null
   );
@@ -334,12 +336,12 @@ export default function UnitDetail() {
 
   return (
     <div className="page unit-detail">
-      <Breadcrumbs renderLink={renderLink} items={[{ label: "Castle Girls", href: "/units" }, { label: u.name }]} />
+      <Breadcrumbs renderLink={renderLink} items={[{ label: "Castle Girls", href: "/units" }, { label: unitName(u) }]} />
       <PageHeader
         art={u.face ? <img className="unit-face" src={iconUrl(u.face)} alt="" width={120} height={120} /> : undefined}
-        title={u.name}
+        title={unitName(u)}
         id={`#${u.id}`}
-        subtitle={u.ruby || undefined}
+        subtitle={[u.name_en ? u.name : "", u.ruby || ""].filter(Boolean).join(" · ") || undefined}
         meta={(
           <MetaChips>
             <MetaChip label="Rarity" value={rarityLabel(meta, u.rarity)} renderLink={renderLink} href={`/units?rarity=${u.rarity}`} />
@@ -462,7 +464,7 @@ export default function UnitDetail() {
                   return (
                     <Link key={sid} to={`/units/${sid}`} className="skin" title={s?.name}>
                       {s?.face ? <img src={iconUrl(s.face)} alt="" width={56} height={56} loading="lazy" /> : <span className="icon-missing small-icon" />}
-                      <span className="skin__name">{s?.name ?? `#${sid}`}</span>
+                      <span className="skin__name">{s ? unitName(s) : `#${sid}`}</span>
                     </Link>
                   );
                 })}

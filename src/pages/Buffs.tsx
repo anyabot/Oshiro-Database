@@ -5,6 +5,7 @@ import { listState, searchParamsAdapter } from "@altterisk/game-hub/filters";
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { iconUrl, rarityLabel, useMeta, useUnits, weaponLabel } from "../data";
 import type { UnitIndexEntry } from "../types";
+import { unitName } from "../labels";
 
 /** One row of public/data/buffs.json (scripts/buffs.ts). */
 interface BuffRow {
@@ -271,7 +272,7 @@ export default function Buffs() {
                               ? <FallbackImage srcs={[iconUrl(u.face)]} alt="" width={36} height={36} loading="lazy" missingClassName="buff-noicon" />
                               : <span className="buff-noicon" />}
                             <span>
-                              <span className="buff-unit-name">{u?.name ?? `#${r.u}`}</span>
+                              <span className="buff-unit-name" title={u?.name_en ? u.name : undefined}>{u ? unitName(u) : `#${r.u}`}</span>
                               {u && <span className="buff-unit-meta">{rarityLabel(meta, u.rarity)} · {weaponLabel(meta, u.weapon)}{r.t > 0 ? ` · ${["", "Kai", "Kai Ni"][r.t]}` : ""}</span>}
                             </span>
                           </Link>

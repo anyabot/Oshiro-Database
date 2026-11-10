@@ -302,3 +302,8 @@ const CATEGORY_JP_EN: Record<string, string> = {
   学園都市: "Academy City", 進撃の巨人: "Attack on Titan", ｼﾞｬﾊﾞｳｫｯｸ島: "Jabberwock Island", 城姫: "Castle Princess",
   ヴァイス: "Weiss", GuP: "Girls und Panzer", "T．O．W．E．R．": "T.O.W.E.R.",
 };
+
+/** A castle girl's display name: English when translated, else the game's Japanese. */
+export function unitName(u: { name: string; name_en?: string | null } | undefined | null): string {
+  return u ? u.name_en || u.name : "";
+}

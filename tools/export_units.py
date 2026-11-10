@@ -27,6 +27,7 @@ from PIL import Image
 
 from oshirore.abilities import AbilityResolver, clean_text, compact
 from oshirore.cache import GameCache
+from names_en import name_en
 
 UNIT_ARC = "PlayerUnitTable.aar"
 FACE_ARCS = [f"PlayerUnitFace{i}.aar" for i in range(10)]
@@ -240,6 +241,7 @@ def main() -> int:
         index.append({
             "id": cid,
             "name": name,
+            "name_en": name_en(name),
             "ruby": nm.get("CardRuby") or None,
             "rarity": r["Rarity"],
             "weapon": wt or None,
@@ -288,6 +290,7 @@ def main() -> int:
         detail = {
             "id": cid,
             "name": name,
+            "name_en": name_en(name),
             "ruby": nm.get("CardRuby") or None,
             "rarity": r["Rarity"],
             "card_type": r["CardType"],

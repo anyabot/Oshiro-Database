@@ -19,6 +19,7 @@ All data lives under `public/`:
 
 - `public/data/units.json` — slim card list; `public/data/unit/<id>.json` — one full card, loaded on demand
 - `public/data/meta.json` — label tables (weapon types, regions, rarities, categories, traits) taken from the game's own text tables
+- `tools/data/unit_names_en.json` — hand-made English castle girl names (`prefix` for `[夏]`-style event tags, `name` for the rest), added to the unit JSON as `name_en` by the exporter; after an export with new cards, translate the new names there and run `python tools/names_en.py` to re-apply
 - `public/unit-icon/<id>.webp` — 120×120 face icons (~11 MB, published)
 
 Card art is not exported (several GB).
