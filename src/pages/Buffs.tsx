@@ -86,7 +86,7 @@ const SOURCE_NOTE: Record<string, string> = {
 const REACH = [
   { value: "self", label: "Self" },
   { value: "single", label: "Single target" },
-  { value: "range", label: "In range" },
+  { value: "range", label: "In range / area" },
   { value: "wide", label: "All / formation" },
   { value: "group", label: "Tokens & others" },
 ];
@@ -94,8 +94,9 @@ function reach(r: BuffRow): string {
   const w = r.w;
   if (w === "Self") return "self";
   if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks") return "single";
-  if (/in range|in the target's range/.test(w)) return "range";
-  if (/^All |in the formation$|^Allies$|^Castle girls$|^Enemies$/.test(w)) return "wide";
+  if (/in range|in the target's range|in the area$/.test(w)) return "range";
+  // Ki over time goes to the side's shared pool: "Your side"
+  if (/^All |in the formation$|^Allies$|^Castle girls$|^Enemies$|^Your side$/.test(w)) return "wide";
   return "group";
 }
 
