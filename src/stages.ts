@@ -1,0 +1,160 @@
+// Stage / enemy data (tools/export_stages.py) and how deliberations (審議) change each enemy.
+import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
+import { describeRow, sideOfTarget, type BuffFact, type EffectDefs } from "./effects";
+import type { RawRow } from "./types";
+
+export type StageGroup = "enma" | "hel" | "osiris" | "abyss" | "bushin" | "other";
+
+export interface StageEntry {
+  id: number; name: string; group: StageGroup; tab: number; tabNo: number; index: number;
+  enemies: number; spawns: number; singi: boolean; veryHard: boolean; bushin?: string;
+}
+
+export interface Spawn { t: number; e: number; r: number; lv?: number; g?: number; hid?: 1 }
+
+export interface SingiOption {
+  id: number; name: string; text: string;
+  /** 審議 points */
+  pts: number;
+  /** SingiGroup (同時設定不可): options of one non-zero group can't be chosen together */
+  grp: number;
+  /** MapEffect.atb rows (deliberations below 20000); absent = text only */
+  rows?: RawRow[];
+}
+
+export interface StageDetail {
+  id: number; name: string; group: StageGroup; tab: number; tabNo: number; type: number; map: number;
+  description: string; battlefield: string; terrain: string;
+  /** [ATK, HP, DEF] % (攻撃/耐久/防御補正); 0 = unchanged */
+  rates: { normal: [number, number, number] | null; hard: [number, number, number] | null };
+  veryHard: boolean; ki: number; coreLife: number;
+  mapEffect: RawRow[];
+  spawns: Spawn[];
+  counts: Record<string, number>;
+  singi: { set: number; options: SingiOption[]; gold?: number; silver?: number } | null;
+  bushin?: string;
+}
+
+export interface MissileInfo { id: number; CrowdControlType?: number; DealDamageEffectID?: number; [k: string]: number | undefined }
+
+export interface Enemy {
+  name: string; typeText: string; types: number[];
+  flying: boolean; magic: boolean; boss: boolean;
+  hp: number; atk: number; def: number; mdef: number; range: number; wait: number; move: number;
+  block: number; targets: number; core: number; weak: number; hpStock: number;
+  ability: { id: number; name: string; text: string; rows: RawRow[] } | null;
+  missiles: MissileInfo[];
+  deadMissiles: MissileInfo[];
+  transforms: RawRow[];
+}
+
+export interface EnemyTarget { all?: boolean; groups?: number[][]; flying?: boolean }
+
+export interface EnemyData {
+  types: Record<string, string>;
+  targets: Record<string, EnemyTarget>;
+  enemies: Record<string, Enemy>;
+}
+
+const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data/${n}.json`] });
+export const useStages = () => useJson<StageEntry[]>(loader, "stages");
+export const useStage = (id: number | null) => useJson<StageDetail>(loader, id == null ? null : `stage/${id}`);
+export const useEnemies = () => useJson<EnemyData>(loader, "enemies");
+
+export const GROUPS: { k: StageGroup; label: string; jp: string }[] = [
+  { k: "enma", label: "Enma", jp: "閻魔" },
+  { k: "hel", label: "Hel", jp: "ヘル" },
+  { k: "osiris", label: "Osiris", jp: "オシリス" },
+  { k: "abyss", label: "Abyss", jp: "深淵" },
+  { k: "bushin", label: "Bushin", jp: "武神" },
+  { k: "other", label: "Other stages", jp: "" },
+];
+
+/** Entry Wait is in frames; the battle runs at 30 per second (DAT_00c6d97c). */
+export const frameSec = (f: number) => Math.round((f / 30) * 10) / 10;
+
+/** EnemyAbility rows in Ability.atb's shape: AbilityEffectType is a UnitEffectID (every row), the
+ *  detail type/value are the ability condition kind and its parameter (same codes as AbilityTypeDetail). */
+export function enemyAbilityRows(rows: RawRow[]): RawRow[] {
+  return rows.map((r) => {
+    const o: RawRow = { AbilityType: 1 };
+    if (r.AbilityTargetType) o.AbilityTargetType = r.AbilityTargetType;
+    if (r.AbilityAreaType) o.AbilityAreaType = r.AbilityAreaType;
+    if (r.AbilityEffectType) o.UnitEffectID = r.AbilityEffectType;
+    if (r.AbilityDetailType) o.AbilityTypeDetail = r.AbilityDetailType;
+    if (r.AbilityDetailValue) o.AbilityEffectDetail = r.AbilityDetailValue;
+    for (const k of ["EffectValue", "LimitValue", "EachGrowUp", "Passive"]) if (r[k]) o[k] = r[k];
+    return o;
+  });
+}
+
+/** MapEffect rows with TargetType/AreaType 0 continue the target of the row above. */
+export function withTargets(rows: RawRow[]): RawRow[] {
+  let tg = 0, ar = 0;
+  return rows.map((r) => {
+    if (r.TargetType) { tg = Number(r.TargetType); ar = Number(r.AreaType ?? 0); return r; }
+    return { ...r, TargetType: tg, AreaType: ar };
+  });
+}
+
+/** Does a target code select this enemy? null = the code tests something else (a state, a unit kind). */
+export function hits(e: Enemy, code: number, targets: Record<string, EnemyTarget>): boolean | null {
+  const t = targets[String(code)];
+  if (!t) return null;
+  if (t.all) return true;
+  if (t.flying !== undefined && t.flying !== e.flying) return false;
+  return (t.groups ?? []).every((g) => g.some((id) => e.types.includes(id)));
+}
+
+export interface EnemyMod extends BuffFact { src: string; text: string }
+
+/** Every stat change the chosen options make on this enemy, plus the enemy-side ones whose target
+ *  the page can't test (shown, not applied). */
+export function modsFor(e: Enemy, options: SingiOption[], defs: EffectDefs, targets: Record<string, EnemyTarget>) {
+  const applied: EnemyMod[] = [];
+  const unknown: EnemyMod[] = [];
+  /** enemy-side effects with no stat number (immunities, attack properties…), as sentences */
+  const notes: { src: string; text: string; sure: boolean }[] = [];
+  for (const o of options) {
+    for (const r of withTargets(o.rows ?? [])) {
+      if (!rowIsEnemySide(r, defs)) continue;
+      const h = hits(e, Number(r.TargetType), targets);
+      if (h === false) continue;
+      const s = describeRow(r, "organized", defs);
+      for (const f of s.facts) (h ? applied : unknown).push({ ...f, src: o.name, text: s.text[f.line] ?? "" });
+      if (!s.facts.length) for (const t of s.text) notes.push({ src: o.name, text: t, sure: !!h });
+    }
+  }
+  return { applied, unknown, notes };
+}
+
+/** Does a MapEffect row target enemies? (its TargetType's name: 敵, an enemy type, …) */
+export function rowIsEnemySide(r: RawRow, defs: EffectDefs): boolean {
+  return sideOfTarget(defs.labels[`otarget:${r.TargetType}`]?.jp ?? defs.labels[`target:${r.TargetType}`]?.jp) === "enemy"
+    && !!r.TargetType;
+}
+
+/** Game text markup: %c[rrggbb] colour switches. */
+export const plainText = (s: string) => s.replace(/%c\[[0-9a-fA-F]{6}\]/g, "");
+
+/** Status codes of the stats shown in the enemy table. */
+export const STAT = { hp: "status:101", atk: "status:202", def: "status:301", mdef: "status:304", range: "status:205", move: "status:401" } as const;
+
+/** One stat after the changes: plain % changes keep only the strongest increase and the strongest
+ *  decrease ("doesn't stack", FUN_00549240), stacking % kinds and multipliers add up, flat values add. */
+export function applyStat(base: number, mods: EnemyMod[]): number {
+  let upMax = 0, downMax = 0, sum = 0, flat = 0;
+  for (const m of mods) {
+    const sign = m.dir === "+" ? 1 : -1;
+    if (m.unit === "%" || m.unit === "×") {
+      const pct = m.unit === "×" ? Math.abs(m.v - 1) * 100 : m.v;
+      if (m.stack === "doesn't stack") {
+        if (sign > 0) upMax = Math.max(upMax, pct); else downMax = Math.max(downMax, pct);
+      } else sum += sign * pct;
+    } else if (m.unit === "") flat += sign * m.v;
+  }
+  return Math.max(0, Math.round(base * (1 + (upMax - downMax + sum) / 100) + flat));
+}
+
+/** Stage rate (攻撃/耐久/防御補正 %), 0 = unchanged. */
+export const rate = (r: number | undefined) => (r ? r / 100 : 1);

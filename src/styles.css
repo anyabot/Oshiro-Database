@@ -165,3 +165,30 @@
 .buff-table td.buff-target { min-width: 120px; max-width: 360px; white-space: normal; overflow-wrap: anywhere; }
 .buff-unit > img, .buff-noicon { width: 36px; height: 36px; border-radius: 6px; flex: none; }
 .buff-noicon { display: inline-block; background: var(--hub-surface-raised); }
+
+/* stages (src/pages/Stages.tsx, StageDetail.tsx) */
+.stage-search { margin: 0 0 12px; max-width: 420px; }
+.stage-list { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 6px; }
+.stage-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding: 8px 12px; border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); background: var(--hub-surface); color: inherit; text-decoration: none; }
+.stage-item:hover { border-color: var(--hub-accent-line); }
+.stage-item__name { font-weight: 600; }
+.stage-item__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.stage-facts { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 10px; font-size: 13px; }
+.singi-list { display: grid; gap: 8px; margin-bottom: 10px; }
+.singi { border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); padding: 6px 10px; background: var(--hub-surface); }
+.singi.is-on { border-color: var(--hub-accent-line); background: var(--hub-accent-soft); }
+.singi__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; }
+.singi__pts { min-width: 22px; text-align: center; font-weight: 700; border-radius: 4px; background: var(--hub-surface-raised); }
+.singi__name { font-weight: 600; }
+.singi__enemy { color: #f7768e; border-color: #f7768e; }
+.singi__text { margin: 4px 0; white-space: pre-line; font-size: 13px; }
+.fx-plain { margin: 4px 0; padding-left: 18px; font-size: 13px; }
+.enemy-table td { vertical-align: top; font-variant-numeric: tabular-nums; }
+.enemy-table .up { color: #f7768e; font-weight: 600; }
+.enemy-table .down { color: var(--hub-success, #3fb950); font-weight: 600; }
+.enemy-name { background: none; border: 0; padding: 0; color: var(--hub-accent); font: inherit; font-weight: 600; cursor: pointer; text-align: left; }
+.enemy-mods { max-width: 320px; white-space: normal; }
+.enemy-detail td { background: var(--hub-surface); }
+.enemy-detail__body { display: grid; gap: 8px; }
+.dot-badge { color: #ff9e64; border-color: #ff9e64; margin-top: 2px; }
+.timeline { margin-top: 8px; }

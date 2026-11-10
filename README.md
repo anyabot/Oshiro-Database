@@ -42,6 +42,25 @@ the stat changes it worded (stat, direction, value, cap, stacking, receiver, all
 Rebuild it after re-exporting effects or units. Left out: the card's own stat profile
 (`always` rows), potentials, quest-only rows, and anything still shown as raw codes.
 
+## Stages and deliberations
+
+`/stages` lists every stage in the current game data (only live quests are in `Quest.atb`),
+with Hell (閻魔 Enma, ヘル Hel, オシリス Osiris), Abyss (深淵) and Bushin (武神) stages grouped.
+A stage page shows its enemies with stats × the stage multipliers (攻撃/耐久/防御補正), their
+abilities, attacks and damage over time, the spawn order, and the deliberations (審議) as
+toggles that are applied to each enemy they target. Built by `tools/export_stages.py`:
+
+- `Quest.MapNo` → `Map%05d.aar`; its `Entry%02d.atb` is the spawn script (Type 2 spawns
+  `Enemy.EnemyID` = `ID`, Type 0 waits; frames at 30 per second).
+- `Quest.SingiID` → `ArenaSingiSet` (header row with the set ID, then one row per deliberation:
+  `Singi` = points, `SingiGroup` = 同時設定不可) → `ArenaSingiSetDetail`.
+- Deliberations below ID 20000 are the `MapEffect.atb` rows with the same ID (their texts and
+  rows agree, e.g. 1005 「全ての敵に毎秒耐久回復10」 = all enemies, regen +10); 2xxxx (castle girl
+  base stats) and 3xxxx (tile limits) have no rows and show their text only.
+- Which enemies a row hits comes from the exe's target predicates (`EnemyTypeID`/`EnemyTypeID2`
+  groups, flying flag; `data/target_codes.json`). % changes that don't stack keep only the
+  strongest; the final number assumes % changes multiply the stage-scaled stat, then flat values add.
+
 ## Regenerate from the game
 
 The exporter in `tools/` reads the game files from the DMM desktop client's

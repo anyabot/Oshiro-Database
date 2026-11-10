@@ -25,6 +25,11 @@ export const LIST_META: Record<string, PageMeta> = {
     description:
       "Every Shiro Project:RE castle girl: rarity, weapon type, region, stats, specialties, formation specialties, stratagems and renovation tiers. Filter by rarity, weapon, region and trait.",
   },
+  "/stages": {
+    title: "Stages",
+    description:
+      "Shiro Project:RE stages with their enemies and stats, including Hell (Enma, Hel, Osiris), Abyss and Bushin stages with deliberations (審議) you can toggle to see how they change each enemy.",
+  },
   "/buffs": {
     title: "Buff Ranking",
     description:
