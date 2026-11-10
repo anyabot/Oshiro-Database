@@ -201,6 +201,13 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
   return `${table} ${v}`;
 }
 
+/** An on/off state as a condition: "while it can't be targeted", "against enemies that have damage immunity". */
+function stateCondition(stat: string, own: boolean): string {
+  const s = stat.charAt(0).toLowerCase() + stat.slice(1);
+  const verb = /^(can't|cannot|can |is )/.test(s);
+  return own ? (verb ? `while it ${s}` : `while it has ${s}`) : (verb ? `against enemies that ${s}` : `against enemies that have ${s}`);
+}
+
 // UnitEffect types that mirror an AbilityType trigger (see unitEffect in describeRow)
 const UNIT_EFFECT_TRIGGER: Record<number, string> = {
   2: "on hit", 11: "each attack it makes", 12: "each time it is attacked", 17: "while blocked (足止め時)", 19: "every second",
@@ -517,7 +524,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const val = `${b.ConditionValue ?? 0}${b.ValueType === 2 ? "%" : ""}`;
     // ≤ 100% of the maximum always holds: the bonus applies to every hit (e.g. 雷光王撃 「攻撃が0.5倍の術ダメージ」)
     const always = b.ValueType === 2 && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≤" && Number(b.ConditionValue) >= 100;
-    const cond = always ? "" : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
+    // an on/off state tested "≥ 1" reads as the state itself: 「隠密状態の城娘が与えるダメージ1.3倍」 =
+    // while it can't be targeted
+    const isState = defs.labels[`statuskind:${b.StatusType}`]?.jp === "bool" && Number(b.ConditionValue) === 1
+      && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≥";
+    const cond = always ? ""
+      : isState ? stateCondition(stat, !!b.ReferenceSenderUnit)
+      : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
     // an AttackBonus row is its own damage multiplier, not an OnGiveDamage (与ダメージ) modifier: ranked
     // apart from "damage dealt %" even when its condition always holds
     last = { key: "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: "×", v: v / 100, note: cond || "every hit" };

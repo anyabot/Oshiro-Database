@@ -10,6 +10,7 @@ import {
 import { DEFAULT_META } from "../meta";
 import { unitName } from "../labels";
 import { usePageMeta } from "../usePageMeta";
+import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
 import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
 
@@ -49,9 +50,21 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
   if (!rows.length) return null;
   if (!defs) return <RawRows title={title} rows={rows} />;
   const bases = rowBases(rows);
+  // totals across rows: overlapping receivers that stack, ladders of attack-bonus multipliers
+  const facts: Fact[] = rows.flatMap((r, i) => {
+    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
+    return s.facts.map((f) => ({ ...f, text: s.text[f.line] ?? "" }));
+  });
+  const combined = combinedLines(facts);
   return (
     <div className="fx-list">
       {rows.map((r, i) => <EffectRow key={i} r={r} base={bases[i]} kind={kind} defs={defs} link={links?.[String(i)]} ctx={ctx} />)}
+      {combined.length > 0 && (
+        <div className="fx-combined">
+          <span className="fx-combined__label">Combined</span>
+          {combined.map((t, i) => <div key={i}>{t}</div>)}
+        </div>
+      )}
     </div>
   );
 }

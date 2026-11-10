@@ -213,3 +213,5 @@
 span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .enemy-table td.enemy-mods { min-width: 240px; max-width: 420px; white-space: normal; overflow-wrap: anywhere; }
 .buff-unit-filters { margin: 0 0 12px; }
+.fx-combined { margin-top: 4px; padding: 6px 10px; border-left: 3px solid var(--hub-accent); background: var(--hub-accent-soft); border-radius: var(--hub-radius-sm); font-size: 13px; }
+.fx-combined__label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--hub-accent); }
