@@ -54,6 +54,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
   rowsIn.forEach((r, i) => {
     const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly });
     for (const f of s.facts as BuffFact[]) {
+      if (!f.v) continue; // a zero change (empty rows) ranks nothing
       const sd = (side ?? f.side) === "enemy" ? "e" : "a";
       const k = `${f.key}|${f.dir}|${f.unit}`;
       keyNames.set(f.key, statName(f.key));

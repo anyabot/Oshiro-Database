@@ -286,12 +286,24 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Ability.atb continuation rows (AbilityID 0) carry AbilityType 0: they belong to the row above and run
 // under its AbilityType/AbilityTypeDetail (e.g. kind 9 rows 1..9 under one head row, one per giant stage)
-/** For each row of one ability, the head row it continues (undefined for head rows). */
+// A row with its own AbilityType but no AbilityTargetType / AbilityAreaType continues the clause above
+// it too: 「射程内の敵の攻撃が50、防御が20、射程と攻撃速度と与ダメージが5%低下」 is one targeted row
+// followed by four untargeted ones (51 such rows; each one's text gives the subject of the row above).
+/** For each row of one ability, the row(s) it continues (undefined when it needs nothing): the head
+ *  row's AbilityType/AbilityTypeDetail, and the last targeted row's target/area. */
 export function rowBases(rows: RawRow[]): (RawRow | undefined)[] {
   let head: RawRow | undefined;
+  let aim: RawRow | undefined;
   return rows.map((r) => {
-    if (r.AbilityType) { head = r; return undefined; }
-    return head;
+    const targeted = !!(r.AbilityTargetType || r.AbilityAreaType);
+    let base: RawRow | undefined;
+    if (r.AbilityType) head = r;
+    else if (head) base = { ...head };
+    if (!targeted && aim) {
+      base = { ...(base ?? {}), AbilityTargetType: aim.AbilityTargetType ?? 0, AbilityAreaType: aim.AbilityAreaType ?? 0 };
+    }
+    if (targeted) aim = r;
+    return base;
   });
 }
 
@@ -302,9 +314,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const used = new Set<string>();
   // a continuation row takes its type/kind from the head row, and target/area too when it has none
   const r: RawRow = { ...r0 };
-  if (base && !r0.AbilityType) {
-    r.AbilityType = base.AbilityType;
-    if (base.AbilityTypeDetail) r.AbilityTypeDetail = base.AbilityTypeDetail;
+  if (base) {
+    if (!r0.AbilityType && base.AbilityType) {
+      r.AbilityType = base.AbilityType;
+      if (base.AbilityTypeDetail) r.AbilityTypeDetail = base.AbilityTypeDetail;
+    }
     if (!r0.AbilityTargetType && !r0.AbilityAreaType) {
       if (base.AbilityTargetType) r.AbilityTargetType = base.AbilityTargetType;
       if (base.AbilityAreaType) r.AbilityAreaType = base.AbilityAreaType;
