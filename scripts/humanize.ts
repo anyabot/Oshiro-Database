@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describeRow, rowBases, stratagemContext, type RowKind } from "../src/effects";
 import { enemyAbilityRows, withTargets } from "../src/stages";
+import { groupRows } from "../src/group";
 
 const root = path.resolve(".");
 const read = (p: string) => JSON.parse(fs.readFileSync(path.join(root, "public/data", p), "utf8"));
@@ -13,7 +14,8 @@ const defs = read("effects.json");
 
 interface Hit { n: number; ex: string[] }
 const found = new Map<string, Map<string, Hit>>();
-let total = 0;
+let total = 0, rowsIn = 0, linesOut = 0, merged = 0;
+const mergedText: string[] = [];
 const seenText = new Set<string>();
 
 // on/off state names (a clause that is only the state is fine): every bool status label
@@ -62,7 +64,14 @@ function check(where: string, text: string) {
 function rows(where: string, rs: any[] | undefined, kind: RowKind, links?: any, ctx: any = {}) {
   if (!rs) return;
   const b = kind === "ability" ? rowBases(rs) : [];
-  rs.forEach((r, i) => describeRow(r, kind, defs, links?.[String(i)], b[i], ctx).text.forEach((t) => check(where, t)));
+  // the lines as the pages show them: alike sentences merged across the rows (src/group.ts)
+  const texts = rs.map((r, i) => describeRow(r, kind, defs, links?.[String(i)], b[i], ctx).text);
+  const lines = groupRows(texts);
+  rowsIn += texts.length; linesOut += lines.length;
+  for (const l of lines) {
+    if (l.rows.length > 1) { merged++; mergedText.push(`${where}: ${l.text}`); }
+    for (const t of l.rows.length > 1 ? [l.text] : l.text.split(" · ")) if (t) check(where, t);
+  }
 }
 
 const units = read("units.json");
@@ -109,7 +118,7 @@ for (const f of fs.readdirSync(path.join(root, "public/data/stage"))) {
   for (const o of s.singi?.options ?? []) if (o.rows && !doneAb.has(`s${o.id}`)) { doneAb.add(`s${o.id}`); rows(`deliberation ${o.name}`, withTargets(o.rows), "organized"); }
 }
 
-const lines = [`# Humanize check`, ``, `${total} sentences, ${seenText.size} distinct.`, ``];
+const lines = [`# Humanize check`, ``, `${total} sentences, ${seenText.size} distinct; ${rowsIn} rows shown as ${linesOut} lines (${merged} merged).`, ``];
 for (const [name, m] of found) {
   const list = [...m.entries()].sort((a, b) => b[1].n - a[1].n);
   lines.push(`## ${name} — ${list.length} patterns, ${list.reduce((n, [, h]) => n + h.n, 0)} sentences`, "");
@@ -123,5 +132,7 @@ let seed = Number(process.env.SEED ?? 7);
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const sample = Array.from({ length: Math.min(160, all.length) }, () => all[Math.floor(rnd() * all.length)]);
 fs.writeFileSync((process.argv[2] ?? "humanize.md").replace(/\.md$/, ".sample.txt"), [...new Set(sample)].join("\n"));
+// every merged line, for reading by eye
+fs.writeFileSync((process.argv[2] ?? "humanize.md").replace(/\.md$/, ".merged.txt"), mergedText.join("\n"));
 console.log(lines[2]);
 for (const [name, m] of found) console.log(String([...m.values()].reduce((n, h) => n + h.n, 0)).padStart(6), name, `(${m.size} patterns)`);

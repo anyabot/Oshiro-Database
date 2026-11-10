@@ -181,7 +181,7 @@ export const JP_EN: Record<string, string> = {
   風属性: "wind", 光属性: "light", 闇属性: "dark", 毒属性: "poison", 属性1: "attribute 1", 属性2: "attribute 2", 属性3: "attribute 3",
   回復を受けられない: "Can't be healed",
   足止め対象にならない: "Can't be blocked",
-  回復がダメージに変化: "Heals on it deal damage",
+  回復がダメージに変化: "Healing it deals damage instead",
   攻撃しない: "Doesn't attack",
   "計略消費気%": "Stratagem Ki cost %",
   // TokenConfig.TokenUnitType 1 = every 伏兵 token (all 390), not only the owner's (that is 自身のトークン)

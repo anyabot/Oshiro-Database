@@ -132,7 +132,8 @@ export function enemyAbilityRows(rows: RawRow[]): RawRow[] {
 export function withTargets(rows: RawRow[]): RawRow[] {
   let tg = 0, ar = 0;
   return rows.map((r) => {
-    if (r.TargetType) { tg = Number(r.TargetType); ar = Number(r.AreaType ?? 0); return r; }
+    // a blank cell repeats the row above: 防御参照攻撃 names AreaType 4 (部隊) on its first row only
+    if (r.TargetType) { tg = Number(r.TargetType); ar = r.AreaType != null ? Number(r.AreaType) : ar; return { ...r, AreaType: ar }; }
     return { ...r, TargetType: tg, AreaType: ar };
   });
 }

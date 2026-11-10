@@ -11,7 +11,8 @@ import { DEFAULT_META } from "../meta";
 import { unitName } from "../labels";
 import { usePageMeta } from "../usePageMeta";
 import { combinedLines, type Fact } from "../combine";
-import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
+import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
+import { groupRows, type Line } from "../group";
 import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
 
 const renderLink = routerLinks(Link, "to");
@@ -43,22 +44,25 @@ function RawRows({ title, rows }: { title: string; rows: RawRow[] }) {
   );
 }
 
-/** Effect rows as readable lines; each keeps its unused raw fields one click away. */
+/** Effect rows as readable lines (alike sentences merged, src/group.ts); each line keeps the raw fields of
+ *  the rows it came from one click away. */
 function EffectList({ title, rows, kind, defs, links, ctx }: {
   title: string; rows: RawRow[]; kind: RowKind; defs?: EffectDefs; links?: Record<string, FieldLink>; ctx?: RowContext;
 }) {
   if (!rows.length) return null;
   if (!defs) return <RawRows title={title} rows={rows} />;
   const bases = rowBases(rows);
+  const described = rows.map((r, i) => describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx));
   // totals across rows: overlapping receivers that stack, ladders of attack-bonus multipliers
-  const facts: Fact[] = rows.flatMap((r, i) => {
-    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
-    return s.facts.map((f) => ({ ...f, text: s.text[f.line] ?? "" }));
-  });
+  const facts: Fact[] = described.flatMap((s) => s.facts.map((f) => ({ ...f, text: s.text[f.line] ?? "" })));
   const combined = combinedLines(facts);
+  // alike sentences merged across rows; a row with no sentence keeps its place as "(not decoded)"
+  const shown = groupRows(described.map((s) => s.text));
   return (
     <div className="fx-list">
-      {rows.map((r, i) => <EffectRow key={i} r={r} base={bases[i]} kind={kind} defs={defs} link={links?.[String(i)]} ctx={ctx} />)}
+      {shown.map((l, i) => (
+        <EffectLine key={i} line={l} rows={l.rows.map((j) => ({ r: rows[j], s: described[j], link: links?.[String(j)] }))} />
+      ))}
       {combined.length > 0 && (
         <div className="fx-combined">
           <span className="fx-combined__label">Combined</span>
@@ -69,25 +73,30 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
   );
 }
 
-/** One effect row: plain selectable text; the raw fields open from a separate button. */
-function EffectRow({ r, base, kind, defs, link, ctx }: { r: RawRow; base?: RawRow; kind: RowKind; defs: EffectDefs; link?: FieldLink; ctx?: RowContext }) {
+/** One effect line: plain selectable text; the raw fields of its rows open from a separate button. */
+function EffectLine({ line, rows }: { line: Line; rows: { r: RawRow; s: Sentence; link?: FieldLink }[] }) {
   const [open, setOpen] = useState(false);
-  const { text, evidence, rest } = describeRow(r, kind, defs, link, base, ctx);
+  const evidence = [...new Set(rows.flatMap((x) => x.s.evidence))];
   return (
     <div className="fx-row">
       <div className="fx-line">
-        <span className="fx-text">{text.length ? text.join(" · ") : <span className="muted">(not decoded)</span>}</span>
+        <span className="fx-text">{line.text || <span className="muted">(not decoded)</span>}</span>
         {evidence.length > 0 && (
           <span className="fx-q" title={`Words taken from the game's ability descriptions:\n${evidence.join("\n")}`}>?</span>
         )}
-        <button type="button" className="fx-raw-btn" aria-expanded={open} onClick={() => setOpen(!open)} title="raw fields">
+        <button type="button" className="fx-raw-btn" aria-expanded={open} onClick={() => setOpen(!open)}
+          title={rows.length > 1 ? `raw fields (${rows.length} rows)` : "raw fields"}>
           {open ? "−" : "+"}
         </button>
       </div>
       {open && (
         <div className="fx-raw">
-          <RawChips row={Object.keys(rest).length ? rest : r} />
-          {link && <><RawChips row={link.field} /><RawChips row={link.missile} /></>}
+          {rows.map(({ r, s, link }, i) => (
+            <div key={i}>
+              <RawChips row={Object.keys(s.rest).length ? s.rest : r} />
+              {link && <><RawChips row={link.field} /><RawChips row={link.missile} /></>}
+            </div>
+          ))}
         </div>
       )}
     </div>

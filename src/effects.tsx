@@ -1108,6 +1108,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   function finish(): Sentence {
     const rest: RawRow = {};
     for (const [k, v] of Object.entries(r0)) if (!used.has(k)) rest[k] = v;
-    return { text, evidence, rest, facts };
+    // a set value that grows on each re-apply starts at the value and climbs by it:
+    // "Physical damage reduction 10%, +10% more each time it is attacked, up to 50%"
+    const grown = text.map((t) => t.replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `));
+    return { text: grown, evidence, rest, facts };
   }
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
+import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
 import {
   GROUPS, STAT, applyStat, enemyImage, mapImage, preText, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
@@ -161,7 +162,8 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
   const bases = kind === "ability" ? rowBases(rows) : [];
   return (
     <ul className="fx-plain">
-      {rows.map((r, i) => <li key={i}>{describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text.join(" · ") || "(not decoded)"}</li>)}
+      {groupRows(rows.map((r, i) => describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text))
+        .map((l, i) => <li key={i}>{l.text || "(not decoded)"}</li>)}
     </ul>
   );
 }
@@ -220,7 +222,7 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
   const innate = useMemo(() => {
     const rows = enemyAbilityRows(e.ability?.rows ?? []);
     const bases = rowBases(rows);
-    return rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text);
+    return groupTexts(rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text));
   }, [e, defs]);
   return (
     <>
