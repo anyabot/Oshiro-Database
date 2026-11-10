@@ -1,9 +1,10 @@
 // Stage / enemy data (tools/export_stages.py) and how deliberations (審議) change each enemy.
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { describeRow, sideOfTarget, type BuffFact, type EffectDefs } from "./effects";
+import { tagEN } from "./labels";
 import type { RawRow } from "./types";
 
-export type StageGroup = "enma" | "hel" | "osiris" | "hades" | "bushin" | "story" | "voyage" | "tenma" | "osaka" | "events" | "other";
+export type StageGroup = "enma" | "hel" | "osiris" | "hades" | "bushin" | "story" | "voyage" | "tenma" | "osaka" | "palace" | "events" | "other";
 
 export interface StageEntry {
   id: number; name: string; group: StageGroup; tab: number; tabNo: number; index: number;
@@ -30,6 +31,8 @@ export interface SingiOption {
   grp: number;
   /** MapEffect.atb rows (deliberations below 20000); absent = text only */
   rows?: RawRow[];
+  /** PreBattleEffect.atb rows (2xxxx deliberations: castle girl base stats) */
+  pre?: RawRow[];
 }
 
 export interface StageDetail {
@@ -101,6 +104,8 @@ export const GROUPS: { k: StageGroup; label: string; jp: string }[] = [
   { k: "voyage", label: "Voyage", jp: "夢幻航海" },
   { k: "tenma", label: "Tenma", jp: "天魔大乱" },
   { k: "osaka", label: "Osaka", jp: "大坂の陣・群雄割拠" },
+  // Event.atb types 14 (絢爛御殿・平, …) and 17 (四季御殿・春, …)
+  { k: "palace", label: "Palace", jp: "御殿" },
   { k: "events", label: "Events", jp: "イベント" },
   { k: "other", label: "Other", jp: "" },
 ];
@@ -167,6 +172,23 @@ export function modsFor(e: Enemy, options: SingiOption[], defs: EffectDefs, targ
 export function rowIsEnemySide(r: RawRow, defs: EffectDefs): boolean {
   return sideOfTarget(defs.labels[`otarget:${r.TargetType}`]?.jp ?? defs.labels[`target:${r.TargetType}`]?.jp) === "enemy"
     && !!r.TargetType;
+}
+
+// PreBattleEffectType, named from the deliberation texts whose rows use it: 1 基礎攻撃…低下 (20009, 20014,
+// 20016, 20018), 4 基礎射程…低下 (20010, 20011, 20019), 5 基礎巨大化気(と時間)…増加 (20012: its only
+// increase row), 6 配置気…増加 (20014, 20015). Types 2, 3 and 7 are used by no deliberation.
+const PRE_TYPE: Record<number, string> = {
+  1: "base ATK −", 4: "base range −", 5: "base giantify Ki (and time) +", 6: "deploy Ki +",
+};
+
+/** A PreBattleEffect row as text: "Melee castle girls: base ATK −50". */
+export function preText(r: RawRow, defs: EffectDefs): string {
+  const tg = Number(r.TargetType ?? 0);
+  const jp = defs.labels[`target:${tg}`]?.jp ?? defs.labels[`otarget:${tg}`]?.jp;
+  const who = jp ? (tagEN(jp) ?? (jp === "城娘" ? "castle girls" : jp)) : `target ${tg}`;
+  const t = Number(r.PreBattleEffectType ?? 0);
+  const what = PRE_TYPE[t] ? `${PRE_TYPE[t]}${r.EffectValue ?? 0}` : `pre-battle effect ${t}: ${r.EffectValue ?? 0}`;
+  return `${who.charAt(0).toUpperCase()}${who.slice(1)}: ${what}`;
 }
 
 /** Game text markup: %c[rrggbb] colour switches. */

@@ -28,8 +28,8 @@ TAB_GROUP = {11: "enma", 12: "hel", 13: "osiris", 23: "hades", 5: "bushin", 1: "
 # Event.atb Type -> site group (types with one event are named by it: 6 閻魔の闘技場, 7 ヘルの遊戯場,
 # 8 オシリスの審判場, 15 ハデスの死闘場 = the 深淵 stages, 4 = 武神降臨, 11 第2部「夢幻航海」, 13 天魔大乱, 9 戦術指南)
 EVENT_GROUP = {6: "enma", 7: "hel", 8: "osiris", 15: "hades", 4: "bushin", 11: "voyage", 13: "tenma",
-               18: "osaka", 1: "events", 2: "events", 3: "events", 10: "events", 12: "events", 14: "events",
-               16: "events", 17: "events", 9: "other"}
+               18: "osaka", 14: "palace", 17: "palace", 1: "events", 2: "events", 3: "events", 10: "events",
+               12: "events", 16: "events", 9: "other"}  # 14 絢爛御殿・平/平山/…, 17 四季御殿・春/…
 
 
 def grouped(rows, key):
@@ -62,6 +62,9 @@ def main() -> None:
     map_effect = grouped(c.table("MapEffect.atb"), "MapEffectID")
     sets = grouped(c.table("ArenaTable.aar", "ArenaSingiSet.atb"), "ID")
     details = {r["ID"]: r for r in c.table("ArenaTable.aar", "ArenaSingiSetDetail.atb")}
+    # 2xxxx deliberations (castle girl base stats): SingiSetDetailParameter = PreBattleEffect.atb set
+    # (every 2xxxx row's text agrees with its set's rows)
+    pre_battle = grouped(c.table("PreBattleEffect.atb"), "ID")
     bushin = {}
     for b in c.table("BushinQuestList.atb"):
         for q in str(b["QuestIDs"]).split(","):
@@ -165,6 +168,8 @@ def main() -> None:
                  "pts": r["Singi"], "grp": r["SingiGroup"]}
             if did < 20000 and did in map_effect:
                 o["rows"] = [nz(x) for x in map_effect[did]]
+            elif 20000 <= did < 30000 and d.get("SingiSetDetailParameter") in pre_battle:
+                o["pre"] = [nz(x) for x in pre_battle[d["SingiSetDetailParameter"]]]
             opts.append(o)
         singi = {"set": set_id, "options": opts}
         if qid in bushin:

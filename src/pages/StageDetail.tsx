@@ -4,7 +4,7 @@ import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { tagEN } from "../labels";
 import {
-  GROUPS, STAT, applyStat, enemyImage, mapImage, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
+  GROUPS, STAT, applyStat, enemyImage, mapImage, preText, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
@@ -137,9 +137,10 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
         </Panel>
       )}
 
-      <Panel title="Enemies" note={`Stats ×stage multiplier${active.length ? ", then the chosen deliberations" : ""}. Hover a number for the base value.`}>
+      <Panel title="Enemies" note={<>Stats ×stage multiplier{active.length ? ", then the chosen deliberations" : ""}. Hover a number for the base value.{" "}
+        <span className="chg-innate">■ the enemy's own ability</span> <span className="chg-singi">■ from deliberations</span></>}>
         <table className="hub-table hub-table--stack enemy-table">
-          <thead><tr><th>Enemy</th><th>#</th><th>HP</th><th>ATK</th><th>DEF</th><th>Magic DEF</th><th>Range</th><th>Move</th><th>Changes</th></tr></thead>
+          <thead><tr><th>Enemy</th><th>#</th><th>HP</th><th>ATK</th><th>DEF</th><th>Magic DEF</th><th>Range</th><th>Move</th><th>Abilities &amp; changes</th></tr></thead>
           <tbody>
             {order.map(({ id: eid, form, depth }) => {
               const e = data.enemies[eid];
@@ -183,6 +184,8 @@ function SingiRow({ o, on, onToggle, defs }: { o: SingiOption; on: boolean; onTo
           <button type="button" className="fx-raw-btn" onClick={() => setOpen(!open)} title="decoded effect rows">{open ? "−" : "+"}</button>
           {open && <RowList rows={withTargets(o.rows)} defs={defs} />}
         </>
+      ) : o.pre ? (
+        <ul className="fx-plain">{o.pre.map((r, i) => <li key={i}>{preText(r, defs)}</li>)}</ul>
       ) : <span className="muted small">No effect rows in the data (text only).</span>}
     </div>
   );
@@ -213,6 +216,12 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
   const other = applied.filter((m) => !shownKeys.includes(m.key));
   const types = e.types.map((t) => data.types[t]).filter(Boolean).map((t) => tagEN(t) ?? t);
   const dot = hasDot(e, defs);
+  // the enemy's own ability, as its sentences (the same as in its expanded detail)
+  const innate = useMemo(() => {
+    const rows = enemyAbilityRows(e.ability?.rows ?? []);
+    const bases = rowBases(rows);
+    return rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text);
+  }, [e, defs]);
   return (
     <>
       <tr className={open ? "is-open" : undefined}>
@@ -239,9 +248,10 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
         <td data-label="Magic DEF">{statCell(e.mdef, 1, by(STAT.mdef))}</td>
         <td data-label="Range">{statCell(e.range, 1, by(STAT.range))}</td>
         <td data-label="Move">{statCell(Math.round(e.move), 1, by(STAT.move))}</td>
-        <td data-label="Changes" className="enemy-mods">
-          {other.map((m, i) => <div key={i} className="small" title={m.src}>{m.text.replace(/^[^:]*: /, "")}</div>)}
-          {notes.map((m, i) => <div key={`n${i}`} className={`small${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{m.text.replace(/^[^:]*: /, "")}</div>)}
+        <td data-label="Abilities & changes" className="enemy-mods">
+          {innate.map((t, i) => <div key={`i${i}`} className="small chg-innate" title="The enemy's own ability">{t}</div>)}
+          {other.map((m, i) => <div key={i} className="small chg-singi" title={m.src}>{m.text.replace(/^[^:]*: /, "")}</div>)}
+          {notes.map((m, i) => <div key={`n${i}`} className={`small chg-singi${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{m.text.replace(/^[^:]*: /, "")}</div>)}
           {unknown.map((m, i) => <div key={`u${i}`} className="small muted" title={`${m.src}: its target isn't an enemy type the page can test`}>? {m.text}</div>)}
         </td>
       </tr>

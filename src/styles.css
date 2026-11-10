@@ -208,3 +208,7 @@
 .enemy-cell { display: flex; gap: 8px; align-items: flex-start; }
 .enemy-icon { width: 56px; height: 56px; object-fit: contain; flex: none; image-rendering: auto; }
 .enemy-icon--none { display: inline-block; }
+.chg-innate { color: #7dcfff; border-left: 3px solid #7dcfff; padding-left: 6px; }
+.chg-singi { color: #f7768e; border-left: 3px solid #f7768e; padding-left: 6px; }
+span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
+.enemy-table td.enemy-mods { min-width: 240px; max-width: 420px; white-space: normal; overflow-wrap: anywhere; }
