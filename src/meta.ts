@@ -25,4 +25,9 @@ export const LIST_META: Record<string, PageMeta> = {
     description:
       "Every Shiro Project:RE castle girl: rarity, weapon type, region, stats, specialties, formation specialties, stratagems and renovation tiers. Filter by rarity, weapon, region and trait.",
   },
+  "/buffs": {
+    title: "Buff Ranking",
+    description:
+      "Shiro Project:RE buff ranking: which castle girls give the biggest ATK, DEF, range, attack speed, damage, Ki and enemy debuff effects, from specialties, formation specialties, stratagems and class abilities.",
+  },
 };

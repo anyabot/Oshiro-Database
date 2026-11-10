@@ -32,6 +32,16 @@ Trait (`Tokusei`) values have no name table in the game data. Where most of a
 trait's carriers share a name prefix (`[夏]`, `[正月]`…), that prefix is used as
 its label; the others show as `特性 <id>`.
 
+## Buff ranking
+
+`/buffs` ranks who gives the biggest effect per stat (ATK %, range, damage taken, enemy DEF…),
+split by source (特技, 編成特技, 計略, class ability…), with receiver, renovation and rarity
+filters. Its data, `public/data/buffs.json`, is built by `npm run buffs` (`scripts/buffs.ts`) from
+the same effect describer the castle girl pages use: `describeRow` returns, next to each sentence,
+the stat changes it worded (stat, direction, value, cap, stacking, receiver, ally/enemy side).
+Rebuild it after re-exporting effects or units. Left out: the card's own stat profile
+(`always` rows), potentials, quest-only rows, and anything still shown as raw codes.
+
 ## Regenerate from the game
 
 The exporter in `tools/` reads the game files from the DMM desktop client's

@@ -18,7 +18,7 @@ export default function App() {
       game="oshiro"
       logo={<img src="/logo.png" alt="" />}
       renderHomeLink={homeLink(Link, "to")}
-      nav={<NavLink to="/units">Units</NavLink>}
+      nav={<><NavLink to="/units">Units</NavLink><NavLink to="/buffs">Buffs</NavLink></>}
       footer={{ links: FOOTER_LINKS }}
       resetKey={pathname}
       contained={false}

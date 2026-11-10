@@ -1,0 +1,111 @@
+// Buff ranking data: every stat change every playable castle girl gives, as the site's own effect
+// describer words it (describeRow facts), tagged with the slot and renovation tier it comes from.
+//   node scripts/buffs.mjs   (built from this file by `npm run buffs`)
+// Writes public/data/buffs.json, read by src/pages/Buffs.tsx.
+import fs from "node:fs";
+import path from "node:path";
+import { describeRow, rowBases, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
+import { JP_EN } from "../src/labels";
+import type { Ability, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
+
+const root = path.resolve(process.argv[2] ?? ".");
+const data = (p: string) => JSON.parse(fs.readFileSync(path.join(root, "public/data", p), "utf8"));
+const defs: EffectDefs = data("effects.json");
+const index: UnitIndexEntry[] = data("units.json");
+
+/** One row of buffs.json (short keys: ~10k rows). */
+export interface BuffRow {
+  u: number;
+  /** renovation tier the slot comes from; -1 = not tied to a tier (class, special ability) */
+  t: number;
+  sl: string;
+  /** effect key: fact key | dir | unit */
+  k: string;
+  v: number;
+  mx?: number;
+  /** grows with no cap */
+  nc?: 1;
+  sd: "a" | "e";
+  w: string;
+  n?: string;
+  /** stacking: 1 stacks, 0 doesn't (only the strongest applies), or the rule's own words */
+  st?: 0 | 1 | string;
+  /** ability / stratagem name */
+  nm?: string;
+}
+
+const rows: BuffRow[] = [];
+const keyNames = new Map<string, string>();
+
+function statName(key: string): string {
+  if (key === "dmg:dealt") return "Damage dealt";
+  if (key === "dmg:taken") return "Damage taken";
+  if (key === "dmg:bonus") return "Damage (conditional)";
+  if (key === "ki:natural") return "Natural Ki gain";
+  const jp = defs.labels[key]?.jp;
+  if (!jp) return key;
+  return JP_EN[jp] ?? jp;
+}
+
+function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, kind: RowKind, name: string | undefined,
+  side?: "ally" | "enemy", links?: Ability["field_links"], selfOnly = false) {
+  if (!rowsIn) return;
+  const bases = rowBases(rowsIn);
+  rowsIn.forEach((r, i) => {
+    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly });
+    for (const f of s.facts as BuffFact[]) {
+      const sd = (side ?? f.side) === "enemy" ? "e" : "a";
+      const k = `${f.key}|${f.dir}|${f.unit}`;
+      keyNames.set(f.key, statName(f.key));
+      rows.push({
+        u, t, sl, k, v: f.v, sd, w: f.who,
+        // LimitValue 9999 / 10000 / 999999: the texts give no cap (e.g. さらに5%ずつ上昇): ranked by the step
+        ...(f.max && f.max >= 9999 ? { nc: 1 as const } : f.max ? { mx: f.max } : {}), ...(f.note ? { n: f.note } : {}),
+        ...(f.stack ? { st: f.stack === "stacks" ? 1 : f.stack === "doesn't stack" ? 0 : f.stack } : {}),
+        ...(name ? { nm: name } : {}),
+      });
+    }
+  });
+}
+
+const ability = (u: number, t: number, sl: string, a: Ability | null | undefined, kind: RowKind = "ability") => {
+  if (a && !a.missing) emit(u, t, sl, a.effects, kind, a.name, undefined, a.field_links);
+};
+
+let units = 0;
+for (const entry of index) {
+  // playable cards only: no NPC / duplicate entries, and transformed states belong to their stratagem
+  if (entry.npc || entry.dup_of || entry.transform_of) continue;
+  const u: UnitDetail = data(`unit/${entry.id}.json`);
+  const before = rows.length;
+  for (const f of u.forms) {
+    ability(u.id, f.tier, "skill", f.ability);
+    ability(u.id, f.tier, "formation", f.organized, "organized");
+    ability(u.id, f.tier, "possession", f.possessed);
+    ability(u.id, f.tier, "defeat", f.defeated);
+    // f.always is the card's own stat profile (ATK/DEF/HP +8%, cost…), not a buff it gives: left out
+    if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
+    for (const s of f.stratagems ?? []) {
+      if (!s.effect) continue;
+      // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
+      const selfOnly = defs.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ";
+      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, selfOnly);
+      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, selfOnly);
+      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, selfOnly);
+    }
+  }
+  ability(u.id, -1, "class", u.class_ability);
+  ability(u.id, -1, "class", u.sub_class?.class_ability);
+  ability(u.id, -1, "special", u.special_ability?.sub_ability);
+  if (rows.length > before) units++;
+}
+
+// the same change listed twice (e.g. a skill repeated in a later form) counts once
+const seenRow = new Set<string>();
+const unique = rows.filter((r) => { const j = JSON.stringify(r); return !seenRow.has(j) && !!seenRow.add(j); });
+rows.length = 0;
+rows.push(...unique);
+const keys = Object.fromEntries([...keyNames.entries()].sort());
+const out = path.join(root, "public/data/buffs.json");
+fs.writeFileSync(out, JSON.stringify({ keys, rows }));
+console.log(`${rows.length} buff rows from ${units} castle girls, ${keyNames.size} stats -> ${path.relative(root, out)} (${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);

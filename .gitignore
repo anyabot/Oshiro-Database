@@ -5,3 +5,4 @@ __pycache__/
 altterisk-game-hub-*.tgz
 scripts/sweep.mjs
 scripts/coverage.mjs
+scripts/buffs.mjs

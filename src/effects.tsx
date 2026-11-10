@@ -45,6 +45,37 @@ export interface Sentence {
   evidence: string[];
   /** Fields the sentences did not use. */
   rest: RawRow;
+  /** The stat changes in the sentences, for the buff ranking (scripts/buffs.ts). */
+  facts: BuffFact[];
+}
+
+/** One stat change a row makes, as the sentence states it. */
+export interface BuffFact {
+  /** "status:<StatusType>", or "dmg:dealt" / "dmg:taken" (OnGiveDamage / OnTakeDamage %). */
+  key: string;
+  dir: "+" | "-";
+  /** "%", "" (flat), "s" (seconds), "×" (the descriptions print it as a multiplier; v is then the multiplier) */
+  unit: string;
+  v: number;
+  /** LimitValue of a growing or per-count row: the most it reaches. */
+  max?: number;
+  stack?: string;
+  /** Who receives it ("Castle girls in range", "Self", "Enemies"…). */
+  who: string;
+  side: "ally" | "enemy";
+  /** Index of the sentence in text. */
+  line: number;
+  /** Conditions, duration, chance… (the sentence's tail). */
+  note?: string;
+}
+
+// Which side a target name is on: the game's own target names (ability / formation target labels).
+// Ally names say 城娘 / 味方 / 自身 / 伏兵 / トークン / 舟 / 蔵 or name a castle type (…城); the rest
+// are enemy types (敵, 兜, 妖怪, 魔物, enemy sets).
+export function sideOfTarget(jp: string | undefined): "ally" | "enemy" {
+  if (!jp) return "ally";
+  if (/敵/.test(jp)) return "enemy";
+  return /城娘|味方|自身|伏兵|トークン|舟|蔵|城$|^\[/.test(jp) ? "ally" : "enemy";
 }
 
 // StatusModifierType.ValueType: 4 = % that stacks with same-kind effects (its descriptions say
@@ -70,10 +101,21 @@ const EFFECT_FLAGS: Record<string, string> = {
   MinDamage: "min damage",
 };
 
+// a row that lists every damage kind (物理/術/貫通) and both melee and ranged applies to all damage
+const DAMAGE_KINDS = ["PhysicalDamage", "MagicDamage", "TrueDamage"];
+const ATTACK_KINDS = ["MeleeAttack", "RangedAttack"];
+/** The row's switches as words, leaving out complete sets (= no restriction). */
+function restriction(row: RawRow): string[] {
+  const all = (ks: string[]) => ks.every((k) => row[k]);
+  return Object.keys(EFFECT_FLAGS).filter((k) => row[k])
+    .filter((k) => !(DAMAGE_KINDS.includes(k) && all(DAMAGE_KINDS)) && !(ATTACK_KINDS.includes(k) && all(ATTACK_KINDS)))
+    .map((k) => EFFECT_FLAGS[k]);
+}
+
 /** One DealDamage / OnTakeDamage / OnGiveDamage / Immunity row as text. */
 function effectRow(table: string, row: RawRow, v: number, modifierText: (code: number, val: number) => string,
   ccName: (cc: number) => string = (cc) => `crowd control ${cc}`): string {
-  const on = Object.keys(EFFECT_FLAGS).filter((k) => row[k]).map((k) => EFFECT_FLAGS[k]);
+  const on = restriction(row);
   const ms = (k: string) => (typeof row[k] === "number" ? (row[k] as number) / 1000 : 0);
   const extra: string[] = [];
   if (ms("IntervalInMillis")) extra.push(`every ${ms("IntervalInMillis")}s`);
@@ -133,9 +175,13 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
 }
 
 // UnitEffect.UnitEffectType -> the table its ActualEffectID is always found in
+// Type 8 ids are OnGiveDamageEffect rows: their texts give the OGD row's amount and direction
+// (5001 -> OGD 11 type 1, v 50 = 与ダメージ1.5倍; 5002 -> OGD 13 type 2, v 60 = 与ダメージ60%低下).
+// Type 22 ids are AttackBonusStatusEffect rows (209 of 209; see attackBonus in describeRow).
 const UNIT_EFFECT_TABLE: Record<number, string> = {
   3: "OnTakeDamageEffect",
   7: "ImmunityEffect",
+  8: "OnGiveDamageEffect",
   9: "DealDamageEffect",
 };
 
@@ -249,7 +295,10 @@ export function rowBases(rows: RawRow[]): (RawRow | undefined)[] {
   });
 }
 
-export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow): Sentence {
+/** Where a row sits: selfOnly = a stratagem whose EnchantEffect.TargetType is 自分のみ (its target is its user). */
+export interface RowContext { selfOnly?: boolean }
+
+export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow, ctx: RowContext = {}): Sentence {
   const used = new Set<string>();
   // a continuation row takes its type/kind from the head row, and target/area too when it has none
   const r: RawRow = { ...r0 };
@@ -263,6 +312,25 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   }
   const num = (k: string) => { used.add(k); return typeof r[k] === "number" ? (r[k] as number) : 0; };
   const evidence: string[] = [];
+  const facts: BuffFact[] = [];
+  // the last stat change modifier() worded; take() files it under the sentence about to be pushed
+  let last: Omit<BuffFact, "who" | "side" | "line"> | null = null;
+  const take = (who: string, side: "ally" | "enemy", note = "") => {
+    // a change can carry its own condition (attack bonus: "while own ATK ≥ 10000"); it leads the note
+    const n = [last?.note, note.replace(/^, /, "")].filter(Boolean).join(", ");
+    if (last) facts.push({ ...last, who, side, line: text.length, ...(rowMax ? { max: rowMax } : {}), ...(n ? { note: n } : { note: undefined }) });
+    last = null;
+  };
+  const damageFact = (which: "dealt" | "taken", dir: "+" | "-", unit: string, v: number) => {
+    last = { key: `dmg:${which}`, dir, unit, v };
+  };
+  /** A change worded only by a mined label (effect / ability type codes): ranked under that label. */
+  const labelFact = (key: string, v: number) => {
+    const l = defs.labels[key];
+    last = l ? { key, dir: l.dir ?? "+", unit: l.unit === "%" ? "%" : l.unit === "秒" ? "s" : l.unit === "倍" ? "×" : "",
+      v: l.unit === "秒" && l.form === "milli" ? v / 1000
+        : l.unit === "倍" ? (l.form === "mul" ? v / 100 : l.dir === "-" ? 1 - v / 100 : 1 + v / 100) : v } : null;
+  };
 
   /** English for a mined code, or the raw code when there is no label. */
   const word = (key: string, fallback: string): string => {
@@ -285,6 +353,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
 
   /** "ATK +20%, doesn't stack" from a StatusModifierType code. */
   const modifier = (code: number, v: number): string => {
+    last = null;
     const d = defs.smt[code];
     if (!d) return `modifier ${code} ${v}`;
     const [status, expr, vt, ref, refSender] = d;
@@ -344,12 +413,38 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     else amount = `${sign}${v} (value type ${vt})`;
     const stack = vt === 1 && (expr === 1 || expr === 2) ? (FLAT_MAX_STATUS.has(status) ? "doesn't stack" : "stacks")
       : expr === 1 || expr === 2 ? STACKING[vt] : undefined;
+    // only amounts the sentence states plainly (not "% of another stat" or an unnamed value type)
+    if (dir && (vt === 1 || vt === 2 || vt === 4 || (w?.unit && vt !== 6))) {
+      const unit = w?.unit === "倍" ? "×" : w?.unit === "秒" ? "s" : vt === 2 || vt === 4 ? "%" : "";
+      const val = w?.unit === "秒" && w.form === "milli" ? v / 1000
+        : w?.unit === "倍" ? (w.form === "mul" ? v / 100 : dir === "-" ? 1 - v / 100 : 1 + v / 100) : v;
+      last = { key: `status:${status}`, dir: dir as "+" | "-", unit, v: val, ...(stack ? { stack } : {}) };
+    }
     return `${stat} ${amount}${stack ? `, ${stack}` : ""}`;
   };
 
   /** 状態異常 name of a CrowdControlType (Gimmick guide links), else its number. */
   const ccName = (cc: number): string =>
     defs.labels[`cc:${cc}`] ? word(`cc:${cc}`, "") : `crowd control ${cc}`;
+
+  /** AttackBonusStatusEffect: damage × v% while a status passes a test. ReferenceSenderUnit 1 tests the
+   *  attacker's own status (its texts: 攻撃が10000以上の時, 耐久が高い程), else the enemy hit (攻撃が300以下の敵,
+   *  防御0の敵); ValueType 2 = % of the maximum (耐久50%以上の敵), 1 = the value itself. */
+  const attackBonus = (b: RawRow, v: number): string => {
+    const stat = word(`status:${b.StatusType}`, `stat ${b.StatusType}`);
+    const op = defs.labels[`op:${b.ConditionOperator}`] ? word(`op:${b.ConditionOperator}`, "") : `op${b.ConditionOperator}`;
+    const val = `${b.ConditionValue ?? 0}${b.ValueType === 2 ? "%" : ""}`;
+    const cond = b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
+    last = { key: "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: "×", v: v / 100, note: cond };
+    return `damage ×${fmt(v / 100)} ${cond}`;
+  };
+  /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */
+  const damageRowFact = (table: string, row: RawRow, v: number) => {
+    if (restriction(row).length) return;
+    const unit = row.ValueType === 2 ? "" : "%";
+    if (table === "OnGiveDamageEffect" && (row.OGDEffectType === 1 || row.OGDEffectType === 2)) damageFact("dealt", row.OGDEffectType === 1 ? "+" : "-", unit, v);
+    if (table === "OnTakeDamageEffect" && (row.OTDEffectType === 6 || row.OTDEffectType === 7)) damageFact("taken", row.OTDEffectType === 7 ? "+" : "-", unit, v);
+  };
 
   /** Any EffectType / EnchantEffectType / UnitEffectID: a UnitEffect row (every such column in the
    *  game points into UnitEffect.atb); type 1 = a StatusModifierType, 3/7/9 = effect tables. */
@@ -358,9 +453,17 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (!ue) return null;
     const [type, actual] = ue;
     if (type === 1) return modifier(actual, v);
+    if (type === 22 && defs.attack_bonus[actual]) return attackBonus(defs.attack_bonus[actual], v);
     const table = UNIT_EFFECT_TABLE[type];
     const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
-    if (row) return effectRow(table, row, v, modifier, ccName);
+    last = null;
+    if (row) {
+      const s = effectRow(table, row, v, modifier, ccName);
+      // an ImmunityEffect words a modifier it blocks: not a change of its own
+      last = null;
+      damageRowFact(table, row, v);
+      return s;
+    }
     return `unit effect type ${type} #${actual} ${v}`;
   };
 
@@ -391,6 +494,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     return `missile #${id}: ${parts.join("; ")}`;
   };
 
+  // the most a growing or per-count row reaches (its LimitValue), for the ranking
+  let rowMax = 0;
+  const PER_COUNT = new Set([2, 5, 6, 7, 10, 14, 17, 18]);
   const tail = (): string => {
     const parts: string[] = [];
     // AbilityTypeDetail 3 = a growing effect (FUN_00ae8ae0): each trigger counts, and once the count
@@ -435,6 +541,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (p) parts.push(`${p}% chance`);
     const lim = num("LimitValue");
     if (lim) parts.push(`up to ${lim}`);
+    if (lim > 0 && (growing || (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && PER_COUNT.has(Number(r.AbilityTypeDetail))))) rowMax = lim;
     // Ability.atb bool columns, worded from their own header names (tools/data/column_names.json)
     if (num("GrowUpLimitOnly")) parts.push("only at max giantification (最大化)");
     if (num("Growup")) parts.push("activates on giantification (巨大化時発動)");
@@ -462,6 +569,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       ? `${cap(trigger)}${subject ? `, ${subject.charAt(0).toLowerCase()}${subject.slice(1)}` : ""}: `
       : subject ? `${subject}: ` : "";
     const perGrowUp = num("EachGrowUp") ? `, ${word("field:EachGrowUp", "per giantification")}` : "";
+    // receiver and side of the row's stat changes, for the ranking
+    const tgJp = defs.labels[`target:${num("AbilityTargetType")}`]?.jp;
+    const hitEnemy = at === 2 && trigger && subject === "Self";
+    const factWho = hitEnemy ? "Enemy hit" : at === 16 && trigger ? "Enemies it blocks" : subject || "—";
+    const factSide = hitEnemy || (at === 16 && trigger) ? "enemy" : subject === "Self" ? "ally" : sideOfTarget(tgJp);
+    /** File the last worded change; the note is the trigger + the sentence's tail. */
+    const file = (tl: string, extra = "") => take(factWho, factSide, [trigger && !hitEnemy && !(at === 16) ? cap(trigger) : "", extra, tl.replace(/^, /, "")].filter(Boolean).join(", "));
     if (at === 21 && link) {
       // on-defeat field effect: Param3 = damage as % of ATK (its descriptions print Param3/100 倍
       // in 63 of 64 cases); the missile's modifiers are what the field applies
@@ -491,13 +605,17 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // UnitEffect.atb dispatch: ActualEffectID is in exactly one table for these types (every row)
       const id = num("UnitEffectID");
       const [type, actual] = defs.unit_effect[id];
-      if (type === 1) text.push(`${lead}${modifier(actual, v)}${perGrowUp}${tail()}`);
-      else {
-        const table = UNIT_EFFECT_TABLE[type];
-        const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
-        if (!table) used.delete("UnitEffectID");
-        const body = row ? effectRow(table, row, v, modifier, ccName) : table ? `${table} #${actual} ${v}` : `unit effect ${id} ${v}`;
-        text.push(`${lead}${body}${tail()}`);
+      if (type === 1) {
+        const m = modifier(actual, v), tl = tail();
+        file(tl, perGrowUp.slice(2));
+        text.push(`${lead}${m}${perGrowUp}${tl}`);
+      } else {
+        const known = (type === 22 && defs.attack_bonus[actual]) || (UNIT_EFFECT_TABLE[type] && defs.effect_tables?.[UNIT_EFFECT_TABLE[type]]?.[actual]);
+        if (!known) used.delete("UnitEffectID");
+        const body = unitEffect(id, v) ?? `unit effect ${id} ${v}`;
+        const tl = tail();
+        file(tl);
+        text.push(`${lead}${body}${tl}`);
       }
     } else if (at === 6 && (atd === 2 || atd === 4)) {
       // class-ability types 6/2 and 6/4: EffectValue is a Missile.atb id (every such row)
@@ -512,7 +630,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // AbilityType 8 handler FUN_00af5bb0: OnGiveDamage of type = AbilityTypeDetail with ValueType 1 (%)
       // (FUN_00af2310(type, 1, ...)); it never reads StatusModifierType
       num("StatusModifierType");
-      text.push(`${lead}${effectRow("OnGiveDamageEffect", { OGDEffectType: atd, ValueType: 1 }, v, modifier, ccName)}${perGrowUp}${tail()}`);
+      const tl = tail();
+      damageFact("dealt", atd === 1 ? "+" : "-", "%", v);
+      file(tl, perGrowUp.slice(2));
+      text.push(`${lead}${effectRow("OnGiveDamageEffect", { OGDEffectType: atd, ValueType: 1 }, v, modifier, ccName)}${perGrowUp}${tl}`);
     } else if (at === 3 && atd >= 1 && atd <= 11) {
       // FUN_00af72f0 never reads StatusModifierType (2 rows set it; their texts say 被ダメージ上昇)
       num("StatusModifierType");
@@ -520,7 +641,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // type (FUN_00aee620 2nd arg: 2 = flat for 4, 5, 9, 10, 11; 1 = % otherwise); Effect = hit visual id
       num("Effect");
       const vt = [4, 5, 9, 10, 11].includes(atd) ? 2 : 1;
-      text.push(`${lead}${effectRow("OnTakeDamageEffect", { OTDEffectType: atd, ValueType: vt }, v, modifier, ccName)}${tail()}`);
+      const tl = tail();
+      if (atd === 6 || atd === 7) { damageFact("taken", atd === 7 ? "+" : "-", "%", v); file(tl); }
+      text.push(`${lead}${effectRow("OnTakeDamageEffect", { OTDEffectType: atd, ValueType: vt }, v, modifier, ccName)}${tl}`);
     } else if (at === 6 && CLASS_ABILITY[atd]) {
       const name = atd === 7 ? defs.ability_names?.[v] : undefined;
       text.push(`${lead}${CLASS_ABILITY[atd](v, num("AbilityEffectDetail"))}${name ? ` 「${name}」` : ""}${tail()}`);
@@ -528,27 +651,39 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // natural Ki tick FUN_0042ce10: 1 Ki (100 units) per tick + EffectValue units; a 2nd/3rd unit with
       // the same effect counts 1/2, 1/4 (BattleSystemConfig 205 = 2)
       word("abilitytype:5/1", "");
-      text.push(`${lead}Natural Ki gain +${v}% (+${fmt(v / 100)} Ki per tick; a 2nd/3rd such unit counts ½/¼)${tail()}`);
+      const tl = tail();
+      last = { key: "ki:natural", dir: "+", unit: "%", v, stack: "a 2nd/3rd such unit counts ½/¼" };
+      file(tl);
+      text.push(`${lead}Natural Ki gain +${v}% (+${fmt(v / 100)} Ki per tick; a 2nd/3rd such unit counts ½/¼)${tl}`);
     } else if (at === 5 && atd === 3) {
       // periodic Ki generation: EffectValue Ki every DurationInMillis
       const ms = num("DurationInMillis");
       text.push(`Ki +${v} every ${fmt(ms / 1000)}s`);
     } else if (at === 22 && atd && defs.attack_bonus[atd]) {
-      const b = defs.attack_bonus[atd];
-      const stat = word(`status:${b.StatusType}`, `stat ${b.StatusType}`);
-      // operator as the descriptions word it next to thresholds (以下 → ≤, 以上 → ≥)
-      const op = defs.labels[`op:${b.ConditionOperator}`] ? word(`op:${b.ConditionOperator}`, "") : `op${b.ConditionOperator}`;
-      text.push(`${lead}damage ×${fmt(v / 100)} against enemies with ${stat} ${op} ${b.ConditionValue ?? 0}${tail()}`);
+      // AbilityTypeDetail = AttackBonusStatusEffectID (operators as the descriptions word them: 以下 ≤, 以上 ≥)
+      const body = attackBonus(defs.attack_bonus[atd], v), tl = tail();
+      file(tl);
+      text.push(`${lead}${body}${tl}`);
     } else if (smt) {
       const how = at > 1 && !trigger && at !== 22 && !(at === 19 && atd === 3) ? ` (ability type ${at}${atd ? `/${atd}` : ""})` : "";
-      text.push(`${lead}${modifier(smt, v)}${perGrowUp}${tail()}${how}`);
+      const m = modifier(smt, v), tl = tail();
+      // an unnamed ability type: its trigger is unknown, so it isn't ranked
+      if (how) last = null;
+      file(tl, perGrowUp.slice(2));
+      text.push(`${lead}${m}${perGrowUp}${tl}${how}`);
     } else {
       const key = `abilitytype:${at}/${atd}`;
-      text.push(`${lead}${word(key, `ability type ${at}/${atd}`)} ${amountFor(key, v)}${perGrowUp}${tail()}`);
+      const body = `${word(key, `ability type ${at}/${atd}`)} ${amountFor(key, v)}`, tl = tail();
+      labelFact(key, v);
+      file(tl, perGrowUp.slice(2));
+      text.push(`${lead}${body}${perGrowUp}${tl}`);
     }
   } else if (kind === "organized" || kind === "always" || kind === "quest" || kind === "potential") {
     const et = num("EffectType"), v = num("EffectValue"), key = `effecttype:${et}`;
     let lead = "";
+    // potential / always rows have no target columns: they change the card itself
+    let factWho = kind === "potential" ? "Self" : "—";
+    let factSide: "ally" | "enemy" = "ally";
     if (kind === "organized") {
       // formation TargetType / AreaType: own vocabulary, named from formation descriptions only
       const tg = num("TargetType"), ar = num("AreaType");
@@ -557,6 +692,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       if (aJp) word(`oarea:${ar}`, "");
       const subject = aJp === "部隊" ? `${t} in the formation` : aJp === "全て" ? `all ${t}` : t || (ar ? `area ${ar}` : "");
       if (subject) lead = `${cap(subject)}: `;
+      factWho = subject ? cap(subject) : "—";
+      factSide = sideOfTarget(defs.labels[`otarget:${tg}`]?.jp);
       // a formation row with no EffectType: the ability's effects are its quest rows (QuestType)
       if (!et && !v) { text.push("No formation effect of its own (its effects are the quest-only rows)"); return finish(); }
     }
@@ -567,8 +704,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       lead = `In quest type ${qt}${ex?.length ? ` (${ex.join(", ")}…)` : ""}${subject ? `, ${subject.charAt(0).toLowerCase()}${subject.slice(1)}` : ""}: `;
       num("Passive");
     }
-    const resolved = unitEffect(et, v);
-    text.push(`${lead}${resolved ?? `${word(key, `effect ${et}`)} ${amountFor(key, v)}`}${tail()}`);
+    let resolved = unitEffect(et, v);
+    if (resolved == null) { resolved = `${word(key, `effect ${et}`)} ${amountFor(key, v)}`; labelFact(key, v); }
+    const tl = tail();
+    // quest-only rows apply in one quest type only: not ranked
+    if (kind === "quest") last = null;
+    take(factWho, factSide, tl);
+    text.push(`${lead}${resolved}${tl}`);
   } else if (kind === "enchant") {
     const secs = num("DurationInSeconds");
     const dur = secs ? `, for ${fmt(secs)}s` : "";
@@ -577,7 +719,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const ally = defs.labels[`etarget:${tt}`]?.jp === "自分のみ" ? (word(`etarget:${tt}`, ""), "Self") : "Target";
     for (const i of [1, 2, 3]) {
       const code = num(`AllyModifierType${i}`), v = num(`AllyEffectValue${i}`);
-      if (code) text.push(`${ally}: ${modifier(code, v)}${dur}`);
+      if (code) { const m = modifier(code, v); take(ally, "ally", dur); text.push(`${ally}: ${m}${dur}`); }
     }
     for (const f of ["MissileID", "SpreadMissileID", "ShotMissileID"]) {
       const id = num(f);
@@ -611,10 +753,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (oa && !defs.labels[`oparea:${oa}`]) used.delete("OpponentAreaType");
     for (const i of [1, 2, 3]) {
       const code = num(`OpponentModifierType${i}`), v = num(`OpponentEffectValue${i}`);
-      if (code) text.push(`${enemies}: ${modifier(code, v)}${dur}`);
+      if (code) { const m = modifier(code, v); take(enemies, "enemy", dur); text.push(`${enemies}: ${m}${dur}`); }
     }
     const red = num("TakeDamageReductionRate");
-    if (red) text.push(`${ally}: damage taken −${red}%${dur}`);
+    if (red) { damageFact("taken", "-", "%", red); take(ally, "ally", dur); text.push(`${ally}: damage taken −${red}%${dur}`); }
     if (!text.length && secs && (r.AllyEffectSetID || r.OpponentEffectSetID)) text.push(`Lasts ${fmt(secs)}s; effects listed below`);
   } else if (kind === "enchant_set") {
     const et = num("EnchantEffectType"), v = num("EffectValue"), key = `enchanttype:${et}`;
@@ -625,9 +767,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const t = defs.labels[`starget:${st}`] ? word(`starget:${st}`, "") : "";
     let subject = "";
     if (area === "対象" && (!t || t === "対象")) subject = "Target";
-    else if (area === "対象の射程内") subject = `${t && t !== "対象" ? t : "units"} in the target's range`;
+    else if (area === "対象の射程内") subject = `${t && t !== "対象" ? t : "units"} in ${ctx.selfOnly ? "range" : "the target's range"}`;
     else if (t) subject = t;
     else subject = `target ${st}${sa ? `, area ${sa}` : ""}`;
+    // a 自分のみ stratagem's target is its user
+    if (ctx.selfOnly && subject === "Target") subject = "Self";
     // EffectDetailType (ユニット効果詳細) / EffectDetailValue are the ability condition kind and its
     // parameter d (FUN_00548d20): rows agree with their stratagem texts (2 敵1体につき, 5 大破数に応じて,
     // 6 城娘1体につき, 7 味方1体につき, 9 d=5 最大化時, 10 d=2 [夏]城娘1体につき, 3 ずつ上昇/N秒毎)
@@ -640,8 +784,14 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       per = c ? `, ${c}` : "";
     } else if (dt && defs.labels[`setdetail:${dt}`]) per = `, ${word(`setdetail:${dt}`, "")}`;
     else if (dt) { used.delete("EffectDetailType"); used.delete("EffectDetailValue"); }
-    const resolved = unitEffect(et, v);
-    text.push(`${cap(subject)}: ${resolved ?? `${word(key, `effect ${et}`)} ${amountFor(key, v)}`}${per}${tail()}`);
+    let resolved = unitEffect(et, v);
+    if (resolved == null) { resolved = `${word(key, `effect ${et}`)} ${amountFor(key, v)}`; labelFact(key, v); }
+    const lim = typeof r.LimitValue === "number" ? r.LimitValue : 0;
+    if (lim > 0 && ((dt === 3) || PER_COUNT.has(dt))) rowMax = lim;
+    const tl = tail();
+    // the side is the set's (ally / opponent set): the caller knows it, the row doesn't
+    take(cap(subject), "ally", `${per}${tl}`);
+    text.push(`${cap(subject)}: ${resolved}${per}${tl}`);
   }
 
   return finish();
@@ -649,6 +799,6 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   function finish(): Sentence {
     const rest: RawRow = {};
     for (const [k, v] of Object.entries(r0)) if (!used.has(k)) rest[k] = v;
-    return { text, evidence, rest };
+    return { text, evidence, rest, facts };
   }
 }

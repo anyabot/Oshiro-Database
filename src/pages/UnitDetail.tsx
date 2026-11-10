@@ -9,7 +9,7 @@ import {
 } from "../data";
 import { DEFAULT_META } from "../meta";
 import { usePageMeta } from "../usePageMeta";
-import { describeRow, rowBases, useEffectDefs, type EffectDefs, type RowKind } from "../effects";
+import { describeRow, rowBases, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
 import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
 
 const renderLink = routerLinks(Link, "to");
@@ -42,23 +42,23 @@ function RawRows({ title, rows }: { title: string; rows: RawRow[] }) {
 }
 
 /** Effect rows as readable lines; each keeps its unused raw fields one click away. */
-function EffectList({ title, rows, kind, defs, links }: {
-  title: string; rows: RawRow[]; kind: RowKind; defs?: EffectDefs; links?: Record<string, FieldLink>;
+function EffectList({ title, rows, kind, defs, links, ctx }: {
+  title: string; rows: RawRow[]; kind: RowKind; defs?: EffectDefs; links?: Record<string, FieldLink>; ctx?: RowContext;
 }) {
   if (!rows.length) return null;
   if (!defs) return <RawRows title={title} rows={rows} />;
   const bases = rowBases(rows);
   return (
     <div className="fx-list">
-      {rows.map((r, i) => <EffectRow key={i} r={r} base={bases[i]} kind={kind} defs={defs} link={links?.[String(i)]} />)}
+      {rows.map((r, i) => <EffectRow key={i} r={r} base={bases[i]} kind={kind} defs={defs} link={links?.[String(i)]} ctx={ctx} />)}
     </div>
   );
 }
 
 /** One effect row: plain selectable text; the raw fields open from a separate button. */
-function EffectRow({ r, base, kind, defs, link }: { r: RawRow; base?: RawRow; kind: RowKind; defs: EffectDefs; link?: FieldLink }) {
+function EffectRow({ r, base, kind, defs, link, ctx }: { r: RawRow; base?: RawRow; kind: RowKind; defs: EffectDefs; link?: FieldLink; ctx?: RowContext }) {
   const [open, setOpen] = useState(false);
-  const { text, evidence, rest } = describeRow(r, kind, defs, link, base);
+  const { text, evidence, rest } = describeRow(r, kind, defs, link, base, ctx);
   return (
     <div className="fx-row">
       <div className="fx-line">
@@ -102,6 +102,8 @@ function AbilityBlock({ label, a, kind = "ability", defs, from }: {
 }
 
 function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; from?: string }) {
+  // EnchantEffect.TargetType 2 = 自分のみ: the effect sets' "target" is the user herself
+  const setCtx: RowContext = { selfOnly: !!s.effect && defs?.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ" };
   if (s.missing) {
     return <div className="ability"><div className="ability__head"><span className="ability__label">Stratagem</span><span className="ability__name">(not in Gimmick.atb)</span><span className="ability__id">#{s.id}</span></div></div>;
   }
@@ -134,8 +136,8 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
         </div>
       )}
       {s.effect && <EffectList title={`EnchantEffect #${s.effect.id}`} rows={[s.effect.row]} kind="enchant" defs={defs} />}
-      {s.effect?.AllyEffectSetID && <EffectList title="ally effect set" rows={s.effect.AllyEffectSetID} kind="enchant_set" defs={defs} />}
-      {s.effect?.OpponentEffectSetID && <EffectList title="opponent effect set" rows={s.effect.OpponentEffectSetID} kind="enchant_set" defs={defs} />}
+      {s.effect?.AllyEffectSetID && <EffectList title="ally effect set" rows={s.effect.AllyEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
+      {s.effect?.OpponentEffectSetID && <EffectList title="opponent effect set" rows={s.effect.OpponentEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
     </div>
   );
 }

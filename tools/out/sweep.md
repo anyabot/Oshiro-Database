@@ -1,11 +1,15 @@
 # Effect sweep
 
-21266 of 21320 effect rows fully decoded (99.7%).
+21256 of 21320 effect rows fully decoded (99.7%).
 
 - **ability · ability type 6/5** — 17 abilities, 17 rows
     - #9536(card 536) フランドーナ・ガニョーレ — "Self: ability type 6/5 1, only at max giantification (最大化)" — 自身の射程内の敵の被ダメージが30%上昇 最大化時、自身の計略効果時間が10秒増加 敵の攻撃対象とならず、全マス間を移動可能
     - #10536(card 536) 天文学者の洞穴 — "Self: ability type 6/5 1, only at max giantification (最大化)" — 自身の射程内の敵の被ダメージが35%上昇 最大化時、自身の計略時間が15秒増加、飛行敵への 攻撃が1.3倍、攻撃対象とならず、全マス間移動可能
     - #9633(card 633) 金亀秘伝・トルネードサーブ — "Self: ability type 6/5 1, only at max giantification (最大化)" — 自身の攻撃が30％上昇 射程内の城娘の与ダメージが25%上昇 最大化時、攻撃した敵を後退させる
+- **enchant_set · stat 10302** — 10 abilities, 10 rows
+    - gimmick#8346/ally 謹賀刃年・笑 — "Target: damage ×1.3 while own stat 10302 ≥ 5" — 20秒間対象の攻撃､射程､与ダメージが70%上昇 大破数5回以上でさらに攻撃が40%上昇｡撤退大破まで 永続で対象の最大耐久が70%低下(自分のみ)
+    - gimmick#8347/ally 謹賀刃年・門 — "Target: damage ×1.3 while own stat 10302 ≥ 5" — 20秒間対象の攻撃､射程､与ダメージが85%上昇 大破数5回以上でさらに攻撃が50%上昇｡撤退大破まで 永続で対象の最大耐久が70%低下(自分のみ)
+    - gimmick#8348/ally 謹賀刃年・来 — "Target: damage ×1.3 while own stat 10302 ≥ 5" — 20秒間対象の攻撃､射程､与ダメージが100%上昇 大破数5回以上でさらに攻撃が60%上昇｡撤退大破まで 永続で対象の最大耐久が70%低下(自分のみ)
 - **ability · unused field AbilityLocationType** — 8 abilities, 8 rows
     - #7507(card 922) 泰然自若 — "Self: Deploy Ki −85%, doesn't stack" — 40秒間自身の足止め数5増加､被ダメージを80%､最大化時更に 40%軽減｡特殊攻撃時の攻撃と効果が2倍､攻撃が標的と周囲 に2倍のダメージを与える｡水上以外の遠近マスに移動可 [AbilityLocationType=90]
     - #7507(card 6922) 泰然自若 — "Self: Deploy Ki −85%, doesn't stack" — 40秒間自身の足止め数5増加､被ダメージを80%､最大化時更に 40%軽減｡特殊攻撃時の攻撃と効果が2倍､攻撃が標的と周囲 に2倍のダメージを与える｡水上以外の遠近マスに移動可 [AbilityLocationType=90]

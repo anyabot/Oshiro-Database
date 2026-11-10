@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import App from "./App";
 import UnitList from "./pages/UnitList";
 import UnitDetail from "./pages/UnitDetail";
+import Buffs from "./pages/Buffs";
 import NotFoundPage from "./pages/NotFound";
 import "@altterisk/game-hub/hub.css";
 import "@altterisk/game-hub/base.css";
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route index element={<Navigate to="/units" replace />} />
           <Route path="units" element={<UnitList />} />
           <Route path="units/:id" element={<UnitDetail />} />
+          <Route path="buffs" element={<Buffs />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
