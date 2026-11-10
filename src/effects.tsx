@@ -148,6 +148,9 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
         1: "ATK", 3: "the target's current HP", 4: "the target's max HP",
       };
       const vt = Number(row.ValueType);
+      // 0 damage: the hit only carries its crowd control (e.g. 15 s 麻痺 on every enemy)
+      const ccPart = extra.find((x) => x.startsWith("inflicts "));
+      if (!v && ccPart) return `${ccPart} (no damage)`;
       const amount = vt === 2 ? `${v}` : base[vt] ? `${fmt(v / 100)}× ${base[vt]}` : `${v} (value type ${vt})`;
       const kind = own ? "damage" : "independent damage";
       return `${kind} ${amount}${tags ? ` (${tags})` : ""}`;
@@ -187,8 +190,12 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       const val = Number(row.ImmunityValue ?? 0);
       let what = modifierText(Number(row.StatusModifierID ?? 0), val);
       if (!val) what = what.replace(/ ([+−])0%?(, (?:doesn't )?stacks?)?$/, (_m, s: string) => (s === "+" ? " increases" : " decreases"));
-      return `immune to ${what}`
-        + (row.ConditionOperator ? ` (condition op${row.ConditionOperator} ${row.ConditionValue ?? 0})` : "");
+      what = what.replace(/ set to /, " being set to ");
+      // move speed set to 0 = being stopped in place
+      if (what === "Move speed being set to 0") return "can't be stopped (immune to move speed being set to 0)";
+      // a condition with threshold 0 restricts nothing the texts mention (「移動速度低下を無効」); others kept raw
+      const cv = Number(row.ConditionValue ?? 0);
+      return `immune to ${what}` + (row.ConditionOperator && cv ? ` (condition op${row.ConditionOperator} ${cv})` : "");
     }
   }
   return `${table} ${v}`;
@@ -414,15 +421,15 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // StatusType 201 holds bit flags in the value; bits are named only where their texts agree
       const names: string[] = [];
       for (let b = 1; b <= v; b <<= 1) if (v & b) names.push(defs.labels[`flag:${b}`] ? word(`flag:${b}`, "") : `flag ${b}`);
-      const how = expr === 4 ? "add" : expr === 5 ? "remove" : expr === 3 ? "set" : `expr${expr}`;
-      return `attack properties (${how}): ${names.join(", ")}`;
+      return `${expr === 4 ? "attacks gain" : expr === 5 ? "attacks lose" : expr === 3 ? "attack properties set to" : `attack properties (expr ${expr})`}: ${names.join(", ")}`;
     }
     const stat = word(`status:${status}`, `stat ${status}`);
     // value kinds the exe defines: on/off states and bitmasks (data/status_types_exe.json)
     const kind = defs.labels[`statuskind:${status}`]?.jp;
     // a flag the exe registers but never reads (data/status_types_exe.json kinds proof): said so, not named
     const unread = defs.labels[`statuskind:${status}`]?.ex[0]?.includes("No reader") ? " (the game client never reads it)" : "";
-    if (kind === "bool") return (expr === 3 ? `${stat}: ${v > 0 ? "on" : "off"}` : `${stat} ${expr === 2 ? "−" : "+"}${v}`) + unread;
+    // on/off states read as the state itself: "Can't be targeted", "… removed"
+    if (kind === "bool") return (expr === 3 ? (v > 0 ? stat : `${stat} removed`) : `${stat} ${expr === 2 ? "−" : "+"}${v}`) + unread;
     if (kind === "bitmask") {
       // bits that the exe maps to crowd-control (状態異常) types (FUN_00acea70)
       const types: string[] = [];
@@ -449,7 +456,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       if (types.length && !rest) {
         // ExpressionType 4 = OR (gains), 5 = AND-NOT (loses), 3 = set (FUN_00ae7c20)
         const how = expr === 5 || expr === 2 ? "loses" : expr === 3 ? "set to" : "gains";
-        return `${stat}: ${how} ${types.map((t) => JP_EN[t] ?? t).join(", ")}`;
+        const names = types.map((t) => (/^\d+$/.test(t) ? `ailment #${t}` : JP_EN[t] ?? t)).join(", ");
+        // 312/313 状態異常無効: "immune to Paralysis, Burn, …"
+        if (status === 312 || status === 313) {
+          return how === "gains" ? `immune to ${names}` : how === "loses" ? `no longer immune to ${names}` : `immune only to ${names}`;
+        }
+        return `${stat}: ${how} ${names}`;
       }
       return `${stat} ${expr === 3 ? "=" : expr === 5 || expr === 2 ? "clear" : "set"} bits 0x${v.toString(16)}`;
     }
@@ -464,12 +476,15 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       : w?.unit === "倍" && w.form === "mul" ? (lim) => `×${fmt(lim / 100)}`
       : w?.unit === "秒" || w?.unit === "倍" ? (lim) => `${lim}`
       : vt === 2 || vt === 4 || pctStatus ? (lim) => `${lim}%` : (lim) => `${lim}`;
+    // a negative move speed for a split second pushes the unit back (後退させる; e.g. −2000 for 0.1 s)
+    if (status === 401 && expr === 3 && v < 0) return `knocked back (move speed −${-v})`;
     let amount: string;
     if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
     else if (w?.unit === "倍" && w.form === "mul") amount = `×${fmt(v / 100)}`;
     else if (w?.unit === "秒") amount = `${sign}${w.form === "milli" ? fmt(v / 1000) : v}s`;
-    else if (vt === 1) amount = `${sign}${v}${pctStatus ? "%" : ""}`;
+    // ValueType 1, 7 and 8 are flat (FUN_00ae7f10 returns the value itself for all three)
+    else if (vt === 1 || vt === 7 || vt === 8) amount = `${sign}${v}${pctStatus ? "%" : ""}`;
     // 3 and 5 are the % kinds that stack (their texts: 「耐久が50％低下」 with ValueType 5)
     else if (vt === 2 || vt === 3 || vt === 4 || vt === 5) amount = `${sign}${v}%`;
     // ValueType 6 = v% of another status. A count status (505 special-attack stock: +StockValue each time
@@ -856,7 +871,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     num("AllyEffectSetID");
     num("OpponentEffectSetID");
     // the unit becomes its transformed card (shown in "During stratagem")
-    if (num("TransformEnabled") || num("TransformEnabledCT")) text.push(`${ally}: transforms${dur}`);
+    if (num("TransformEnabled") || num("TransformEnabledCT")) text.push(`${ally}: transforms${dur.replace(/^, /, " ")}`);
     const oa = num("OpponentAreaType");
     const enemies = defs.labels[`oparea:${oa}`] ? `Enemies ${word(`oparea:${oa}`, "")}` : "Enemies";
     if (oa && !defs.labels[`oparea:${oa}`]) used.delete("OpponentAreaType");
