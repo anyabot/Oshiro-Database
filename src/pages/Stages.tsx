@@ -4,6 +4,8 @@ import { FallbackImage, FilterChip, FilterRow, LoadState, PageHeader, SearchBox 
 import { listState, searchParamsAdapter, textMatch } from "@altterisk/game-hub/filters";
 import { GROUPS, mapImage, useEvents, useStages, type GameEvent, type StageEntry } from "../stages";
 
+const HELL = new Set(["enma", "hel", "osiris"]);
+
 /** Events shown open at first; the rest are one click away. */
 const OPEN_FIRST = 6;
 
@@ -27,8 +29,11 @@ export default function Stages() {
     const evById = new Map((events || []).map((e) => [e.id, e]));
     const list = (stages || []).filter((s) => (pastToo || s.live)
       && (q ? textMatch(q, [s.name, s.id, s.bushin, s.event != null ? evById.get(s.event)?.title : ""]) : s.group === group));
-    // Bushin: one section per war god; everything else: per event
-    const key = (s: StageEntry) => (s.group === "bushin" && s.bushin ? `b:${s.bushin}` : s.event != null ? `e:${s.event}` : "none");
+    // Bushin: one section per war god; Enma/Hel/Osiris: one per area, like the game's pages
+    // (賽の河原 一層…七層, 焦熱地獄 一層…); everything else: per event
+    const area = (s: StageEntry) => s.name.replace(/\s*\S+層$/, "");
+    const key = (s: StageEntry) => (s.group === "bushin" && s.bushin ? `b:${s.bushin}`
+      : HELL.has(s.group) ? `a:${area(s)}` : s.event != null ? `e:${s.event}` : "none");
     const m = new Map<string, StageEntry[]>();
     for (const s of list) m.set(key(s), [...(m.get(key(s)) || []), s]);
     return [...m.entries()].map(([k, ss]) => {
@@ -36,10 +41,13 @@ export default function Stages() {
       ss.sort((a, b) => a.tabNo - b.tabNo || a.index - b.index || a.id - b.id);
       return {
         k, ev, stages: ss,
-        title: k.startsWith("b:") ? `武神 ${ss[0].bushin}` : ev?.title ?? "Without an event",
+        title: k.startsWith("b:") ? `武神 ${ss[0].bushin}` : k.startsWith("a:") ? k.slice(2) : ev?.title ?? "Without an event",
         live: ss.some((s) => s.live),
       };
-    }).sort((a, b) => Number(b.live) - Number(a.live) || (b.ev?.start ?? "").localeCompare(a.ev?.start ?? "") || a.title.localeCompare(b.title));
+    }).sort((a, b) => Number(b.live) - Number(a.live)
+      // hell areas keep the game's order (by their first stage); events newest first
+      || (a.k.startsWith("a:") && b.k.startsWith("a:") ? a.stages[0].id - b.stages[0].id : 0)
+      || (b.ev?.start ?? "").localeCompare(a.ev?.start ?? "") || a.title.localeCompare(b.title));
   }, [stages, events, group, q, pastToo]);
 
   if (!stages) return <LoadState loading={loading} error={error} />;

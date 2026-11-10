@@ -24,12 +24,12 @@ from pathlib import Path
 from oshirore.cache import GameCache
 from oshirore.lazy import LazyArchive
 
-TAB_GROUP = {11: "enma", 12: "hel", 13: "osiris", 23: "hades", 5: "bushin"}
+TAB_GROUP = {11: "enma", 12: "hel", 13: "osiris", 23: "hades", 5: "bushin", 1: "story"}
 # Event.atb Type -> site group (types with one event are named by it: 6 閻魔の闘技場, 7 ヘルの遊戯場,
 # 8 オシリスの審判場, 15 ハデスの死闘場 = the 深淵 stages, 4 = 武神降臨, 11 第2部「夢幻航海」, 13 天魔大乱, 9 戦術指南)
-EVENT_GROUP = {6: "enma", 7: "hel", 8: "osiris", 15: "hades", 4: "bushin", 11: "story", 13: "story",
-               1: "events", 2: "events", 3: "events", 10: "events", 12: "events", 14: "events", 16: "events",
-               17: "events", 18: "events", 9: "other"}
+EVENT_GROUP = {6: "enma", 7: "hel", 8: "osiris", 15: "hades", 4: "bushin", 11: "voyage", 13: "tenma",
+               18: "osaka", 1: "events", 2: "events", 3: "events", 10: "events", 12: "events", 14: "events",
+               16: "events", 17: "events", 9: "other"}
 
 
 def grouped(rows, key):
@@ -96,6 +96,23 @@ def main() -> None:
 
     used_enemies: set[int] = set()
     stage_list = []
+
+    def forms_of(counts):
+        """EnemyTransform chains of the spawned enemies: {enemy: [[to, trigger, seconds-or-0], ...]}."""
+        out, todo = {}, list(counts)
+        while todo:
+            eid = todo.pop()
+            if eid in out:
+                continue
+            out[eid] = []
+            for t in transforms.get(eid, []):
+                to = t.get("TransformedEnemyID")
+                if not to or to not in enemy_rows or to == eid:
+                    continue
+                used_enemies.add(to)
+                out[eid].append([to, t.get("Trigger", 0), round(t.get("TimeElapsedTransformFrame", 0) / 30, 1)])
+                todo.append(to)
+        return {k: v for k, v in out.items() if v}
 
     def spawn_list(arc, entry_name):
         # spawn script: Type 2 = spawn EnemyID on a route; Type 0 = wait (frames, 30 per second)
@@ -174,7 +191,7 @@ def main() -> None:
             "veryHard": bool(q["VeryHardEnabled"]),
             "ki": q["InitialKi"], "coreLife": q["CoreLife"],
             "mapEffect": [nz(x) for x in map_effect.get(q["MapEffect"], [])] if q["MapEffect"] else [],
-            "spawns": spawns, "counts": dict(counts),
+            "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts),
             "singi": singi_of(q["SingiID"], qid),
             **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
         }, q["Index"])
@@ -183,6 +200,27 @@ def main() -> None:
     # and the client cache still holds the maps. Quest ID -> map = (id // 1000) * 100 + id % 100 for
     # every live quest of every event type except the three Hell arenas (which keep their own maps),
     # so it is used for those event types only. Live Bushin quests use deliberation set = quest ID.
+    # rebuilt Bushin have no multipliers: offer the ones the live Bushin of the same rank use (the
+    # most common [ATK, HP, DEF] among them), shown on the page as an estimate
+    def rank_of(qid):
+        same = sorted(i for i in bushin if bushin[i]["name"] == bushin[qid]["name"])
+        return 0 if same.index(qid) == 0 else 1
+
+    live_bushin = collections.defaultdict(list)
+    for q in quests:
+        if q["QuestID"] in bushin:
+            live_bushin[rank_of(q["QuestID"])].append(q)
+
+    def bushin_estimate(qid):
+        qs = live_bushin.get(rank_of(qid), [])
+        if not qs:
+            return None
+        def common(prefix):
+            vals = collections.Counter((q[f"{prefix}AttackRate"], q[f"{prefix}HealthRate"], q[f"{prefix}DefenseRate"]) for q in qs)
+            v, n = vals.most_common(1)[0]
+            return {"rates": list(v), "of": len(qs), "n": n, "values": [list(x) for x in vals]} if any(v) else None
+        return {"normal": common("Normal"), "hard": common("Hard"), "from": sorted(q["QuestID"] for q in qs)}
+
     recovered = 0
     used_maps = {x["map"] for x in stage_list}
     for ev in events:
@@ -219,8 +257,9 @@ def main() -> None:
                 "tab": 0, "tabNo": 0, "type": 0, "map": map_no, "live": False, "recovered": True,
                 "description": "", "battlefield": "", "terrain": "",
                 "rates": {"normal": None, "hard": None}, "veryHard": False, "ki": 0, "coreLife": 0,
-                "mapEffect": [], "spawns": spawns, "counts": dict(counts),
+                "mapEffect": [], "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts),
                 "singi": singi_of(qid, qid) if qid in bushin else None,
+                **({"estimate": bushin_estimate(qid)} if qid in bushin else {}),
                 **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
             }, k)
 
@@ -243,7 +282,7 @@ def main() -> None:
             "typeText": t.get("EnemyTypeText") or "",
             "types": [x for x in (e["EnemyTypeID"], e["EnemyTypeID2"]) if x],
             "flying": bool(e["Flying"]), "magic": bool(e["MagicAttack"]), "boss": bool(e["BossFlag"]),
-            "hp": e["MaxHealth"] or e["Health"], "atk": e["AttackPower"], "def": e["DefenseArmor"],
+            "hp": e["Health"] or e["MaxHealth"], "atk": e["AttackPower"], "def": e["DefenseArmor"],
             "mdef": e["DefenseMagicResistance"], "range": e["AttackRange"], "wait": e["AttackWait"],
             "move": e["MoveSpeed"], "block": e["BlockRequiredNum"], "targets": e["MaxTarget"],
             "core": e["CoreLifeDamage"], "weak": e["WeakAttribute"], "hpStock": e["HealthStock"],

@@ -3,7 +3,7 @@ import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { describeRow, sideOfTarget, type BuffFact, type EffectDefs } from "./effects";
 import type { RawRow } from "./types";
 
-export type StageGroup = "enma" | "hel" | "osiris" | "hades" | "bushin" | "story" | "events" | "other";
+export type StageGroup = "enma" | "hel" | "osiris" | "hades" | "bushin" | "story" | "voyage" | "tenma" | "osaka" | "events" | "other";
 
 export interface StageEntry {
   id: number; name: string; group: StageGroup; tab: number; tabNo: number; index: number;
@@ -42,6 +42,14 @@ export interface StageDetail {
   mapEffect: RawRow[];
   spawns: Spawn[];
   counts: Record<string, number>;
+  /** EnemyTransform chains: enemy -> [form, Trigger, seconds (TimeElapsedTransformFrame / 30) or 0][] */
+  forms?: Record<string, [number, number, number][]>;
+  /** rebuilt Bushin: the multipliers live Bushin of the same rank use (most common of `of`) */
+  estimate?: {
+    normal: { rates: [number, number, number]; of: number; n: number; values: number[][] } | null;
+    hard: { rates: [number, number, number]; of: number; n: number; values: number[][] } | null;
+    from: number[];
+  };
   singi: { set: number; options: SingiOption[]; gold?: number; silver?: number } | null;
   bushin?: string;
 }
@@ -83,8 +91,12 @@ export const GROUPS: { k: StageGroup; label: string; jp: string }[] = [
   // ハデスの死闘場 (Event.atb): its stages are the 深淵 (Abyss) ones
   { k: "hades", label: "Hades", jp: "ハデス・深淵" },
   { k: "bushin", label: "Bushin", jp: "武神" },
-  { k: "events", label: "Events", jp: "イベント" },
   { k: "story", label: "Main story", jp: "" },
+  // Event.atb titles: 第2部「夢幻航海」 (type 11), 天魔大乱 (13), 群雄割拠 (18: 大坂の陣)
+  { k: "voyage", label: "Voyage", jp: "夢幻航海" },
+  { k: "tenma", label: "Tenma", jp: "天魔大乱" },
+  { k: "osaka", label: "Osaka", jp: "大坂の陣・群雄割拠" },
+  { k: "events", label: "Events", jp: "イベント" },
   { k: "other", label: "Other", jp: "" },
 ];
 

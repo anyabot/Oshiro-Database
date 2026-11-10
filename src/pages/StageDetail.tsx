@@ -8,6 +8,7 @@ import {
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
+import { useUnits } from "../data";
 import type { RawRow } from "../types";
 
 // CrowdControlType: 3 火傷 (% of current HP), 4 猛毒 (% of max HP) are the damage-over-time states
@@ -49,14 +50,35 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   };
   const active = options.filter((o) => chosen.has(o.id));
   const points = active.reduce((s, o) => s + o.pts, 0);
-  const r = (hard ? stage.rates.hard : stage.rates.normal) ?? [0, 0, 0];
+  // rebuilt Bushin: estimated multipliers (those live Bushin of the same rank use), on unless switched off
+  const est = stage.estimate && (hard ? stage.estimate.hard : stage.estimate.normal);
+  const useEst = !!stage.estimate?.normal && params.get("mult") !== "base";
+  const r = (useEst && est ? est.rates : (hard ? stage.rates.hard : stage.rates.normal)) ?? [0, 0, 0];
+  // enemy castle girls (EnemyType 敵城娘) whose name is exactly one castle girl's: link to her page
+  const { data: units } = useUnits();
+  const girlLink = useMemo(() => {
+    const m = new Map<string, number[]>();
+    for (const u of units || []) if (!u.npc) m.set(u.name, [...(m.get(u.name) || []), u.id]);
+    return (e: Enemy) => (e.types.includes(101) && m.get(e.name)?.length === 1 ? m.get(e.name)![0] : undefined);
+  }, [units]);
 
   const order = useMemo(() => {
     const first = new Map<number, number>();
     for (const s of stage.spawns) if (!first.has(s.e)) first.set(s.e, s.t);
     // enemies with no EnemyText name are map helpers (spawners, timers): listed last
     const named = (id: number) => (data.enemies[id]?.name.startsWith("Enemy ") ? 1 : 0);
-    return [...first.keys()].sort((a, b) => named(a) - named(b));
+    const spawned = [...first.keys()].sort((a, b) => named(a) - named(b));
+    // each enemy followed by the forms it turns into (EnemyTransform), once each
+    const rows: { id: number; form?: string; depth: number }[] = [];
+    const seen = new Set<number>();
+    const add = (id: number, depth: number, form?: string) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      rows.push({ id, depth, form });
+      for (const [to, trig, sec] of stage.forms?.[id] ?? []) add(to, depth + 1, sec ? `after ${sec}s` : `transform trigger ${trig}`);
+    };
+    for (const id of spawned) add(id, 0);
+    return rows;
   }, [stage, data]);
 
   const group = GROUPS.find((g) => g.k === stage.group);
@@ -69,7 +91,7 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", `Quest #${stage.id}`, `map ${stage.map}`].filter(Boolean).join(" · ")} />
       <FallbackImage srcs={[mapImage(stage.map)]} alt={`${stage.name} map`} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
       {stage.recovered && (
-        <p className="muted small">This stage is from a past event and no longer in the game's quest list: it was rebuilt from the map still in the client cache, so its own name, stage multipliers and Ki aren't in the data. Enemy stats below are their base values.</p>
+        <p className="muted small">This stage is from a past event and no longer in the game's quest list: it was rebuilt from the map still in the client cache, so its own name, stage multipliers and Ki aren't in the data.{stage.estimate?.normal ? " The multipliers below are estimated from the live Bushin of the same rank." : " Enemy stats below are their base values."}</p>
       )}
       {!stage.recovered && stage.live === false && <p className="muted small">Removed from the game's quest list; kept from an earlier export.</p>}
       {stage.description && <p className="game-text">{plainText(stage.description)}</p>}
@@ -86,8 +108,14 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
             options={[{ value: "normal", label: "Normal" }, { value: "hard", label: stage.veryHard ? "Hard / 超難" : "Hard" }]}
             onToggle={(v) => setParam("diff", v === "hard" ? "hard" : null)} />
         )}
+        {stage.estimate?.normal && (
+          <SegmentedButtons label="Multipliers" selected={useEst ? "est" : "base"}
+            options={[{ value: "est", label: "Estimated" }, { value: "base", label: "None (base stats)" }]}
+            onToggle={(v) => setParam("mult", v === "base" ? "base" : null)} />
+        )}
         <span className="muted small">
           Stage multipliers (攻撃/耐久/防御補正): ATK ×{rate(r[0])}, HP ×{rate(r[1])}, DEF ×{rate(r[2])}
+          {useEst && est && ` — estimated: the live Bushin of this rank (${stage.estimate!.from.join(", ")}) use ${est.values.map((v) => v.map((x) => rate(x)).join("/")).join(" or ")} (ATK/HP/DEF); ${est.n} of ${est.of} use these`}
         </span>
       </div>
 
@@ -111,9 +139,10 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
         <table className="hub-table hub-table--stack enemy-table">
           <thead><tr><th>Enemy</th><th>#</th><th>HP</th><th>ATK</th><th>DEF</th><th>Magic DEF</th><th>Range</th><th>Move</th><th>Changes</th></tr></thead>
           <tbody>
-            {order.map((eid) => {
+            {order.map(({ id: eid, form, depth }) => {
               const e = data.enemies[eid];
-              return e ? <EnemyRow key={eid} id={eid} e={e} n={stage.counts[eid] ?? 0} r={r} active={active} data={data} defs={defs} /> : null;
+              return e ? <EnemyRow key={eid} id={eid} e={e} n={stage.counts[eid] ?? 0} r={r} active={active} data={data} defs={defs}
+                form={form} depth={depth} unit={girlLink(e)} /> : null;
             })}
           </tbody>
         </table>
@@ -171,8 +200,9 @@ function statCell(base: number, rateMul: number, mods: EnemyMod[]) {
   );
 }
 
-function EnemyRow({ id, e, n, r, active, data, defs }: {
+function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
   id: number; e: Enemy; n: number; r: [number, number, number]; active: SingiOption[]; data: EnemyData; defs: EffectDefs;
+  form?: string; depth?: number; unit?: number;
 }) {
   const [open, setOpen] = useState(false);
   const { applied, unknown, notes } = useMemo(() => modsFor(e, active, defs, data.targets), [e, active, defs, data]);
@@ -184,16 +214,18 @@ function EnemyRow({ id, e, n, r, active, data, defs }: {
   return (
     <>
       <tr className={open ? "is-open" : undefined}>
-        <td data-label="Enemy">
+        <td data-label="Enemy" style={depth ? { paddingLeft: 12 + 16 * depth } : undefined}>
+          {form && <div className="small muted">↳ form ({form})</div>}
           <button type="button" className="enemy-name" onClick={() => setOpen(!open)} aria-expanded={open}>
             {e.name.startsWith("Enemy ") ? `${e.name} (map helper, no name)` : e.name}
           </button>
           <div className="muted small">
+            {unit != null && <><Link to={`/units/${unit}`}>castle girl page</Link> · </>}
             {types.join(" · ")}{e.flying ? " · flying" : ""}{e.magic ? " · magic attack" : ""}{e.boss ? " · boss" : ""}
           </div>
           {dot && <span className="hub-badge dot-badge" title={dot}>DoT</span>}
         </td>
-        <td data-label="#">{n}</td>
+        <td data-label="#">{form ? "–" : n}</td>
         <td data-label="HP">{statCell(e.hp, rate(r[1]), by(STAT.hp))}</td>
         <td data-label="ATK">{statCell(e.atk, rate(r[0]), by(STAT.atk))}</td>
         <td data-label="DEF">{statCell(e.def, rate(r[2]), by(STAT.def))}</td>
