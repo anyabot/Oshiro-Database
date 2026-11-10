@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FilterChip, FilterRow, LoadState, PageHeader, Pager, SearchBox } from "@altterisk/game-hub";
-import { listState, searchParamsAdapter, textMatch } from "@altterisk/game-hub/filters";
+import { listState, pageCount, paginate, searchParamsAdapter, textMatch } from "@altterisk/game-hub/filters";
 import { GROUPS, useStages, type StageEntry } from "../stages";
 
 const PAGE = 60;
@@ -25,7 +25,8 @@ export default function Stages() {
     .sort((a, b) => a.tab - b.tab || a.tabNo - b.tabNo || a.index - b.index || a.id - b.id), [stages, group, q]);
 
   if (!stages) return <LoadState loading={loading} error={error} />;
-  const shown = list.slice(url.page * PAGE, (url.page + 1) * PAGE);
+  // listState pages count from 1
+  const shown = paginate(list, url.page, PAGE);
   return (
     <div className="page">
       <PageHeader title="Stages"
@@ -44,7 +45,7 @@ export default function Stages() {
         {shown.map((s) => <StageItem key={s.id} s={s} />)}
       </ul>
       {!list.length && <p className="muted">No stage matches.</p>}
-      {list.length > PAGE && <Pager page={url.page} pages={Math.ceil(list.length / PAGE)} onPage={(p) => url.setPage(p)} />}
+      {list.length > PAGE && <Pager page={url.page} pages={pageCount(list.length, PAGE)} onPage={(p) => url.setPage(p)} />}
     </div>
   );
 }
