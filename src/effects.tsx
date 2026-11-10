@@ -383,7 +383,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const stat = word(`status:${status}`, `stat ${status}`);
     // value kinds the exe defines: on/off states and bitmasks (data/status_types_exe.json)
     const kind = defs.labels[`statuskind:${status}`]?.jp;
-    if (kind === "bool") return expr === 3 ? `${stat}: ${v > 0 ? "on" : "off"}` : `${stat} ${expr === 2 ? "−" : "+"}${v}`;
+    // a flag the exe registers but never reads (data/status_types_exe.json kinds proof): said so, not named
+    const unread = defs.labels[`statuskind:${status}`]?.ex[0]?.includes("No reader") ? " (the game client never reads it)" : "";
+    if (kind === "bool") return (expr === 3 ? `${stat}: ${v > 0 ? "on" : "off"}` : `${stat} ${expr === 2 ? "−" : "+"}${v}`) + unread;
     if (kind === "bitmask") {
       // bits that the exe maps to crowd-control (状態異常) types (FUN_00acea70)
       const types: string[] = [];
