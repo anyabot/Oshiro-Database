@@ -1,0 +1,1222 @@
+{
+ "source": "shiroprore_exe.exe target-code registry FUN_0052f830 (Ghidra 12.2); see README; array-registered codes (11..1081) and inserter codes followed to their predicates with TargetPreds.java",
+ "codes": {
+  "301": {
+   "kind": "weapon",
+   "value": 1
+  },
+  "302": {
+   "kind": "weapon",
+   "value": 2
+  },
+  "303": {
+   "kind": "weapon",
+   "value": 3
+  },
+  "304": {
+   "kind": "weapon",
+   "value": 10
+  },
+  "305": {
+   "kind": "weapon",
+   "value": 13
+  },
+  "308": {
+   "kind": "weapon",
+   "value": 18
+  },
+  "309": {
+   "kind": "weapon",
+   "value": 19
+  },
+  "310": {
+   "kind": "weapon",
+   "value": 21
+  },
+  "311": {
+   "kind": "weapon",
+   "value": 22
+  },
+  "312": {
+   "kind": "weapon",
+   "value": 23
+  },
+  "313": {
+   "kind": "weapon",
+   "value": 24
+  },
+  "306": {
+   "kind": "weapon",
+   "value": 14
+  },
+  "307": {
+   "kind": "weapon",
+   "value": 17
+  },
+  "400": {
+   "kind": "weapon",
+   "value": 4
+  },
+  "401": {
+   "kind": "weapon",
+   "value": 5
+  },
+  "402": {
+   "kind": "weapon",
+   "value": 6
+  },
+  "403": {
+   "kind": "weapon",
+   "value": 7
+  },
+  "404": {
+   "kind": "weapon",
+   "value": 8
+  },
+  "405": {
+   "kind": "weapon",
+   "value": 9
+  },
+  "406": {
+   "kind": "weapon",
+   "value": 11
+  },
+  "407": {
+   "kind": "weapon",
+   "value": 12
+  },
+  "408": {
+   "kind": "weapon",
+   "value": 15
+  },
+  "409": {
+   "kind": "weapon",
+   "value": 16
+  },
+  "410": {
+   "kind": "weapon",
+   "value": 20
+  },
+  "601": {
+   "kind": "region",
+   "value": 1
+  },
+  "602": {
+   "kind": "region",
+   "value": 2
+  },
+  "603": {
+   "kind": "region",
+   "value": 3
+  },
+  "604": {
+   "kind": "region",
+   "value": 4
+  },
+  "605": {
+   "kind": "region",
+   "value": 5
+  },
+  "606": {
+   "kind": "region",
+   "value": 6
+  },
+  "607": {
+   "kind": "region",
+   "value": 7
+  },
+  "608": {
+   "kind": "region",
+   "value": 8
+  },
+  "609": {
+   "kind": "region",
+   "value": 9
+  },
+  "610": {
+   "kind": "region",
+   "value": 10
+  },
+  "611": {
+   "kind": "region",
+   "value": 11
+  },
+  "612": {
+   "kind": "region",
+   "value": 12
+  },
+  "614": {
+   "kind": "region",
+   "value": 14
+  },
+  "801": {
+   "kind": "trait",
+   "value": 1
+  },
+  "802": {
+   "kind": "trait",
+   "value": 2
+  },
+  "803": {
+   "kind": "trait",
+   "value": 3
+  },
+  "804": {
+   "kind": "trait",
+   "value": 4
+  },
+  "805": {
+   "kind": "trait",
+   "value": 5
+  },
+  "806": {
+   "kind": "trait",
+   "value": 6
+  },
+  "807": {
+   "kind": "trait",
+   "value": 7
+  },
+  "808": {
+   "kind": "trait",
+   "value": 8
+  },
+  "809": {
+   "kind": "trait",
+   "value": 9
+  },
+  "810": {
+   "kind": "trait",
+   "value": 10
+  },
+  "811": {
+   "kind": "trait",
+   "value": 11
+  },
+  "812": {
+   "kind": "trait",
+   "value": 12
+  },
+  "813": {
+   "kind": "trait",
+   "value": 13
+  },
+  "814": {
+   "kind": "trait",
+   "value": 14
+  },
+  "815": {
+   "kind": "trait",
+   "value": 15
+  },
+  "816": {
+   "kind": "trait",
+   "value": 16
+  },
+  "817": {
+   "kind": "trait",
+   "value": 17
+  },
+  "818": {
+   "kind": "trait",
+   "value": 18
+  },
+  "819": {
+   "kind": "trait",
+   "value": 19
+  },
+  "820": {
+   "kind": "trait",
+   "value": 20
+  },
+  "821": {
+   "kind": "trait",
+   "value": 21
+  },
+  "822": {
+   "kind": "trait",
+   "value": 22
+  },
+  "823": {
+   "kind": "trait",
+   "value": 23
+  },
+  "824": {
+   "kind": "trait",
+   "value": 24
+  },
+  "825": {
+   "kind": "trait",
+   "value": 25
+  },
+  "826": {
+   "kind": "trait",
+   "value": 26
+  },
+  "827": {
+   "kind": "trait",
+   "value": 27
+  },
+  "828": {
+   "kind": "trait",
+   "value": 28
+  },
+  "829": {
+   "kind": "trait",
+   "value": 29
+  },
+  "830": {
+   "kind": "trait",
+   "value": 30
+  },
+  "831": {
+   "kind": "trait",
+   "value": 31
+  },
+  "832": {
+   "kind": "trait",
+   "value": 32
+  },
+  "833": {
+   "kind": "trait",
+   "value": 33
+  },
+  "834": {
+   "kind": "trait",
+   "value": 34
+  },
+  "835": {
+   "kind": "trait",
+   "value": 35
+  },
+  "836": {
+   "kind": "trait",
+   "value": 36
+  },
+  "837": {
+   "kind": "trait",
+   "value": 37
+  },
+  "838": {
+   "kind": "trait",
+   "value": 38
+  },
+  "839": {
+   "kind": "trait",
+   "value": 39
+  },
+  "840": {
+   "kind": "trait",
+   "value": 40
+  },
+  "841": {
+   "kind": "trait",
+   "value": 41
+  },
+  "842": {
+   "kind": "trait",
+   "value": 42
+  },
+  "843": {
+   "kind": "trait",
+   "value": 43
+  },
+  "844": {
+   "kind": "trait",
+   "value": 44
+  },
+  "845": {
+   "kind": "trait",
+   "value": 45
+  },
+  "846": {
+   "kind": "trait",
+   "value": 46
+  },
+  "847": {
+   "kind": "trait",
+   "value": 47
+  },
+  "848": {
+   "kind": "trait",
+   "value": 48
+  },
+  "849": {
+   "kind": "trait",
+   "value": 49
+  },
+  "850": {
+   "kind": "trait",
+   "value": 50
+  },
+  "851": {
+   "kind": "trait",
+   "value": 51
+  },
+  "852": {
+   "kind": "trait",
+   "value": 52
+  },
+  "853": {
+   "kind": "trait",
+   "value": 53
+  },
+  "854": {
+   "kind": "trait",
+   "value": 54
+  },
+  "855": {
+   "kind": "trait",
+   "value": 55
+  },
+  "856": {
+   "kind": "trait",
+   "value": 56
+  },
+  "857": {
+   "kind": "trait",
+   "value": 57
+  },
+  "858": {
+   "kind": "trait",
+   "value": 58
+  },
+  "859": {
+   "kind": "trait",
+   "value": 59
+  },
+  "860": {
+   "kind": "trait",
+   "value": 60
+  },
+  "861": {
+   "kind": "trait",
+   "value": 61
+  },
+  "862": {
+   "kind": "trait",
+   "value": 62
+  },
+  "863": {
+   "kind": "trait",
+   "value": 63
+  },
+  "864": {
+   "kind": "trait",
+   "value": 64
+  },
+  "865": {
+   "kind": "trait",
+   "value": 65
+  },
+  "5100": {
+   "kind": "rarity",
+   "value": 1
+  },
+  "5101": {
+   "kind": "rarity",
+   "value": 2
+  },
+  "5102": {
+   "kind": "rarity",
+   "value": 3
+  },
+  "5103": {
+   "kind": "rarity",
+   "value": 4
+  },
+  "5104": {
+   "kind": "rarity",
+   "value": 5
+  },
+  "5105": {
+   "kind": "rarity",
+   "value": 6
+  },
+  "5106": {
+   "kind": "rarity",
+   "value": 7
+  },
+  "1001": {
+   "kind": "category",
+   "value": 1
+  },
+  "1011": {
+   "kind": "category",
+   "value": 2
+  },
+  "1021": {
+   "kind": "category",
+   "value": 3
+  },
+  "1031": {
+   "kind": "category",
+   "value": 4
+  },
+  "1041": {
+   "kind": "category",
+   "value": 5
+  },
+  "1051": {
+   "kind": "category",
+   "value": 6
+  },
+  "1052": {
+   "kind": "category",
+   "value": 7
+  },
+  "1053": {
+   "kind": "category",
+   "value": 16
+  },
+  "1061": {
+   "kind": "category",
+   "value": 8
+  },
+  "1063": {
+   "kind": "category",
+   "value": 9
+  },
+  "1071": {
+   "kind": "category",
+   "value": 10
+  },
+  "1081": {
+   "kind": "category",
+   "value": 11
+  },
+  "1091": {
+   "kind": "category",
+   "value": 12
+  },
+  "1092": {
+   "kind": "category",
+   "value": 13
+  },
+  "1093": {
+   "kind": "category",
+   "value": 14
+  },
+  "1100": {
+   "kind": "category",
+   "value": 15
+  },
+  "1110": {
+   "kind": "category",
+   "value": 17
+  },
+  "1111": {
+   "kind": "category",
+   "value": 18
+  },
+  "1121": {
+   "kind": "category",
+   "value": 19
+  },
+  "1122": {
+   "kind": "category",
+   "value": 20
+  },
+  "1062": {
+   "kind": "category",
+   "value": 8,
+   "except_self": true
+  },
+  "615": {
+   "kind": "region",
+   "value": 11,
+   "except_self": true
+  },
+  "41": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ]
+   ]
+  },
+  "42": {
+   "kind": "enemytype",
+   "value": [
+    [
+     2
+    ]
+   ]
+  },
+  "43": {
+   "kind": "enemytype",
+   "value": [
+    [
+     7
+    ]
+   ]
+  },
+  "901": {
+   "kind": "enemytype",
+   "value": [
+    [
+     101
+    ]
+   ]
+  },
+  "902": {
+   "kind": "enemytype",
+   "value": [
+    [
+     102
+    ]
+   ]
+  },
+  "903": {
+   "kind": "enemytype",
+   "value": [
+    [
+     103
+    ]
+   ]
+  },
+  "904": {
+   "kind": "enemytype",
+   "value": [
+    [
+     104
+    ]
+   ]
+  },
+  "906": {
+   "kind": "enemytype",
+   "value": [
+    [
+     106
+    ]
+   ]
+  },
+  "101": {
+   "kind": "enemytype",
+   "value": [
+    [
+     3
+    ]
+   ]
+  },
+  "102": {
+   "kind": "enemytype",
+   "value": [
+    [
+     4
+    ]
+   ]
+  },
+  "103": {
+   "kind": "enemytype",
+   "value": [
+    [
+     5
+    ]
+   ]
+  },
+  "201": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ],
+    [
+     3
+    ]
+   ]
+  },
+  "202": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ],
+    [
+     4
+    ]
+   ]
+  },
+  "203": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ],
+    [
+     5
+    ]
+   ]
+  },
+  "205": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ],
+    [
+     6
+    ]
+   ]
+  },
+  "206": {
+   "kind": "enemytype",
+   "value": [
+    [
+     201
+    ]
+   ]
+  },
+  "207": {
+   "kind": "enemytype",
+   "value": [
+    [
+     202
+    ]
+   ]
+  },
+  "208": {
+   "kind": "enemytype",
+   "value": [
+    [
+     203
+    ]
+   ]
+  },
+  "209": {
+   "kind": "enemytype",
+   "value": [
+    [
+     204
+    ]
+   ]
+  },
+  "210": {
+   "kind": "enemytype",
+   "value": [
+    [
+     205
+    ]
+   ]
+  },
+  "211": {
+   "kind": "enemytype",
+   "value": [
+    [
+     206
+    ]
+   ]
+  },
+  "212": {
+   "kind": "enemytype",
+   "value": [
+    [
+     207
+    ]
+   ]
+  },
+  "213": {
+   "kind": "enemytype",
+   "value": [
+    [
+     208
+    ]
+   ]
+  },
+  "214": {
+   "kind": "enemytype",
+   "value": [
+    [
+     209
+    ]
+   ]
+  },
+  "215": {
+   "kind": "enemytype",
+   "value": [
+    [
+     210
+    ]
+   ]
+  },
+  "216": {
+   "kind": "enemytype",
+   "value": [
+    [
+     211
+    ]
+   ]
+  },
+  "217": {
+   "kind": "enemytype",
+   "value": [
+    [
+     212
+    ]
+   ]
+  },
+  "218": {
+   "kind": "enemytype",
+   "value": [
+    [
+     213
+    ]
+   ]
+  },
+  "251": {
+   "kind": "enemytype",
+   "value": [
+    [
+     301
+    ]
+   ]
+  },
+  "252": {
+   "kind": "enemytype",
+   "value": [
+    [
+     302
+    ]
+   ]
+  },
+  "253": {
+   "kind": "enemytype",
+   "value": [
+    [
+     303
+    ]
+   ]
+  },
+  "254": {
+   "kind": "enemytype",
+   "value": [
+    [
+     304
+    ]
+   ]
+  },
+  "255": {
+   "kind": "enemytype",
+   "value": [
+    [
+     305
+    ]
+   ]
+  },
+  "256": {
+   "kind": "enemytype",
+   "value": [
+    [
+     306
+    ]
+   ]
+  },
+  "257": {
+   "kind": "enemytype",
+   "value": [
+    [
+     307
+    ]
+   ]
+  },
+  "258": {
+   "kind": "enemytype",
+   "value": [
+    [
+     308
+    ]
+   ]
+  },
+  "259": {
+   "kind": "enemytype",
+   "value": [
+    [
+     309
+    ]
+   ]
+  },
+  "260": {
+   "kind": "enemytype",
+   "value": [
+    [
+     310
+    ]
+   ]
+  },
+  "261": {
+   "kind": "enemytype",
+   "value": [
+    [
+     311
+    ]
+   ]
+  },
+  "262": {
+   "kind": "enemytype",
+   "value": [
+    [
+     312
+    ]
+   ]
+  },
+  "263": {
+   "kind": "enemytype",
+   "value": [
+    [
+     313
+    ]
+   ]
+  },
+  "264": {
+   "kind": "enemytype",
+   "value": [
+    [
+     314
+    ]
+   ]
+  },
+  "265": {
+   "kind": "enemytype",
+   "value": [
+    [
+     315
+    ]
+   ]
+  },
+  "266": {
+   "kind": "enemytype",
+   "value": [
+    [
+     316
+    ]
+   ]
+  },
+  "267": {
+   "kind": "enemytype",
+   "value": [
+    [
+     317
+    ]
+   ]
+  },
+  "268": {
+   "kind": "enemytype",
+   "value": [
+    [
+     318
+    ]
+   ]
+  },
+  "269": {
+   "kind": "enemytype",
+   "value": [
+    [
+     319
+    ]
+   ]
+  },
+  "270": {
+   "kind": "enemytype",
+   "value": [
+    [
+     320
+    ]
+   ]
+  },
+  "271": {
+   "kind": "enemytype",
+   "value": [
+    [
+     321
+    ]
+   ]
+  },
+  "272": {
+   "kind": "enemytype",
+   "value": [
+    [
+     322
+    ]
+   ]
+  },
+  "273": {
+   "kind": "enemytype",
+   "value": [
+    [
+     323
+    ]
+   ]
+  },
+  "274": {
+   "kind": "enemytype",
+   "value": [
+    [
+     324
+    ]
+   ]
+  },
+  "275": {
+   "kind": "enemytype",
+   "value": [
+    [
+     325
+    ]
+   ]
+  },
+  "276": {
+   "kind": "enemytype",
+   "value": [
+    [
+     326
+    ]
+   ]
+  },
+  "277": {
+   "kind": "enemytype",
+   "value": [
+    [
+     327
+    ]
+   ]
+  },
+  "278": {
+   "kind": "enemytype",
+   "value": [
+    [
+     328
+    ]
+   ]
+  },
+  "279": {
+   "kind": "enemytype",
+   "value": [
+    [
+     329
+    ]
+   ]
+  },
+  "280": {
+   "kind": "enemytype",
+   "value": [
+    [
+     330
+    ]
+   ]
+  },
+  "104": {
+   "kind": "enemytype",
+   "value": [],
+   "flying": true
+  },
+  "105": {
+   "kind": "enemytype",
+   "value": [],
+   "flying": false
+  },
+  "204": {
+   "kind": "enemytype",
+   "value": [
+    [
+     1,
+     3,
+     4,
+     5,
+     6,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ]
+   ],
+   "flying": true
+  },
+  "31": {
+   "kind": "token",
+   "value": null
+  },
+  "32": {
+   "kind": "token",
+   "value": null,
+   "own": true
+  },
+  "33": {
+   "kind": "token",
+   "value": 1
+  },
+  "35": {
+   "kind": "token",
+   "value": 2
+  },
+  "34": {
+   "kind": "token",
+   "value": 3
+  },
+  "36": {
+   "kind": "token",
+   "value": 4
+  },
+  "11": {
+   "kind": "named",
+   "jp": "城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "12": {
+   "kind": "named",
+   "jp": "近接城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 is 1 or 3; 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "13": {
+   "kind": "named",
+   "jp": "遠隔城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 is 2 or 3; 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "15": {
+   "kind": "named",
+   "jp": "城娘(自身を除く)",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); excluding the owner; 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "16": {
+   "kind": "named",
+   "jp": "近接城娘(自身を除く)",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 is 1 or 3; excluding the owner; 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "17": {
+   "kind": "named",
+   "jp": "遠隔城娘(自身を除く)",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 is 2 or 3; excluding the owner; 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "18": {
+   "kind": "named",
+   "jp": "近接のみの城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 == 1 (12 accepts 1 or 3); 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "19": {
+   "kind": "named",
+   "jp": "遠隔のみの城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 == 2 (13 accepts 2 or 3); 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "20": {
+   "kind": "named",
+   "jp": "近接・遠隔両用の城娘",
+   "how": "same-side (FUN_00551c00) castle girl (kind 1) with Card.CardType 0 or 15 (unit +0x168); placement value of FUN_0050c2b0()+0x10 == 3 (accepted by both 12 and 13); 12/13 words = their descriptions' 近接城娘/遠隔城娘"
+  },
+  "2001": {
+   "kind": "named",
+   "jp": "「絶望」状態の敵",
+   "how": "hostile side (FUN_00551bd0); predicate checks FUN_00529ed0(8) = crowd-control state 8 = CrowdControlType 9 「絶望」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2002": {
+   "kind": "named",
+   "jp": "「絶望」状態のユニット",
+   "how": "any unit; predicate checks FUN_00529ed0(8) = crowd-control state 8 = CrowdControlType 9 「絶望」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2004": {
+   "kind": "named",
+   "jp": "「絶望」状態の城娘",
+   "how": "same-side (FUN_00551c00) castle girl (FUN_005576b0); predicate checks FUN_00529ed0(8) = crowd-control state 8 = CrowdControlType 9 「絶望」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2006": {
+   "kind": "named",
+   "jp": "「絶望」状態のトークン",
+   "how": "token (FUN_005788f0); predicate checks FUN_00529ed0(8) = crowd-control state 8 = CrowdControlType 9 「絶望」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2101": {
+   "kind": "named",
+   "jp": "「氷結」状態の敵",
+   "how": "hostile side (FUN_00551bd0); predicate checks FUN_00529ed0(5) = crowd-control state 5 = CrowdControlType 6 「氷結」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2102": {
+   "kind": "named",
+   "jp": "「氷結」状態のユニット",
+   "how": "any unit; predicate checks FUN_00529ed0(5) = crowd-control state 5 = CrowdControlType 6 「氷結」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2103": {
+   "kind": "named",
+   "jp": "「氷結」状態の城娘",
+   "how": "same-side (FUN_00551c00) castle girl (FUN_005576b0); predicate checks FUN_00529ed0(5) = crowd-control state 5 = CrowdControlType 6 「氷結」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "2105": {
+   "kind": "named",
+   "jp": "「氷結」状態のトークン",
+   "how": "token (FUN_005788f0); predicate checks FUN_00529ed0(5) = crowd-control state 5 = CrowdControlType 6 「氷結」 (state = type-1; texts: 2001 「絶望」状態の敵, 2101 「氷結」状態の敵)"
+  },
+  "513": {
+   "kind": "named",
+   "jp": "無属性を含む城",
+   "how": "castle girl (FUN_005576b0) whose castle type FUN_00ab6910() is 16 or 13 (FUN_0052f130) = InstallationCastleTypeLimit ID 17 '無属性を含む' {16, 13}"
+  },
+  "508": {
+   "kind": "trait",
+   "value": 39
+  },
+  "509": {
+   "kind": "trait",
+   "value": 24
+  },
+  "510": {
+   "kind": "trait",
+   "value": 6,
+   "except_self": true
+  },
+  "511": {
+   "kind": "trait",
+   "value": 64
+  },
+  "512": {
+   "kind": "trait",
+   "value": 55
+  }
+ }
+}

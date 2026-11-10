@@ -1,0 +1,30 @@
+{
+  "name": "oshiro-database",
+  "private": true,
+  "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "hub:update": "npm install --no-save github:Altterisk/game-hub#main",
+    "hub:local": "node scripts/hub-local.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "sweep": "esbuild scripts/sweep.ts --bundle --platform=node --format=esm --outfile=scripts/sweep.mjs --log-level=warning && node scripts/sweep.mjs . 60",
+    "coverage": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=scripts/coverage.mjs --log-level=warning && node scripts/coverage.mjs ."
+  },
+  "dependencies": {
+    "@altterisk/game-hub": "github:Altterisk/game-hub#main",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.0"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+altterisk-game-hub-*.tgz
+scripts/sweep.mjs
+scripts/coverage.mjs
