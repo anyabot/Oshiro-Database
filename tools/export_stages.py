@@ -97,14 +97,36 @@ def main() -> None:
     used_enemies: set[int] = set()
     stage_list = []
 
-    def forms_of(counts):
-        """EnemyTransform chains of the spawned enemies: {enemy: [[to, trigger, seconds-or-0], ...]}."""
+    def route_forms(arc, spawns):
+        """Route events: @RouteEventType 4 on a route point turns the enemy walking it into enemy
+        @RouteEventParam1 (5434 of 5446 such events in all cached maps name an EnemyID)."""
+        out = collections.defaultdict(set)
+        cache = {}
+        for sp in spawns:
+            name = "Route%02d.atb" % sp["r"]
+            if name not in arc.offsets:
+                continue
+            if name not in cache:
+                cache[name] = [r["@RouteEventParam1"] for r in arc.table(name)
+                               if r["@RouteEventType"] == 4 and r["@RouteEventParam1"] in enemy_rows]
+            for to in cache[name]:
+                if to != sp["e"]:
+                    out[sp["e"]].add(to)
+        return out
+
+    def forms_of(counts, routes=None):
+        """Forms of the spawned enemies: EnemyTransform chains and route events (trigger -4):
+        {enemy: [[to, trigger, seconds-or-0], ...]}."""
         out, todo = {}, list(counts)
         while todo:
             eid = todo.pop()
             if eid in out:
                 continue
             out[eid] = []
+            for to in sorted((routes or {}).get(eid, ())):
+                used_enemies.add(to)
+                out[eid].append([to, -4, 0])
+                todo.append(to)
             for t in transforms.get(eid, []):
                 to = t.get("TransformedEnemyID")
                 if not to or to not in enemy_rows or to == eid:
@@ -191,7 +213,7 @@ def main() -> None:
             "veryHard": bool(q["VeryHardEnabled"]),
             "ki": q["InitialKi"], "coreLife": q["CoreLife"],
             "mapEffect": [nz(x) for x in map_effect.get(q["MapEffect"], [])] if q["MapEffect"] else [],
-            "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts),
+            "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts, route_forms(arc, spawns)),
             "singi": singi_of(q["SingiID"], qid),
             **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
         }, q["Index"])
@@ -257,7 +279,7 @@ def main() -> None:
                 "tab": 0, "tabNo": 0, "type": 0, "map": map_no, "live": False, "recovered": True,
                 "description": "", "battlefield": "", "terrain": "",
                 "rates": {"normal": None, "hard": None}, "veryHard": False, "ki": 0, "coreLife": 0,
-                "mapEffect": [], "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts),
+                "mapEffect": [], "spawns": spawns, "counts": dict(counts), "forms": forms_of(counts, route_forms(arc, spawns)),
                 "singi": singi_of(qid, qid) if qid in bushin else None,
                 **({"estimate": bushin_estimate(qid)} if qid in bushin else {}),
                 **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
@@ -279,6 +301,8 @@ def main() -> None:
         ab = enemy_ability.get(e["AbilityID"], []) if e["AbilityID"] else []
         enemies[eid] = {
             "name": t.get("EnemyName") or f"Enemy {eid}",
+            # battle sprite: Enemy%03d.atx of EnemyStory1.aar (export_enemy_images.py); DotID 0 = own ID
+            "dot": e["DotID"] or eid,
             "typeText": t.get("EnemyTypeText") or "",
             "types": [x for x in (e["EnemyTypeID"], e["EnemyTypeID2"]) if x],
             "flying": bool(e["Flying"]), "magic": bool(e["MagicAttack"]), "boss": bool(e["BossFlag"]),

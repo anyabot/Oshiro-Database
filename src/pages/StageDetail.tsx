@@ -4,7 +4,7 @@ import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { tagEN } from "../labels";
 import {
-  GROUPS, STAT, applyStat, mapImage, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
+  GROUPS, STAT, applyStat, enemyImage, mapImage, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
@@ -75,7 +75,9 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
       if (seen.has(id)) return;
       seen.add(id);
       rows.push({ id, depth, form });
-      for (const [to, trig, sec] of stage.forms?.[id] ?? []) add(to, depth + 1, sec ? `after ${sec}s` : `transform trigger ${trig}`);
+      for (const [to, trig, sec] of stage.forms?.[id] ?? []) {
+        add(to, depth + 1, trig === -4 ? "at a point of its route" : sec ? `after ${sec}s` : `transform trigger ${trig}`);
+      }
     };
     for (const id of spawned) add(id, 0);
     return rows;
@@ -154,11 +156,11 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
 }
 
 /** A list of effect rows as sentences. */
-function RowList({ rows, defs, kind = "organized" }: { rows: RawRow[]; defs: EffectDefs; kind?: "organized" | "ability" }) {
+function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawRow[]; defs: EffectDefs; kind?: "organized" | "ability"; enemy?: boolean }) {
   const bases = kind === "ability" ? rowBases(rows) : [];
   return (
     <ul className="fx-plain">
-      {rows.map((r, i) => <li key={i}>{describeRow(r, kind, defs, undefined, bases[i]).text.join(" · ") || "(not decoded)"}</li>)}
+      {rows.map((r, i) => <li key={i}>{describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text.join(" · ") || "(not decoded)"}</li>)}
     </ul>
   );
 }
@@ -216,6 +218,9 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
       <tr className={open ? "is-open" : undefined}>
         <td data-label="Enemy" style={depth ? { paddingLeft: 12 + 16 * depth } : undefined}>
           {form && <div className="small muted">↳ form ({form})</div>}
+          <div className="enemy-cell">
+          {e.dot != null && <FallbackImage srcs={[enemyImage(e.dot)]} alt="" loading="lazy" className="enemy-icon" missingClassName="enemy-icon enemy-icon--none" />}
+          <div>
           <button type="button" className="enemy-name" onClick={() => setOpen(!open)} aria-expanded={open}>
             {e.name.startsWith("Enemy ") ? `${e.name} (map helper, no name)` : e.name}
           </button>
@@ -224,6 +229,8 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
             {types.join(" · ")}{e.flying ? " · flying" : ""}{e.magic ? " · magic attack" : ""}{e.boss ? " · boss" : ""}
           </div>
           {dot && <span className="hub-badge dot-badge" title={dot}>DoT</span>}
+          </div>
+          </div>
         </td>
         <td data-label="#">{form ? "–" : n}</td>
         <td data-label="HP">{statCell(e.hp, rate(r[1]), by(STAT.hp))}</td>
@@ -282,7 +289,7 @@ function EnemyDetail({ id, e, defs }: { id: number; e: Enemy; defs: EffectDefs }
         <div className="ability">
           <div className="ability__head"><span className="ability__label">Ability</span><span className="ability__name">{e.ability.name || "(no name)"}</span><span className="ability__id">#{e.ability.id}</span></div>
           {e.ability.text && <p className="game-text">{e.ability.text}</p>}
-          <RowList rows={enemyAbilityRows(e.ability.rows)} defs={defs} kind="ability" />
+          <RowList rows={enemyAbilityRows(e.ability.rows)} defs={defs} kind="ability" enemy />
         </div>
       )}
       {e.missiles.length > 0 && (

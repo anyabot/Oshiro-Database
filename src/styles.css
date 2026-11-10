@@ -205,3 +205,6 @@
 .stage-card__name { font-weight: 600; padding: 0 8px; font-size: 13px; }
 .stage-card__meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 0 8px 8px; }
 .stage-hero { width: 100%; max-width: 720px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--hub-radius-sm); display: block; margin: 8px 0; }
+.enemy-cell { display: flex; gap: 8px; align-items: flex-start; }
+.enemy-icon { width: 56px; height: 56px; object-fit: contain; flex: none; image-rendering: auto; }
+.enemy-icon--none { display: inline-block; }

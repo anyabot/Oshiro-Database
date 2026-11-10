@@ -327,7 +327,16 @@ export function rowBases(rows: RawRow[]): (RawRow | undefined)[] {
 }
 
 /** Where a row sits: selfOnly = a stratagem whose EnchantEffect.TargetType is 自分のみ (its target is its user). */
-export interface RowContext { selfOnly?: boolean }
+export interface RowContext {
+  selfOnly?: boolean;
+  /** an enemy's ability (EnemyAbility): side-relative targets read from the enemy's side */
+  enemyOwner?: boolean;
+}
+
+// Side-relative target codes as enemy abilities use them, named by their own texts (strict majority):
+// 3 = 敵軍ユニット (the enemy army, the owner's side: 117 of 144 texts), 4 = 殿側ユニット (the player's
+// side: 45 of 85). Code 3 never appears on a castle girl; the other codes keep their usual words.
+const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side (殿側ユニット)" };
 
 export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow, ctx: RowContext = {}): Sentence {
   const used = new Set<string>();
@@ -483,7 +492,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const cond = always ? "" : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
     last = { key: always ? "dmg:dealt" : "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: always ? "%" : "×",
       v: always ? Math.abs(v - 100) : v / 100, ...(cond ? { note: cond } : {}) };
-    return `damage ×${fmt(v / 100)}${cond ? ` ${cond}` : ""}`;
+    return `damage dealt ×${fmt(v / 100)}${cond ? ` ${cond}` : ""}`;
   };
   /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */
   const damageRowFact = (table: string, row: RawRow, v: number) => {
@@ -501,6 +510,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const [type, actual] = ue;
     if (type === 1) return modifier(actual, v);
     if (type === 22 && defs.attack_bonus[actual]) return attackBonus(defs.attack_bonus[actual], v);
+    // type 19: its one row (enemy ability 3588) points at modifier 52 (Range, flat) and its text says
+    // 「自身の射程が時間経過で徐々に減少」: worded as that modifier, the type kept visible
+    if (type === 19 && defs.smt[actual]) return `${modifier(actual, v)} (unit effect type 19)`;
     const table = UNIT_EFFECT_TABLE[type];
     const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
     last = null;
@@ -518,7 +530,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const who = (tg: number, ar: number): string => {
     // target 51: every carrier's description names one specific castle girl (the token's or item's castle)
     if (tg === 51) return "The castle girl named in the text";
-    const t = tg ? word(`target:${tg}`, `target ${tg}`) : "";
+    const t = ctx.enemyOwner && ENEMY_OWNER_TARGET[tg] ? ENEMY_OWNER_TARGET[tg] : tg ? word(`target:${tg}`, `target ${tg}`) : "";
     const aJp = ar ? defs.labels[`area:${ar}`]?.jp : undefined;
     if (aJp === "自身" || defs.labels[`target:${tg}`]?.jp === "自身") {
       if (aJp) word(`area:${ar}`, "");

@@ -58,6 +58,8 @@ export interface MissileInfo { id: number; CrowdControlType?: number; DealDamage
 
 export interface Enemy {
   name: string; typeText: string; types: number[];
+  /** battle sprite id: Enemy.DotID, or the EnemyID when that is 0 */
+  dot?: number;
   flying: boolean; magic: boolean; boss: boolean;
   hp: number; atk: number; def: number; mdef: number; range: number; wait: number; move: number;
   block: number; targets: number; core: number; weak: number; hpStock: number;
@@ -80,6 +82,9 @@ export const useStages = () => useJson<StageEntry[]>(loader, "stages");
 export const useStage = (id: number | null) => useJson<StageDetail>(loader, id == null ? null : `stage/${id}`);
 export const useEnemies = () => useJson<EnemyData>(loader, "enemies");
 export const useEvents = () => useJson<GameEvent[]>(loader, "events");
+
+/** Enemy battle sprite, one standing frame (tools/export_enemy_images.py). */
+export const enemyImage = (dot: number) => `${import.meta.env.BASE_URL}enemy-icon/${dot}.webp`;
 
 /** Map background (tools/export_stage_images.py). */
 export const mapImage = (map: number) => `${import.meta.env.BASE_URL}stage-map/${map}.webp`;
