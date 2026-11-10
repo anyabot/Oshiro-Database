@@ -47,8 +47,9 @@ function category(r: BuffRow): string {
   const key = r.k.split("|")[0];
   if (key === "dmg:dealt" || key === "dmg:bonus") return "offense";
   if (key === "dmg:taken") return "defense";
-  if (key === "ki:natural") return "ki";
-  const m = /^status:(\d+)$/.exec(key);
+  if (key === "ki:natural" || key === "ki:periodic") return "ki";
+  // inspire keys ("status:202~giver:202") rank with the status they change
+  const m = /^status:(\d+)/.exec(key);
   if (!m) return "other";
   const s = Number(m[1]);
   if (OFFENSE.has(s)) return "offense";
@@ -66,6 +67,7 @@ const SOURCES = [
   { value: "special", label: "Special ability" },
   { value: "possession", label: "Possession 所持" },
   { value: "defeat", label: "On defeat 撃破時" },
+  { value: "token", label: "Ambush unit 伏兵" },
 ];
 const SOURCE_LABEL = Object.fromEntries(SOURCES.map((s) => [s.value, s.label]));
 const SOURCE_NOTE: Record<string, string> = {
@@ -77,6 +79,7 @@ const SOURCE_NOTE: Record<string, string> = {
   special: "Special ability (sub-ability) effects.",
   possession: "Applies while the castle girl is owned / in the formation.",
   defeat: "When the castle girl is defeated.",
+  token: "Abilities of the ambush unit (伏兵) her stratagem places.",
 };
 
 // who receives it, bucketed from the receiver text the effect describer writes
@@ -98,7 +101,7 @@ function reach(r: BuffRow): string {
 
 
 
-const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec" };
+const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec", "/s": "per second" };
 function effectLabel(k: string, names: Record<string, string>): string {
   const [key, dir, unit] = k.split("|");
   return `${names[key] ?? key} ${dir === "+" ? "↑" : "↓"} ${UNIT_TAG[unit] ?? unit}`;

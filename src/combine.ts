@@ -13,8 +13,31 @@ const statOf = (f: Fact) => /:\s(.+?) [+−×]/.exec(f.text)?.[1] ?? f.key;
 const BASES: [RegExp, (who: string) => boolean][] = [
   [/^All castle girls$/, (w) => /^All .+ castle girls$/.test(w)],
   [/^Castle girls in range$/, (w) => /^.+ castle girls in range$/.test(w)],
+  [/^Castle girls except self in range$/, (w) => /^.+ castle girls in range$/.test(w) && !/except self/.test(w)],
   [/^Castle girls in the formation$/, (w) => /^.+ castle girls in the formation$/.test(w)],
+  // the owner's own ambush units are ambush units too: 60% + 30% = 90% = 「自身の伏兵は加算値1.5倍」
+  [/^Ambush units \(伏兵\) in range$/, (w) => /^Own tokens( in range)?$/.test(w)],
 ];
+
+/** " of the giver's ATK" for an inspire (鼓舞) fact, "" otherwise. */
+const ofGiver = (f: Fact) => (f.key.includes("~") ? / of (?:the giver's )?[^,]+/.exec(f.text)?.[0] ?? "" : "");
+
+/** Overlapping-receiver totals as facts: the narrower group's row plus the group row it also gets. */
+export function combinedFacts(facts: Fact[]): (Fact & { base: string })[] {
+  const out: (Fact & { base: string })[] = [];
+  const amount = (f: Fact) => f.max ?? f.v;
+  const same = (a: Fact, b: Fact) => a.key === b.key && a.dir === b.dir && a.unit === b.unit;
+  const adds = (f: Fact) => f.stack === "stacks" || f.key.includes("~");
+  for (const [baseRe, isSub] of BASES) {
+    for (const b of facts.filter((f) => f.side === "ally" && baseRe.test(f.who) && adds(f))) {
+      for (const s of facts.filter((f) => f !== b && isSub(f.who) && same(f, b) && adds(f))) {
+        const total = amount(b) + amount(s);
+        out.push({ ...s, v: total, max: undefined, base: b.who, note: `total with the "${b.who}" row (${fmt(amount(b))} + ${fmt(amount(s))})` });
+      }
+    }
+  }
+  return out;
+}
 
 export function combinedLines(facts: Fact[]): string[] {
   const out: string[] = [];
@@ -26,14 +49,16 @@ export function combinedLines(facts: Fact[]): string[] {
   //    changes of one status except those in effects.tsx FLAT_MAX_STATUS, and sums ValueType 3/4/5; only
   //    rows the decoder marks "stacks" are combined here
   for (const [baseRe, isSub] of BASES) {
-    const bases = facts.filter((f) => f.side === "ally" && baseRe.test(f.who) && f.stack === "stacks");
+    // inspire rows (% of the giver's stat) add up too: 寿ぐ真夏の大波 60% + 30% = 90% = 「[夏]は加算値1.5倍」
+    const adds = (f: Fact) => f.stack === "stacks" || f.key.includes("~");
+    const bases = facts.filter((f) => f.side === "ally" && baseRe.test(f.who) && adds(f));
     for (const b of bases) {
-      const subs = facts.filter((f) => f !== b && isSub(f.who) && same(f, b) && f.stack === "stacks");
+      const subs = facts.filter((f) => f !== b && isSub(f.who) && same(f, b) && adds(f));
       if (!subs.length) continue;
       const sign = b.dir === "+" ? "+" : "−";
       const unit = b.unit === "s" ? "s" : b.unit;
       const capped = b.max != null || subs.some((s) => s.max != null) ? "up to " : "";
-      for (const s of subs) out.push(`${s.who}: ${statOf(b)} ${capped}${sign}${fmt(amount(b) + amount(s))}${unit} in total (both rows stack)`);
+      for (const s of subs) out.push(`${s.who}: ${statOf(b)} ${capped}${sign}${fmt(amount(b) + amount(s))}${unit}${ofGiver(b)} in total (both rows stack)`);
       if (subs.length > 1) {
         const all = amount(b) + subs.reduce((n, s) => n + amount(s), 0);
         out.push(`In all of those groups at once (e.g. a dual-terrain castle): ${statOf(b)} ${capped}${sign}${fmt(all)}${unit}`);

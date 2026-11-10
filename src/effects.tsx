@@ -86,7 +86,7 @@ export function sideOfTarget(jp: string | undefined): "ally" | "enemy" {
 
 // Target codes no game table names, named by every row that uses them (Japanese, worded through tagEN):
 //   866  [正月]城娘: 「[正月]城娘には50%/60%の値を加算」 (2 of 2)
-//   867  [夏]城娘と自身の伏兵: 「[夏]と自身の伏兵は加算値1.4倍」 (2 of 2)
+//   867  [夏]城娘: 「[夏]と自身の伏兵は加算値1.4倍」 (2 of 2); the 自身の伏兵 part is its own code-32 row there
 //   4004 [魔女][JFW基地]城娘: formation 9074 「部隊の[魔女][JFW基地]の…」, abilities 「[魔女]には…」 (5 of 5)
 //   4005 [能力者][魔術師][学園]城娘: 「自身と[能力者][魔術師][学園]への効果は1.4」 (4 of 4)
 // Map effects (and deliberations) belong to the player's side, so the owner-relative codes read from it:
@@ -96,7 +96,7 @@ export function sideOfTarget(jp: string | undefined): "ally" | "enemy" {
 // 「兜以外の敵」, 「大将兜以外」), and the exe registry has no entry for it, so it is not named
 const GROUP_905 = "enemies in the stage-specific group (code 905)";
 export const TEXT_TARGETS: Record<number, string> = {
-  866: "[正月]城娘", 867: "[夏]城娘と自身の伏兵", 4004: "[魔女][JFW基地]城娘", 4005: "[能力者][魔術師][学園]城娘",
+  866: "[正月]城娘", 867: "[夏]城娘", 4004: "[魔女][JFW基地]城娘", 4005: "[能力者][魔術師][学園]城娘",
 };
 // 2 (自身) in a map effect carries the player's Ki effects (「気の自然回復量が50%低下」): your side
 export const MAP_TARGETS: Record<number, string> = { 2: "殿側", 3: "殿側ユニット", 14: "敵城娘" };
@@ -581,6 +581,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const stack = vt === 1 && (expr === 1 || expr === 2) ? (FLAT_MAX_STATUS.has(status) ? "doesn't stack" : "stacks")
       : expr === 1 || expr === 2 ? STACKING[vt] : undefined;
     // only amounts the sentence states plainly (not "% of another stat" or an unnamed value type)
+    // ValueType 6 (鼓舞: 「自身の攻撃の60%の値を加算」): a % of another status, ranked as its own kind
+    if (dir && vt === 6 && !COUNT_STATUS[ref]) {
+      last = { key: `status:${status}~${refSender ? "giver" : "own"}:${ref}`, dir: dir as "+" | "-", unit: "%", v };
+    }
     if (dir && ((vt >= 1 && vt <= 5) || (w?.unit && vt !== 6))) {
       const unit = w?.unit === "倍" ? "×" : w?.unit === "秒" ? "s" : (vt >= 2 && vt <= 5) || pctStatus ? "%" : "";
       const val = w?.unit === "秒" && w.form === "milli" ? v / 1000
@@ -651,8 +655,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (type === 5 && actual === 4) return `natural Ki gain −${v}%`;
     if (type === 5 && actual === 5) return `Ki −${v} when it appears (given back when it is defeated)`;
     // 3 = 「5秒ごとに気が2増加」 (with 2), 6 = 「気が5秒毎に4減少」 (with 4, 2 of 2 texts)
-    if (type === 5 && actual === 3) return `Ki +${v} every 5s`;
-    if (type === 5 && actual === 6) return `Ki −${v} every 5s`;
+    if (type === 5 && actual === 3) { last = { key: "ki:periodic", dir: "+", unit: "/s", v: v / 5, note: `+${v} every 5s` }; return `Ki +${v} every 5s`; }
+    if (type === 5 && actual === 6) { last = { key: "ki:periodic", dir: "-", unit: "/s", v: v / 5, note: `−${v} every 5s` }; return `Ki −${v} every 5s`; }
     const table = UNIT_EFFECT_TABLE[type];
     const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
     last = null;
@@ -876,7 +880,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     } else if (at === 5 && atd === 3) {
       // periodic Ki generation: EffectValue Ki every DurationInMillis
       const ms = num("DurationInMillis");
-      text.push(`Ki +${v} every ${fmt(ms / 1000)}s`);
+      if (ms > 0) {
+        last = { key: "ki:periodic", dir: "+", unit: "/s", v: Math.round((v / (ms / 1000)) * 1000) / 1000, note: `+${v} every ${fmt(ms / 1000)}s` };
+        // Ki is the side's shared pool, whoever the row names
+        take("Your side", "ally");
+      }
+      text.push(`${lead}Ki +${v} every ${fmt(ms / 1000)}s`);
     } else if (at === 22 && atd && defs.attack_bonus[atd]) {
       // AbilityTypeDetail = AttackBonusStatusEffectID (operators as the descriptions word them: 以下 ≤, 以上 ≥)
       const body = attackBonus(defs.attack_bonus[atd], v), tl = tail();
@@ -1000,7 +1009,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const t = defs.labels[`starget:${st}`] ? word(`starget:${st}`, "") : "";
     let subject = "";
     if (area === "対象" && (!t || t === "対象")) subject = ctx.fieldArea ? "Units in the area" : "Target";
-    else if (area === "対象の射程内") subject = `${t && t !== "対象" ? t : "units"} in ${ctx.selfOnly ? "range" : "the target's range"}`;
+    else if (area === "対象の射程内") {
+      // set targets share the ability-target registry (exe): 15 城娘(自身を除く), 33 伏兵, 867 [夏]城娘,
+      // 32 own ambush units. Their mined 「対象」 label only echoes the stratagem's own target word.
+      const jp = st !== 2 ? targetJp(defs, st) : undefined;
+      const who = jp ? (JP_EN[jp] ?? tagEN(jp) ?? jp) : t && t !== "対象" ? t : "units";
+      subject = `${who} in ${ctx.selfOnly ? "range" : "the target's range"}`;
+    }
     else if (t) subject = t;
     // a code with no set-target label still has its ability-target name (same exe registry)
     else if (defs.labels[`target:${st}`]) subject = `${word(`target:${st}`, "")}${sa ? ` (area ${sa})` : ""}`;

@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describeRow, rowBases, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
+import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
 import type { Ability, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
 
@@ -42,6 +43,13 @@ function statName(key: string): string {
   if (key === "dmg:taken") return "Damage taken";
   if (key === "dmg:bonus") return "Damage multiplier (attack bonus)";
   if (key === "ki:natural") return "Natural Ki gain";
+  if (key === "ki:periodic") return "Ki over time (per second)";
+  // inspire (鼓舞): "status:202~giver:202" = ATK + % of the giver's ATK
+  const insp = /^status:(\d+)~(giver|own):(\d+)$/.exec(key);
+  if (insp) {
+    const n = (s: string) => { const jp = defs.labels[`status:${s}`]?.jp; return jp ? JP_EN[jp] ?? jp : `stat ${s}`; };
+    return `${n(insp[1])} (+% of ${insp[2] === "giver" ? "the giver's" : "own"} ${n(insp[3])})`;
+  }
   const jp = defs.labels[key]?.jp;
   if (!jp) return key;
   return JP_EN[jp] ?? jp;
@@ -51,9 +59,14 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
   side?: "ally" | "enemy", links?: Ability["field_links"], selfOnly = false, fieldArea = false) {
   if (!rowsIn) return;
   const bases = rowBases(rowsIn);
+  const all: Fact[] = [];
   rowsIn.forEach((r, i) => {
     const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly, fieldArea });
-    for (const f of s.facts as BuffFact[]) {
+    for (const f of s.facts as BuffFact[]) all.push({ ...f, text: s.text[f.line] ?? "" });
+  });
+  // a narrower group that also gets the group row (「[夏]は加算値1.5倍」): ranked with its total too
+  for (const f of [...all, ...combinedFacts(all)]) {
+    {
       if (!f.v) continue; // a zero change (empty rows) ranks nothing
       const sd = (side ?? f.side) === "enemy" ? "e" : "a";
       const k = `${f.key}|${f.dir}|${f.unit}`;
@@ -66,7 +79,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
         ...(name ? { nm: name } : {}),
       });
     }
-  });
+  }
 }
 
 const ability = (u: number, t: number, sl: string, a: Ability | null | undefined, kind: RowKind = "ability") => {
@@ -94,6 +107,11 @@ for (const entry of index) {
       emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, selfOnly, fieldArea);
       emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, selfOnly, fieldArea);
       emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, selfOnly, fieldArea);
+    }
+    // ambush units (伏兵) a stratagem places: their own abilities buff and debuff too
+    for (const s of f.stratagems ?? []) {
+      if (s.token?.ability) ability(u.id, f.tier, "token", s.token.ability);
+      if (s.token?.general_ability) ability(u.id, f.tier, "token", s.token.general_ability);
     }
   }
   ability(u.id, -1, "class", u.class_ability);
