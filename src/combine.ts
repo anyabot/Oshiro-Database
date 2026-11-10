@@ -21,7 +21,10 @@ export function combinedLines(facts: Fact[]): string[] {
   const amount = (f: Fact) => f.max ?? f.v;
   const same = (a: Fact, b: Fact) => a.key === b.key && a.dir === b.dir && a.unit === b.unit;
 
-  // 1. stacking bonuses on a group and on a narrower group add up for the narrower group
+  // 1. stacking bonuses on a group and on a narrower group add up for the narrower group. The exe's
+  //    in-battle merge (FUN_00549240 sorts entries, FUN_00547bc0 applies them) sums flat (ValueType 1)
+  //    changes of one status except those in effects.tsx FLAT_MAX_STATUS, and sums ValueType 3/4/5; only
+  //    rows the decoder marks "stacks" are combined here
   for (const [baseRe, isSub] of BASES) {
     const bases = facts.filter((f) => f.side === "ally" && baseRe.test(f.who) && f.stack === "stacks");
     for (const b of bases) {
@@ -38,11 +41,16 @@ export function combinedLines(facts: Fact[]): string[] {
     }
   }
 
-  // 2. a ladder of attack-bonus multipliers on one condition: all rows whose threshold is met apply, and
-  //    they multiply: in all 5 abilities with such a ladder the product matches the text's maximum
-  //    (壮大華麗の武芸 ×2.06 = 最大2倍, 幽霊の都 ×1.44 = 1.4倍, 幽冥の都府 ×1.54 = 1.5倍, ハンティング・ハロウィン
-  //    ×1.86 = 1.8倍, …ナイト ×2.06 = 2倍), while the sums (×1.75, ×1.37, ×1.44, ×1.64) fall short
+  // 2. a ladder of attack-bonus multipliers on one condition: every row whose condition holds applies, and
+  //    they multiply. The exe: FUN_00546f40(attacker, target) walks the attacker's attack-bonus entries and,
+  //    for each whose condition passes (FUN_00af9bf0), sets total = bonus * total / 100 (integer percent,
+  //    truncated each step); the damage formula FUN_004cd680 then does damage * total / 100.
+  //    壮大華麗の武芸: 109 → 117 → 126 → 136 → 146 → 157 → 169 → 184 → 200 = its text's 最大2倍
   const ladders = new Map<string, { f: Fact; thr: number }[]>();
+  // every-hit bonuses (a condition that always holds, e.g. own HP ≤ 100%) pass too, so they multiply into
+  // every total of the same receiver: 白色の城 107 (every hit) × 6 HP steps = 160 = 最大1.6倍
+  const always = new Map<string, number[]>();
+  for (const f of facts) if (f.key === "dmg:bonus" && f.note === "every hit") always.set(f.who, [...(always.get(f.who) || []), f.v]);
   for (const f of facts) {
     if (f.key !== "dmg:bonus" || !f.note) continue;
     const m = /^(against enemies with|while own) (.+?) (≤|≥) ([\d.]+)(%?)$/.exec(f.note);
@@ -50,12 +58,24 @@ export function combinedLines(facts: Fact[]): string[] {
     const k = `${f.who}|${m[1]}|${m[2]}|${m[3]}|${m[5]}`;
     ladders.set(k, [...(ladders.get(k) || []), { f, thr: Number(m[4]) }]);
   }
+  // the game's own arithmetic: integer percent, truncated after each multiplication, in row order
+  const mult = (vs: number[]) => vs.reduce((t, v) => (t ? Math.trunc((Math.round(v * 100) * t) / 100) : Math.round(v * 100)), 0);
+  const perWho = new Map<string, number[]>();
   for (const [k, rows] of ladders) {
+    const owner = k.split("|")[0];
+    perWho.set(owner, [...(perWho.get(owner) || []), ...rows.map((r) => r.f.v)]);
     if (rows.length < 2) continue;
     const [who, pre, stat, op, pct] = k.split("|");
     const thr = op === "≤" ? Math.min(...rows.map((r) => r.thr)) : Math.max(...rows.map((r) => r.thr));
-    const prod = rows.reduce((n, r) => n * r.f.v, 1);
-    out.push(`${who}: ×${fmt(prod)} damage in total ${pre} ${stat} ${op} ${thr}${pct} (all ${rows.length} multipliers apply and multiply)`);
+    const extra = always.get(who) ?? [];
+    const total = mult([...extra, ...rows.map((r) => r.f.v)]);
+    out.push(`${who}: ×${fmt(total / 100)} damage in total ${pre} ${stat} ${op} ${thr}${pct} (all ${rows.length + extra.length} multipliers apply and multiply)`);
+  }
+  // several ladders (「敵の耐久/移動速度が低い程」: one on HP, one on move speed) all multiply into one total
+  for (const [who, vs] of perWho) {
+    const ladderCount = [...ladders.keys()].filter((k) => k.startsWith(`${who}|`) && ladders.get(k)!.length > 1).length;
+    const extra = always.get(who) ?? [];
+    if (ladderCount > 1) out.push(`${who}: ×${fmt(mult([...extra, ...vs]) / 100)} damage with every condition met (all ${vs.length + extra.length} multipliers)`);
   }
   return out;
 }
