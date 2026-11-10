@@ -16,9 +16,9 @@ export const JP_EN: Record<string, string> = {
   "GimmickPoint (current)": "Stratagem cooldown progress",
   GimmickStockCount: "Stratagem stock",
   Deposit: "Deposit",
-  "DamageVs妖怪": "Damage vs 妖怪",
+  "DamageVs妖怪": "Damage vs yokai",
   AntiSpecterBonus: "Anti-yokai bonus",
-  "DamageVs魔物": "Damage vs 魔物",
+  "DamageVs魔物": "Damage vs demons",
   SpreadReductionRate: "Splash damage rate",
   DirectHitBonus: "Direct-hit bonus",
   "DirectHitBonus (override)": "Direct-hit bonus (override)",
@@ -186,7 +186,11 @@ export const JP_EN: Record<string, string> = {
   "計略消費気%": "Stratagem Ki cost %",
   // TokenConfig.TokenUnitType 1 = every 伏兵 token (all 390), not only the owner's (that is 自身のトークン)
   "伏兵(種別1)": "ambush units (伏兵)",
-  "舟(種別4)": "boats (token type 4)",
+  殿側: "your side",
+  殿側ユニット: "castle girl side units (殿側ユニット)",
+  敵城娘: "enemy castle girls (敵城娘)",
+  // TokenConfig.TokenUnitType 4 = the 6 boats (筏, 小舟, 渡し舟, 砲撃舟, ボロ舟, 水蜘蛛)
+  "舟(種別4)": "boats",
   トークンB: "test token B",
   トークンC: "test token C",
   飛行以外の敵: "non-flying enemies",
@@ -195,7 +199,7 @@ export const JP_EN: Record<string, string> = {
   "遠隔城娘(自身を除く)": "ranged castle girls except self",
   近接のみの城娘: "melee-only castle girls",
   遠隔のみの城娘: "ranged-only castle girls",
-  "近接・遠隔両用の城娘": "castle girls placeable on both",
+  "近接・遠隔両用の城娘": "castle girls that can be placed on melee and ranged tiles",
 };
 
 /** CardCategoryName.atb, keyed by category id. */
@@ -266,14 +270,24 @@ export const CASTLE_EN: Record<string, string> = {
 export const ENEMY_EN: Record<string, string> = {
   兜: "Kabuto", 妖怪: "Yokai", 赤備え兜: "Red-Armor Kabuto", 動物兜: "Animal Kabuto", 海洋兜: "Ocean Kabuto",
   西洋兜: "Western Kabuto", 魔物: "Demon", 敵城娘: "Enemy Castle Girl", 大将兜: "Commander Kabuto",
-  敵兜娘: "Enemy Kabuto Girl", 武神: "War God", 焦熱地獄: "Scorching Hell", 極寒地獄: "Freezing Hell",
+  敵兜娘: "Enemy Kabuto Girl", 武神: "War God enemies", 焦熱地獄: "Scorching Hell", 極寒地獄: "Freezing Hell",
   等活地獄: "Reviving Hell", 針山地獄: "Needle Mountain Hell", 無間地獄: "Avici Hell",
+  // the rest of EnemyType.atb (Hel's realms, Osiris's lands, event sets), translated literally
+  武神用: "War God stage enemies", 飛行兜: "Flying Kabuto", 幻想: "Fantasy enemies", 群雄割拠: "Warring States enemies",
+  ムスペルヘイム: "Muspelheim enemies", ニヴルヘイム: "Niflheim enemies", ニザヴェッリル: "Nidavellir enemies",
+  ヴァルハラ: "Valhalla enemies", ヘルヘイム: "Helheim enemies", マアト: "Maat enemies", ヘリオポリス: "Heliopolis enemies",
+  ヌン: "Nun enemies", オンボス: "Ombos enemies", アアル: "Aaru enemies", マジムン: "Majimun", ハデス: "Hades enemies",
+  夏: "Summer enemies", 聖夜: "Christmas enemies", 正月: "New Year enemies", バレンタイン: "Valentine's enemies",
+  肝試し: "Test of Courage enemies", ハロウィン: "Halloween enemies", 花嫁: "Bridal enemies", 学園: "School enemies",
 };
 
 /** English for a tag-style game name: "[夏]城娘", "関東城娘", "鉄砲城娘", "平を含む城", "水城", enemy types. */
 export function tagEN(jp: string): string | undefined {
   const tr = (x: string) => TRAIT_EN[x] ?? CATEGORY_JP_EN[x] ?? REGION_EN[x] ?? WEAPON_EN[x] ?? ENEMY_EN[x];
-  let m = /^\[(.+)\]城娘(.*)$/.exec(jp);
+  // a group plus the owner's own ambush units: "[夏]城娘と自身の伏兵"
+  let m = /^(.+)と自身の伏兵$/.exec(jp);
+  if (m) return `${tagEN(m[1]) ?? m[1]} and own ambush units`;
+  m = /^\[(.+)\]城娘(.*)$/.exec(jp);
   if (m && tr(m[1])) return `${tr(m[1])} castle girls${suffixEN(m[2])}`;
   m = /^(.+?)城娘(.*)$/.exec(jp);
   if (m && (REGION_EN[m[1]] || WEAPON_EN[m[1]])) return `${REGION_EN[m[1]] ?? WEAPON_EN[m[1]]} castle girls${suffixEN(m[2])}`;
@@ -288,12 +302,27 @@ export function tagEN(jp: string): string | undefined {
     return parts.length > 1 ? `${parts.join("/")} castle girls` : `${parts[0]}-only castle girls`;
   }
   if (jp.includes("・")) {
-    const parts = jp.split("・").map((p) => ENEMY_EN[p] ?? p);
+    const parts = jp.split("・").map((p) => tagEN(p) ?? p);
     return parts.join(", ");
   }
+  // several tags at once: "[魔女][JFW基地]城娘"
+  m = /^((?:\[[^\]]+\])+)城娘(.*)$/.exec(jp);
+  if (m) {
+    const tags = [...m[1].matchAll(/\[([^\]]+)\]/g)].map((t) => tr(t[1]) ?? setName(t[1]) ?? t[1]);
+    return `${tags.join(" / ")} castle girls${suffixEN(m[2])}`;
+  }
+  // units in a crowd-control state: "「絶望」状態の敵"
+  m = /^「(.+)」状態(?:の(.+))?$/.exec(jp);
+  if (m) return `${m[2] ? (tagEN(m[2]) ?? JP_EN[m[2]] ?? m[2]) : "units"} in ${JP_EN[m[1]] ?? m[1]}`;
+  if (setName(jp)) return setName(jp);
+  // the game's internal enemy categories, translated literally: 特殊2 = Special 2, イベント3 = Event 3
+  m = /^(特殊|イベント|エネミーセット)(\d*)$/.exec(jp);
+  if (m) return `${{ 特殊: "Special", イベント: "Event", エネミーセット: "Enemy set" }[m[1]]}${m[2] ? ` ${m[2]}` : ""} enemies`;
   return ENEMY_EN[jp] ?? TRAIT_EN[jp];
 }
 const suffixEN = (s: string) => (s === "(自身を除く)" ? " except self" : s);
+/** 城娘セット18..50: trait sets the game never names. */
+const setName = (jp: string) => (/^城娘セット(\d+)$/.exec(jp) ? `unnamed trait set ${/\d+/.exec(jp)![0]}` : undefined);
 
 /** CardCategoryName.atb Japanese -> English (keyed by name, for composite tags). */
 const CATEGORY_JP_EN: Record<string, string> = {

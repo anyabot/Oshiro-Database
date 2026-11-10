@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "sweep": "esbuild scripts/sweep.ts --bundle --platform=node --format=esm --outfile=scripts/sweep.mjs --log-level=warning && node scripts/sweep.mjs . 60",
     "coverage": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=scripts/coverage.mjs --log-level=warning && node scripts/coverage.mjs .",
-    "buffs": "esbuild scripts/buffs.ts --bundle --platform=node --format=esm --outfile=scripts/buffs.mjs --log-level=warning && node scripts/buffs.mjs ."
+    "buffs": "esbuild scripts/buffs.ts --bundle --platform=node --format=esm --outfile=scripts/buffs.mjs --log-level=warning && node scripts/buffs.mjs .",
+    "humanize": "esbuild scripts/humanize.ts --bundle --platform=node --format=esm --outfile=scripts/humanize.mjs --log-level=warning && node scripts/humanize.mjs tools/out/humanize.md"
   },
   "dependencies": {
     "@altterisk/game-hub": "github:Altterisk/game-hub#main",

@@ -4,7 +4,7 @@
 //           (tools/mine_effects.py): word, direction (上昇/低下…), unit (%/倍) and how
 //           the printed number relates to the stored one. Mined words are marked "?".
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
-import { JP_EN, tagEN } from "./labels";
+import { JP_EN, WEAPON_EN, tagEN } from "./labels";
 import type { FieldLink, RawRow } from "./types";
 
 export interface MinedLabel {
@@ -23,6 +23,8 @@ export interface EffectDefs {
   missiles: Record<string, [number, number, number][]>;
   /** Missile.atb DamageRepeatNum + RepeatDamageDelayMillis (repeat hits after the first). */
   missile_repeat?: Record<string, [number, number]>;
+  /** WeaponType.atb names by WeaponTypeID (damage-source tags: WeaponTypeTrigger). */
+  weapon_types?: Record<string, string>;
   /** Missile.atb DealDamageEffectID + DealDamageEffectValue + DealDamageEffectDurationInMillis. */
   missile_dde?: Record<string, [number, number, number]>;
   /** Missile.atb CrowdControlType + DurationInMillis1. */
@@ -79,7 +81,30 @@ export interface BuffFact {
 export function sideOfTarget(jp: string | undefined): "ally" | "enemy" {
   if (!jp) return "ally";
   if (/敵/.test(jp)) return "enemy";
-  return /城娘|味方|自身|伏兵|トークン|舟|蔵|城$|^\[/.test(jp) ? "ally" : "enemy";
+  return /城娘|味方|自身|伏兵|トークン|舟|蔵|殿|城$|^\[/.test(jp) ? "ally" : "enemy";
+}
+
+// Target codes no game table names, named by every row that uses them (Japanese, worded through tagEN):
+//   866  [正月]城娘: 「[正月]城娘には50%/60%の値を加算」 (2 of 2)
+//   867  [夏]城娘と自身の伏兵: 「[夏]と自身の伏兵は加算値1.4倍」 (2 of 2)
+//   4004 [魔女][JFW基地]城娘: formation 9074 「部隊の[魔女][JFW基地]の…」, abilities 「[魔女]には…」 (5 of 5)
+//   4005 [能力者][魔術師][学園]城娘: 「自身と[能力者][魔術師][学園]への効果は1.4」 (4 of 4)
+// Map effects (and deliberations) belong to the player's side, so the owner-relative codes read from it:
+//   3  殿側ユニット: 「吸精: 殿側ユニットの計略使用までの時間増加」 has only a code-3 row
+//   14 敵城娘: 「難攻不落: 敵城娘の被ダメージが減少」 has only a code-14 row
+// 905: an enemy set chosen per stage. Its texts name a different enemy each time (セト, アヌビス, イシス,
+// 「兜以外の敵」, 「大将兜以外」), and the exe registry has no entry for it, so it is not named
+const GROUP_905 = "enemies in the stage-specific group (code 905)";
+export const TEXT_TARGETS: Record<number, string> = {
+  866: "[正月]城娘", 867: "[夏]城娘と自身の伏兵", 4004: "[魔女][JFW基地]城娘", 4005: "[能力者][魔術師][学園]城娘",
+};
+// 2 (自身) in a map effect carries the player's Ki effects (「気の自然回復量が50%低下」): your side
+export const MAP_TARGETS: Record<number, string> = { 2: "殿側", 3: "殿側ユニット", 14: "敵城娘" };
+
+/** A target code's Japanese name: the game's label, else one named by its texts. */
+export function targetJp(defs: EffectDefs, code: number, map = false): string | undefined {
+  if (map && MAP_TARGETS[code]) return MAP_TARGETS[code];
+  return defs.labels[`target:${code}`]?.jp ?? defs.labels[`otarget:${code}`]?.jp ?? TEXT_TARGETS[code];
 }
 
 // StatusModifierType.ValueType: 4 = % that stacks with same-kind effects (its descriptions say
@@ -104,7 +129,7 @@ const FLAT_MAX_STATUS = new Set([105, 106, 108, 111, 113, 203, 210, 211, 212, 21
 const EFFECT_FLAGS: Record<string, string> = {
   PhysicalDamage: "physical", MagicDamage: "magic", TrueDamage: "true damage",
   MeleeAttack: "melee", RangedAttack: "ranged", AmbushAttack: "ambush units",
-  AntiAir: "vs air", AntiSpecter: "vs specters", AntiDemon: "vs demons",
+  AntiAir: "anti-air", AntiSpecter: "anti-yokai", AntiDemon: "anti-demon",
   IgnoreGiveDamage: "ignores damage-dealt modifiers", IgnoreTakeDamage: "ignores damage-taken modifiers",
   IgnoreAttackBonus: "ignores attack bonuses", IgnoreImmuneToDamageForEnemyGimmick: "ignores enemy damage immunity",
   MinDamage: "min damage",
@@ -124,16 +149,28 @@ function restriction(row: RawRow): string[] {
     .map((k) => EFFECT_FLAGS[k]);
 }
 
+// filled from effects.json weapon_types by describeRow (effectRow has no defs of its own)
+let WEAPON_NAMES: Record<number, string> = {};
+
 /** One DealDamage / OnTakeDamage / OnGiveDamage / Immunity row as text. */
 function effectRow(table: string, row: RawRow, v: number, modifierText: (code: number, val: number) => string,
   ccName: (cc: number) => string = (cc) => `crowd control ${cc}`): string {
   const on = restriction(row);
+  const ign = ["ignores damage-dealt modifiers", "ignores damage-taken modifiers", "ignores attack bonuses"];
+  if (ign.every((x) => on.includes(x))) on.splice(on.indexOf(ign[0]), 0, "ignores all damage modifiers and attack bonuses");
+  else if (on.includes(ign[0]) && on.includes(ign[1])) on.splice(on.indexOf(ign[0]), 0, "ignores damage-dealt and damage-taken modifiers");
+  if (on.some((x) => x.startsWith("ignores all") || x.startsWith("ignores damage-dealt and"))) {
+    for (const x of ign) if (on.includes(x) && !(x === ign[2] && !on.some((y) => y.startsWith("ignores all")))) on.splice(on.indexOf(x), 1);
+  }
   const ms = (k: string) => (typeof row[k] === "number" ? (row[k] as number) / 1000 : 0);
   const extra: string[] = [];
   if (ms("IntervalInMillis")) extra.push(`every ${ms("IntervalInMillis")}s`);
   if (row.CrowdControl) extra.push(`inflicts ${ccName(Number(row.CrowdControl))}${ms("CrowdControlDurationInMillis") ? ` for ${ms("CrowdControlDurationInMillis")}s` : ""}`);
   if (row.MissileID) extra.push(`missile #${row.MissileID}`);
-  if (row.WeaponTypeTrigger) extra.push(`weapon type ${row.WeaponTypeTrigger}`);
+  if (row.WeaponTypeTrigger) {
+    const jp = WEAPON_NAMES[Number(row.WeaponTypeTrigger)];
+    extra.push(jp ? `${WEAPON_EN[jp] ?? jp} castle girls` : `weapon type ${row.WeaponTypeTrigger}`);
+  }
   const tags = [...on, ...extra].join(", ");
   switch (table) {
     case "DealDamageEffect": {
@@ -165,6 +202,8 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
         case 2: return `when attacked${from}: counter damage ${flat ? v : `${v}% of the attacker's ATK`} (反射)`;
         // the game's items call this 障壁 (barrier): Supply 800 '殿障壁+3000'
         case 3: return `barrier${from}: blocks ${flat ? `up to ${v}` : `${v}%`} of the damage`;
+        // 「全ての敵が受けるダメージを5000まで防ぐ」: a shield that absorbs up to v in total
+        case 4: return `damage shield${from}: blocks up to ${v} damage in total`;
         case 5: return `when attacked${from}: damage split into hits of ${v}`;
         case 6: return `damage taken${from} ${flat ? `−${v}` : `−${v}%`}`;
         case 7: return `damage taken${from} ${flat ? `+${v}` : `+${v}%`}`;
@@ -192,14 +231,34 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       if (!val) what = what.replace(/ ([+−])0%?(, (?:doesn't )?stacks?)?$/, (_m, s: string) => (s === "+" ? " increases" : " decreases"));
       what = what.replace(/ set to /, " being set to ");
       // move speed set to 0 = being stopped in place
-      if (what === "Move speed being set to 0") return "can't be stopped (immune to move speed being set to 0)";
+      if (what === "Move speed being set to 0" || what.startsWith("can't move")) return "can't be stopped (immune to move speed being set to 0)";
       // a condition with threshold 0 restricts nothing the texts mention (「移動速度低下を無効」); others kept raw
       const cv = Number(row.ConditionValue ?? 0);
-      return `immune to ${what}` + (row.ConditionOperator && cv ? ` (condition op${row.ConditionOperator} ${cv})` : "");
+      const opSym = OP_SYMBOL[Number(row.ConditionOperator)] ?? `op${row.ConditionOperator}`;
+      return `immune to ${what}` + (row.ConditionOperator && cv ? ` (only while the value is ${opSym} ${cv})` : "");
     }
   }
   return `${table} ${v}`;
 }
+
+// Condition operators, from the exe's comparator registry (FUN_00af9c20; constructors FUN_00b64740..
+// 00b64860 store the code, vtable slot 2 compares value with threshold): 0 never, 1 ==, 2 !=, 3 >, 4 >=,
+// 5 <, 6 <=. (1, 4 and 6 had been named from texts before; the exe agrees.)
+export const OP_SYMBOL: Record<number, string> = { 0: "never", 1: "=", 2: "≠", 3: ">", 4: "≥", 5: "<", 6: "≤" };
+
+// Crowd-control types the guide texts don't name, named by the texts of every row that inflicts them:
+//   7  「耐久が減少し続ける状態」 (美人薄命, 大海の菊, 此岸の刈刃: HP keeps dropping)
+//   8  「希望」 (希望の象徴: 「状態異常にならず、大破しない「希望」状態」)
+//   10 「沈黙」 (日輪雲前立形兜, 酒井忠次: 「沈黙は計略使用封じ、再使用時間停止」)
+const CC_TEXT: Record<number, string> = { 7: "constant HP loss (耐久減少)", 8: "Hope (希望)", 10: "Silence (沈黙)" };
+
+// Statuses no exe evidence names, named by their rows' texts: 108 = redeploy time extension
+// (真・佐竹義重[爆焔] 「再配置時間延長効果を与える」; deliberations 1542/1561/1600 「再配置時間を(大幅)延長」)
+const STATUS_TEXT: Record<number, string> = { 108: "Redeploy time extension (再配置時間延長)" };
+
+/** "for 20s", or "for the rest of the battle" for the 999999.999 s the data uses as forever. */
+// 999999.999 s and 999.999 s are both the data's "forever" (the 999.999 s ones are 撤退大破まで永続 effects)
+const forTime = (ms: number) => (ms >= 999999 ? "for the rest of the battle" : `for ${fmt(ms / 1000)}s`);
 
 /** An on/off state as a condition: "while it can't be targeted", "against enemies that have damage immunity". */
 function stateCondition(stat: string, own: boolean): string {
@@ -209,8 +268,11 @@ function stateCondition(stat: string, own: boolean): string {
 }
 
 // UnitEffect types that mirror an AbilityType trigger (see unitEffect in describeRow)
+// 13 = 敵撃破時 (「敵撃破時、攻撃後の隙が5%ずつ短縮」, 「敵を倒す度に攻撃が40上昇」), 16 = 足止めした敵
+// (「足止めした敵の攻撃が40%低下」, 10 stratagems), 14 = 特殊攻撃 (AbilityType 14's own name)
 const UNIT_EFFECT_TRIGGER: Record<number, string> = {
-  2: "on hit", 11: "each attack it makes", 12: "each time it is attacked", 17: "while blocked (足止め時)", 19: "every second",
+  2: "on hit", 11: "each attack it makes", 12: "each time it is attacked", 13: "each enemy it defeats",
+  14: "with its special attack", 16: "on the enemies it blocks", 17: "while blocked (足止め時)", 19: "every second",
 };
 
 // UnitEffect.UnitEffectType -> the table its ActualEffectID is always found in
@@ -234,14 +296,14 @@ const UNIT_EFFECT_TABLE: Record<number, string> = {
 const per = (what: string, d: number) => (d > 1 ? `per ${d} ${what}` : `per ${what}`);
 const CONDITION: Record<number, (d: number, trait: (id: number) => string) => string> = {
   2: () => "per enemy in range",
-  5: (d) => per("times this unit was knocked out (大破)", d),
+  5: (d) => (d > 1 ? `per ${d} knockouts (大破) it has taken` : "per knockout (大破) it has taken"),
   6: () => "per other castle girl in range",
   7: () => "per ally in range",
   9: (d) => `at giantification stage ${d}`,
   10: (d, trait) => `per ${trait(d)} unit in range`,
   11: (d) => `while blocking ≥ ${d}`,
   12: (d) => `while blocking ≤ ${d}`,
-  14: (d) => per("knockouts (大破) in the formation", d),
+  14: (d) => (d > 1 ? `per ${d} knockouts (大破) in the formation` : "per knockout (大破) in the formation"),
   17: (d) => per("own ambush unit (伏兵) deployed", d),
   18: (d) => per("own ambush unit (伏兵) deployed", d),
 };
@@ -258,8 +320,8 @@ const moveSpeed = (v: number) => (v >= 99999 ? "instant (teleport)" : String(v))
 // with the walk slot (FUN_004fc130), 2/6/9 with the stand slot (FUN_004fc0a0); mode 4 takes 歩き2 and mode 9
 // 立ち2 when the weapon has that flag (Weapon.atb bytes +0x9d / +0x9c via FUN_0057daa0 / FUN_0057da20).
 const MOVE_MODE: Record<number, string> = {
-  2: "moves in its stand pose", 3: "walks", 4: "walks with its 歩き2 (walk2) motion", 6: "moves in its stand pose",
-  7: "walks", 9: "moves in its 立ち2 (stand2) pose",
+  2: "moves in its stand pose", 3: "walks", 4: "walks with its second walk motion (歩き2)", 6: "moves in its stand pose",
+  7: "walks", 9: "moves in its second stand pose (立ち2)",
 };
 const moveMode = (d: number) => (d ? `, ${MOVE_MODE[d] ?? `move mode ${d}`}` : "");
 const CLASS_ABILITY: Record<number, (v: number, d: number) => string> = {
@@ -359,9 +421,10 @@ export interface RowContext {
 // 3 = 敵軍ユニット (the enemy army, the owner's side: 117 of 144 texts), 4 = 殿側ユニット (the player's
 // side: 45 of 85). Code 3 never appears on a castle girl; the other codes keep their usual words.
 // 14 = 城娘 (28 of the 34 enemy abilities that use it say 城娘)
-const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side (殿側ユニット)", 14: "castle girls (城娘)" };
+const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side units (殿側ユニット)", 14: "castle girls (城娘)" };
 
 export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow, ctx: RowContext = {}): Sentence {
+  if (defs.weapon_types) WEAPON_NAMES = defs.weapon_types as unknown as Record<number, string>;
   const used = new Set<string>();
   // a continuation row takes its type/kind from the head row, and target/area too when it has none
   const r: RawRow = { ...r0 };
@@ -430,13 +493,24 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       for (let b = 1; b <= v; b <<= 1) if (v & b) names.push(defs.labels[`flag:${b}`] ? word(`flag:${b}`, "") : `flag ${b}`);
       return `${expr === 4 ? "attacks gain" : expr === 5 ? "attacks lose" : expr === 3 ? "attack properties set to" : `attack properties (expr ${expr})`}: ${names.join(", ")}`;
     }
-    const stat = word(`status:${status}`, `stat ${status}`);
+    // 318: a one-time "won't fall" timer in ms. Every row's text agrees: 10000 = 「1度だけ大破せず、10秒間耐久が
+    // 0にならない」, 25000 = 「一度だけ25秒間大破しない」, 3000/1000/5000 = 3/1/5秒, +3000 = 「大破しない秒数が3秒増加」
+    if (status === 318) {
+      return expr === 3 ? `once, can't be knocked out: HP can't drop to 0 for ${fmt(v / 1000)}s`
+        : `that "can't be knocked out" time ${expr === 2 ? "−" : "+"}${fmt(v / 1000)}s`;
+    }
+    const stat = word(`status:${status}`, STATUS_TEXT[status] ?? `stat ${status}`);
+    // names like "Stratagem Ki cost %" read "Stratagem Ki cost +100%": the amount carries the %
+    const statName = stat.replace(/ %$/, "");
+    // 221 攻撃しない is a state (its texts: 「攻撃をしない」); set to 1 = it doesn't attack
+    if (status === 221 && expr === 3) return v > 0 ? stat : `${stat} removed`;
     // value kinds the exe defines: on/off states and bitmasks (data/status_types_exe.json)
     const kind = defs.labels[`statuskind:${status}`]?.jp;
     // a flag the exe registers but never reads (data/status_types_exe.json kinds proof): said so, not named
     const unread = defs.labels[`statuskind:${status}`]?.ex[0]?.includes("No reader") ? " (the game client never reads it)" : "";
     // on/off states read as the state itself: "Can't be targeted", "… removed"
-    if (kind === "bool") return (expr === 3 ? (v > 0 ? stat : `${stat} removed`) : `${stat} ${expr === 2 ? "−" : "+"}${v}`) + unread;
+    const off = /^Can't /.test(stat) ? `can ${stat.slice(6)} again` : `${stat} removed`;
+    if (kind === "bool") return (expr === 3 ? (v > 0 ? stat : off) : `${stat} ${expr === 2 ? "−" : "+"}${v}`) + unread;
     if (kind === "bitmask") {
       // bits that the exe maps to crowd-control (状態異常) types (FUN_00acea70)
       const types: string[] = [];
@@ -450,7 +524,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       let wrest = v;
       for (let b = 1; b <= v; b <<= 1) {
         const l = defs.labels[`weatherbit:${b}`];
-        if (v & b && l && status === 319) { weathers.push(l.jp); wrest &= ~b; }
+        if (v & b && l && status === 319) { weathers.push(JP_EN[l.jp] ?? l.jp); wrest &= ~b; }
       }
       // status 225: attack-attribute bits = EnemyWeakAttribute.atb column order (炎 2, 雷 16, ...)
       if (status === 225) {
@@ -463,7 +537,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       if (types.length && !rest) {
         // ExpressionType 4 = OR (gains), 5 = AND-NOT (loses), 3 = set (FUN_00ae7c20)
         const how = expr === 5 || expr === 2 ? "loses" : expr === 3 ? "set to" : "gains";
-        const names = types.map((t) => (/^\d+$/.test(t) ? `ailment #${t}` : JP_EN[t] ?? t)).join(", ");
+        const names = types.map((t) => (/^\d+$/.test(t) ? (CC_TEXT[Number(t)]?.replace(/ \(.*\)$/, "") ?? `ailment #${t}`) : JP_EN[t] ?? t)).join(", ");
         // 312/313 状態異常無効: "immune to Paralysis, Burn, …"
         if (status === 312 || status === 313) {
           return how === "gains" ? `immune to ${names}` : how === "loses" ? `no longer immune to ${names}` : `immune only to ${names}`;
@@ -474,7 +548,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     }
     // how this code's descriptions word the change, when they agree (短縮 = down, 秒 = seconds, 1.2倍)
     const w = defs.labels[`smt:${code}`];
-    const dir = expr === 1 || expr === 2 ? (w?.dir ?? (expr === 1 ? "+" : "-")) : "";
+    // a negative value on an add/subtract modifier is the opposite change (Block "+-1" = −1)
+    let dir = expr === 1 || expr === 2 ? (w?.dir ?? (expr === 1 ? "+" : "-")) : "";
+    if (v < 0 && dir) { dir = dir === "+" ? "-" : "+"; v = -v; }
     const sign = dir === "+" ? "+" : dir === "-" ? "−" : "";
     // statuses that hold a percentage (防御を20%無視): their flat amounts print as % (statunit, mined)
     const pctStatus = vt === 1 && (defs.labels[`statunit:${status}`]?.unit === "%" || /%\s*(\(|$)/.test(defs.labels[`status:${status}`]?.jp ?? ""));
@@ -485,6 +561,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       : vt === 2 || vt === 4 || pctStatus ? (lim) => `${lim}%` : (lim) => `${lim}`;
     // a negative move speed for a split second pushes the unit back (後退させる; e.g. −2000 for 0.1 s)
     if (status === 401 && expr === 3 && v < 0) return `knocked back (move speed −${-v})`;
+    if (status === 401 && expr === 3 && v === 0) return "can't move (move speed 0)";
+    // 104 is a time in ms (regen interval, FUN_0050e710)
+    if (status === 104 && expr === 3) return `Regen interval set to ${fmt(v / 1000)}s`;
     let amount: string;
     if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
@@ -508,26 +587,26 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         : w?.unit === "倍" ? (w.form === "mul" ? v / 100 : dir === "-" ? 1 - v / 100 : 1 + v / 100) : v;
       last = { key: `status:${status}`, dir: dir as "+" | "-", unit, v: val, ...(stack ? { stack } : {}) };
     }
-    return `${stat} ${amount}${stack ? `, ${stack}` : ""}`;
+    return `${statName} ${amount}${stack ? `, ${stack}` : ""}`;
   };
 
   /** 状態異常 name of a CrowdControlType (Gimmick guide links), else its number. */
   const ccName = (cc: number): string =>
-    defs.labels[`cc:${cc}`] ? word(`cc:${cc}`, "") : `crowd control ${cc}`;
+    defs.labels[`cc:${cc}`] ? word(`cc:${cc}`, "") : CC_TEXT[cc] ?? `crowd control ${cc}`;
 
   /** AttackBonusStatusEffect: damage × v% while a status passes a test. ReferenceSenderUnit 1 tests the
    *  attacker's own status (its texts: 攻撃が10000以上の時, 耐久が高い程), else the enemy hit (攻撃が300以下の敵,
    *  防御0の敵); ValueType 2 = % of the maximum (耐久50%以上の敵), 1 = the value itself. */
   const attackBonus = (b: RawRow, v: number): string => {
     const stat = word(`status:${b.StatusType}`, `stat ${b.StatusType}`);
-    const op = defs.labels[`op:${b.ConditionOperator}`] ? word(`op:${b.ConditionOperator}`, "") : `op${b.ConditionOperator}`;
+    const op = OP_SYMBOL[Number(b.ConditionOperator)] ?? `op${b.ConditionOperator}`;
     const val = `${b.ConditionValue ?? 0}${b.ValueType === 2 ? "%" : ""}`;
     // ≤ 100% of the maximum always holds: the bonus applies to every hit (e.g. 雷光王撃 「攻撃が0.5倍の術ダメージ」)
-    const always = b.ValueType === 2 && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≤" && Number(b.ConditionValue) >= 100;
+    const always = b.ValueType === 2 && op === "≤" && Number(b.ConditionValue) >= 100;
     // an on/off state tested "≥ 1" reads as the state itself: 「隠密状態の城娘が与えるダメージ1.3倍」 =
     // while it can't be targeted
     const isState = defs.labels[`statuskind:${b.StatusType}`]?.jp === "bool" && Number(b.ConditionValue) === 1
-      && defs.labels[`op:${b.ConditionOperator}`]?.jp === "≥";
+      && op === "≥";
     const cond = always ? ""
       : isState ? stateCondition(stat, !!b.ReferenceSenderUnit)
       : b.ReferenceSenderUnit ? `while own ${stat} ${op} ${val}` : `against enemies with ${stat} ${op} ${val}`;
@@ -563,12 +642,17 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const smtTrigger = UNIT_EFFECT_TRIGGER[type];
     if (smtTrigger && defs.smt[actual]) {
       const m = modifier(actual, v);
-      return type === 2 ? `on the unit it hits: ${m}` : `${smtTrigger}: ${m}`;
+      // one colon per sentence: "each attack it makes, attacks lose direct-hit bonus"
+      const body = m.replace(/^(attacks gain|attacks lose|attack properties set to): /, "$1 ");
+      return type === 2 ? `on the unit it hits: ${body}` : type === 16 ? `the enemies it blocks: ${body}` : `${smtTrigger}, ${body}`;
     }
     // type 5 mirrors AbilityType 5 (Ki): 4 = natural Ki gain −% (「気の自然回復量が50%低下」 with 50,
     // 「…100%低下」 with 100), 5 = Ki taken on appearing (「登場時に気を20減らし」 with 20, returned on defeat)
     if (type === 5 && actual === 4) return `natural Ki gain −${v}%`;
     if (type === 5 && actual === 5) return `Ki −${v} when it appears (given back when it is defeated)`;
+    // 3 = 「5秒ごとに気が2増加」 (with 2), 6 = 「気が5秒毎に4減少」 (with 4, 2 of 2 texts)
+    if (type === 5 && actual === 3) return `Ki +${v} every 5s`;
+    if (type === 5 && actual === 6) return `Ki −${v} every 5s`;
     const table = UNIT_EFFECT_TABLE[type];
     const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
     last = null;
@@ -589,7 +673,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // code 1 alone is the lord: its abilities say 殿 every time it appears without 城娘 (11) / 伏兵 (33)
     // (「殿の特技です」, 「殿の攻撃と防御が90上昇」); with them, the texts call the group 「射程内の味方」
     if (tg === 1 && !ctx.enemyOwner) return cap(`${ar && defs.labels[`area:${ar}`]?.jp === "全て" ? "the " : ""}lord (殿)${ar && defs.labels[`area:${ar}`]?.jp === "射程内" ? " in range" : ""}`);
-    const t = ctx.enemyOwner && ENEMY_OWNER_TARGET[tg] ? ENEMY_OWNER_TARGET[tg] : tg ? word(`target:${tg}`, `target ${tg}`) : "";
+    const textJp = !defs.labels[`target:${tg}`] && TEXT_TARGETS[tg];
+    const t = ctx.enemyOwner && ENEMY_OWNER_TARGET[tg] ? ENEMY_OWNER_TARGET[tg]
+      : textJp ? (tagEN(textJp) ?? textJp) : tg === 905 ? GROUP_905 : tg ? word(`target:${tg}`, `target ${tg}`) : "";
     const aJp = ar ? defs.labels[`area:${ar}`]?.jp : undefined;
     if (aJp === "自身" || defs.labels[`target:${tg}`]?.jp === "自身") {
       if (aJp) word(`area:${ar}`, "");
@@ -607,18 +693,19 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const mods = defs.missiles[id] ?? [];
     const cc = defs.missile_cc?.[id];
     const rep = defs.missile_repeat?.[id];
-    const parts = mods.map(([code, v, ms]) => `${modifier(code, v)}${ms ? `, for ${fmt(ms / 1000)}s` : ""}`);
+    const parts = mods.map(([code, v, ms]) => `${modifier(code, v)}${ms ? `, ${forTime(ms)}` : ""}`);
     if (rep) parts.unshift(`hits ${rep[0] + 1} times${rep[1] ? `, ${fmt(rep[1] / 1000)}s apart` : ""}`);
     const dde = defs.missile_dde?.[id];
     const ddeRow = dde ? defs.effect_tables?.DealDamageEffect?.[dde[0]] : undefined;
     if (dde && ddeRow) parts.push(`${effectRow("DealDamageEffect", ddeRow, dde[1], modifier, ccName)}${dde[2] ? `, for ${fmt(dde[2] / 1000)}s` : ""}`);
-    if (cc) parts.unshift(`inflicts ${ccName(cc[0])}${cc[1] ? ` (${fmt(cc[1] / 1000)}s)` : ""}`);
-    if (!parts.length) return `missile #${id}`;
+    if (cc) parts.unshift(`inflicts ${ccName(cc[0])}${cc[1] ? ` (${forTime(cc[1]).replace(/^for /, "")})` : ""}`);
+    if (!parts.length) return `missile #${id} (no extra effects)`;
     return `missile #${id}: ${parts.join("; ")}`;
   };
 
   // the most a growing or per-count row reaches (its LimitValue), for the ranking
   let rowMax = 0;
+  let skipEvery = false;
   const PER_COUNT = new Set([2, 5, 6, 7, 10, 14, 17, 18]);
   const tail = (): string => {
     const parts: string[] = [];
@@ -650,7 +737,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     } else {
       // AbilityEffectDetail >= 1000 is the "N秒毎" interval of the clause (27 of 34 descriptions)
       const every = num("AbilityEffectDetail");
-      if (every >= 1000) parts.push(`every ${fmt(every / 1000)}s`);
+      if (every >= 1000 && !skipEvery) parts.push(`every ${fmt(every / 1000)}s`);
       else if (every && !(r.AbilityType === 6 && CLASS_ABILITY[Number(r.AbilityTypeDetail)])
         && !(r.AbilityType === 21 && r.AbilityTypeDetail === 2 && defs.labels["fieldpulse:2"])) used.delete("AbilityEffectDetail");
     }
@@ -660,12 +747,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const ms = num("DurationInMillis") || num("EffectDuration");
     // values under 0.1s never match a duration in the descriptions; they stay in the raw fields
     // under 0.1s: a status that lasts a few frames (e.g. the 0.035s Move speed −1000 of 後退させる knockback)
-    if (ms >= 100) parts.push(`for ${fmt(ms / 1000)}s`);
+    if (ms >= 100) parts.push(forTime(ms));
     else if (ms) parts.push(`for ${ms}ms`);
     const p = num("ProbabilityOfActivation");
     if (p) parts.push(`${p}% chance`);
     const lim = num("LimitValue");
-    if (lim) parts.push(`up to ${limitFmt(lim)}`);
+    if (lim) parts.push(lim < 0 ? `down to −${limitFmt(-lim)}` : `up to ${limitFmt(lim)}`);
     if (lim > 0 && (growing || (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && PER_COUNT.has(Number(r.AbilityTypeDetail))))) rowMax = lim;
     // Ability.atb bool columns, worded from their own header names (tools/data/column_names.json)
     if (num("GrowUpLimitOnly")) parts.push("only at max giantification (最大化)");
@@ -704,7 +791,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (at === 21 && link && Number(link.field.FieldEffectType) === 3) {
       // FieldEffectType 3: an area (radius EffectArea) that applies EnchantEffect Param1 to the units in it;
       // the stratagem's EnchantEffect rows are those effects (e.g. 11080: radius 300 = 「範囲:特大」)
-      text.push(`Area effect #${link.field_id}, radius ${link.field.EffectArea ?? "?"}: the effects below apply to units in the area`);
+      text.push(`Area effect, radius ${link.field.EffectArea ?? "?"}: the effects below apply to units in the area`);
     } else if (at === 21 && link) {
       // on-defeat field effect: Param3 = damage as % of ATK (its descriptions print Param3/100 倍
       // in 63 of 64 cases); the missile's modifiers are what the field applies
@@ -714,7 +801,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       if (dmg) parts.push(`damage ×${fmt(dmg / 100)} ATK`);
       // the field's missile (Param1) may carry a crowd control: CrowdControlType + DurationInMillis1
       const mcc = Number(m.CrowdControlType ?? 0);
-      if (mcc) parts.push(`inflicts ${ccName(mcc)}${m.DurationInMillis1 ? ` (${fmt(Number(m.DurationInMillis1) / 1000)}s)` : ""}`);
+      if (mcc) parts.push(`inflicts ${ccName(mcc)}${m.DurationInMillis1 ? ` (${forTime(Number(m.DurationInMillis1)).replace(/^for /, "")})` : ""}`);
       // Missile.DealDamageEffectID (ダメージ発生効果) + DealDamageEffectValue
       const dde = Number(m.DealDamageEffectID ?? 0);
       const ddeRow = dde ? defs.effect_tables?.DealDamageEffect?.[dde] : undefined;
@@ -723,13 +810,15 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       for (const i of [1, 2]) {
         const code = Number(m[`StatusModifierType${i}`] ?? 0), val = Number(m[`StatusEffectValue${i}`] ?? 0);
         const ms = Number(m[`DurationInMillis${i}`] ?? 0);
-        if (code) parts.push(`${modifier(code, val)}${ms ? `, for ${fmt(ms / 1000)}s` : ""}`);
+        if (code) parts.push(`${modifier(code, val)}${ms ? `, ${forTime(ms)}` : ""}`);
       }
       // 21/2 (while deployed): AbilityEffectDetail = re-apply interval in ms (text-supported, see fieldpulse:2)
       const pulse = num("AbilityTypeDetail") === 2 ? num("AbilityEffectDetail") : 0;
       const every = pulse && defs.labels["fieldpulse:2"] ? (word("fieldpulse:2", ""), `, re-applied every ${fmt(pulse / 1000)}s`) : "";
       if (pulse && !every) used.delete("AbilityEffectDetail");
-      text.push(`Field effect #${link.field_id}: ${parts.join("; ") || "(no decoded effect)"}${every}${tail()}`);
+      // the re-apply interval is AbilityEffectDetail, which tail() would print again
+      if (every) skipEvery = true;
+      text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tail()}`);
     } else if (num("UnitEffectID") && defs.unit_effect[num("UnitEffectID")]) {
       // UnitEffect.atb dispatch: ActualEffectID is in exactly one table for these types (every row)
       const id = num("UnitEffectID");
@@ -748,7 +837,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       }
     } else if (at === 6 && (atd === 2 || atd === 4)) {
       // class-ability types 6/2 and 6/4: EffectValue is a Missile.atb id (every such row)
-      text.push(`${lead}${cap(missile(v))}${tail()}`);
+      text.push(`${lead}${lead ? missile(v) : cap(missile(v))}${tail()}`);
     } else if (at === 9 && defs.effect_tables?.DealDamageEffect?.[atd]) {
       // AbilityType 9 handler FUN_00af5150: AbilityTypeDetail looked up by FUN_00aa9b40 = DealDamageEffectID
       // (all 35 ids in the data are DealDamageEffect rows; e.g. 1028 = magic, ATK, every 2s = 2秒毎に攻撃の
@@ -802,6 +891,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       text.push(`${lead}${m}${perGrowUp}${tl}${how}`);
     } else {
       const key = `abilitytype:${at}/${atd}`;
+      // AbilityType 1 with no modifier, no unit effect and no value does nothing (placeholder rows)
+      if (at === 1 && !atd && !v) { text.push(`${lead}no effect (an empty row in the data)${tail()}`); return finish(); }
       const body = `${word(key, `ability type ${at}/${atd}`)} ${amountFor(key, v)}`, tl = tail();
       labelFact(key, v);
       file(tl, perGrowUp.slice(2));
@@ -816,13 +907,18 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (kind === "organized") {
       // formation TargetType / AreaType: own vocabulary, named from formation descriptions only
       const tg = num("TargetType"), ar = num("AreaType");
-      const t = tg ? word(`otarget:${tg}`, `target ${tg}`) : "";
+      const mapJp = !defs.labels[`otarget:${tg}`] && (MAP_TARGETS[tg] ?? TEXT_TARGETS[tg]);
+      // a code with no formation label still has its ability-target name (same exe registry)
+      const t = mapJp ? (JP_EN[mapJp] ?? tagEN(mapJp) ?? mapJp)
+        : tg && !defs.labels[`otarget:${tg}`] && defs.labels[`target:${tg}`] ? word(`target:${tg}`, "")
+        : tg === 905 ? GROUP_905 : tg ? word(`otarget:${tg}`, `target ${tg}`) : "";
       const aJp = ar ? defs.labels[`oarea:${ar}`]?.jp : undefined;
       if (aJp) word(`oarea:${ar}`, "");
-      const subject = aJp === "部隊" ? `${t} in the formation` : aJp === "全て" ? `all ${t}` : t || (ar ? `area ${ar}` : "");
+      const enemyTarget = sideOfTarget(defs.labels[`otarget:${tg}`]?.jp ?? MAP_TARGETS[tg] ?? TEXT_TARGETS[tg]) === "enemy";
+      const subject = aJp === "部隊" ? (enemyTarget ? `all ${t}` : `${t} in the formation`) : aJp === "全て" ? `all ${t}` : t || (ar ? `area ${ar}` : "");
       if (subject) lead = `${cap(subject)}: `;
       factWho = subject ? cap(subject) : "—";
-      factSide = sideOfTarget(defs.labels[`otarget:${tg}`]?.jp);
+      factSide = sideOfTarget(defs.labels[`otarget:${tg}`]?.jp ?? MAP_TARGETS[tg] ?? TEXT_TARGETS[tg]);
       // a formation row with no EffectType: the ability's effects are its quest rows (QuestType)
       if (!et && !v) { text.push("No formation effect of its own (its effects are the quest-only rows)"); return finish(); }
     }
@@ -876,7 +972,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (ts) {
       const codes = defs.target_sets?.[ts] ?? [];
       const names = codes.map((t) => word(`target:${enchantTarget(t)}`, `target ${t}`));
-      text.push(`Can target (発動対象): ${names.length ? names.join(", ") : `set #${ts}`}`);
+      text.push(`Can be used on (発動対象): ${names.length ? names.join(", ") : `set #${ts}`}`);
     }
     // named by the game's own field: the stratagem can't be used while a special attack is running
     if (num("SpecialAttackingInvalidActivate")) text.push("Can't be used during a special attack");
@@ -906,6 +1002,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (area === "対象" && (!t || t === "対象")) subject = ctx.fieldArea ? "Units in the area" : "Target";
     else if (area === "対象の射程内") subject = `${t && t !== "対象" ? t : "units"} in ${ctx.selfOnly ? "range" : "the target's range"}`;
     else if (t) subject = t;
+    // a code with no set-target label still has its ability-target name (same exe registry)
+    else if (defs.labels[`target:${st}`]) subject = `${word(`target:${st}`, "")}${sa ? ` (area ${sa})` : ""}`;
     else subject = `target ${st}${sa ? `, area ${sa}` : ""}`;
     // a 自分のみ stratagem's target is its user
     if (ctx.selfOnly && subject === "Target") subject = "Self";
@@ -915,7 +1013,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const dt = num("EffectDetailType"), dv = num("EffectDetailValue");
     let per = "";
     if (dt === 3 && num("LimitValue")) {
-      per = `, grows by that amount ${dv > 1 ? `every ${dv} triggers (seconds when timed)` : "each trigger"}`;
+      // the step counts the unit effect's own trigger: seconds for the 1 s timer (type 19), else its event
+      const ueType = defs.unit_effect[et]?.[0];
+      const noun = ueType === 19 ? ["second", "seconds"] : ueType === 11 ? ["attack", "attacks"]
+        : ueType === 12 ? ["hit taken", "hits taken"] : ueType === 13 ? ["kill", "kills"] : ["trigger", "triggers"];
+      per = `, grows by that amount ${dv > 1 ? `every ${dv} ${noun[1]}` : `each ${noun[0]}`}`;
     } else if (CONDITION[dt]) {
       const c = CONDITION[dt](dv, (id) => word(`trait:${id}`, `trait ${id}`));
       per = c ? `, ${c}` : "";
