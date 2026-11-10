@@ -57,6 +57,15 @@ toggles that are applied to each enemy they target. Built by `tools/export_stage
 - Deliberations below ID 20000 are the `MapEffect.atb` rows with the same ID (their texts and
   rows agree, e.g. 1005 「全ての敵に毎秒耐久回復10」 = all enemies, regen +10); 2xxxx (castle girl
   base stats) and 3xxxx (tile limits) have no rows and show their text only.
+- Stages are grouped by `Event.atb` (title, dates, quest-ID range; past events too). Hades
+  (ハデスの死闘場) is the 深淵 series. Past events' stages are rebuilt from the maps still in the
+  client cache: quest ID → map = (id ÷ 1000)·100 + id mod 100, which holds for every live quest
+  of every event type except the three Hell arenas (and only for IDs with a 0 hundreds digit,
+  like all live ones). Past Bushin keep their deliberation sets (set ID = quest ID on every live
+  Bushin). Rebuilt stages have no names, multipliers or Ki (those were only in `Quest.atb`).
+- The export never drops a stage: one missing from a later export keeps its file, marked removed.
+- `tools/export_stage_images.py` writes each map's background (`MapBg01.atx`) to
+  `public/stage-map/<map>.webp`, incrementally, never deleting.
 - Which enemies a row hits comes from the exe's target predicates (`EnemyTypeID`/`EnemyTypeID2`
   groups, flying flag; `data/target_codes.json`). % changes that don't stack keep only the
   strongest; the final number assumes % changes multiply the stage-scaled stat, then flat values add.

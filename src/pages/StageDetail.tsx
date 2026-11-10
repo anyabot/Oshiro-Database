@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { LoadState, PageHeader, Panel, SegmentedButtons } from "@altterisk/game-hub";
+import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { tagEN } from "../labels";
 import {
-  GROUPS, STAT, applyStat, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
+  GROUPS, STAT, applyStat, mapImage, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
@@ -60,11 +60,18 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   }, [stage, data]);
 
   const group = GROUPS.find((g) => g.k === stage.group);
+  const { data: events } = useEvents();
+  const ev = stage.event != null ? events?.find((e) => e.id === stage.event) : undefined;
   return (
     <div className="page stage-page">
-      <p className="muted small"><Link to={`/stages?group=${stage.group}`}>Stages</Link> / {group?.label}</p>
+      <p className="muted small"><Link to={`/stages?group=${stage.group}`}>Stages</Link> / {group?.label}{ev ? ` / ${ev.title}` : ""}</p>
       <PageHeader title={stage.name}
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", `Quest #${stage.id}`, `map ${stage.map}`].filter(Boolean).join(" · ")} />
+      <FallbackImage srcs={[mapImage(stage.map)]} alt={`${stage.name} map`} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
+      {stage.recovered && (
+        <p className="muted small">This stage is from a past event and no longer in the game's quest list: it was rebuilt from the map still in the client cache, so its own name, stage multipliers and Ki aren't in the data. Enemy stats below are their base values.</p>
+      )}
+      {!stage.recovered && stage.live === false && <p className="muted small">Removed from the game's quest list; kept from an earlier export.</p>}
       {stage.description && <p className="game-text">{plainText(stage.description)}</p>}
       <div className="stage-facts">
         <span>Initial Ki {stage.ki}</span>

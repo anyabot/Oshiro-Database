@@ -3,12 +3,22 @@ import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { describeRow, sideOfTarget, type BuffFact, type EffectDefs } from "./effects";
 import type { RawRow } from "./types";
 
-export type StageGroup = "enma" | "hel" | "osiris" | "abyss" | "bushin" | "other";
+export type StageGroup = "enma" | "hel" | "osiris" | "hades" | "bushin" | "story" | "events" | "other";
 
 export interface StageEntry {
   id: number; name: string; group: StageGroup; tab: number; tabNo: number; index: number;
+  /** Event.atb row the quest ID falls in (index into events.json) */
+  event: number | null;
+  map: number;
   enemies: number; spawns: number; singi: boolean; veryHard: boolean; bushin?: string;
+  /** in the game's current Quest.atb */
+  live: boolean;
+  /** rebuilt from a cached map of a past event (no Quest.atb row: no names, multipliers or Ki) */
+  recovered?: boolean;
 }
+
+/** Event.atb: title, dates and the quest-ID range of an event. */
+export interface GameEvent { id: number; title: string; type: number; start: string; end: string; head: number; tail: number }
 
 export interface Spawn { t: number; e: number; r: number; lv?: number; g?: number; hid?: 1 }
 
@@ -24,6 +34,7 @@ export interface SingiOption {
 
 export interface StageDetail {
   id: number; name: string; group: StageGroup; tab: number; tabNo: number; type: number; map: number;
+  event?: number | null; live?: boolean; recovered?: boolean;
   description: string; battlefield: string; terrain: string;
   /** [ATK, HP, DEF] % (攻撃/耐久/防御補正); 0 = unchanged */
   rates: { normal: [number, number, number] | null; hard: [number, number, number] | null };
@@ -60,14 +71,21 @@ const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data
 export const useStages = () => useJson<StageEntry[]>(loader, "stages");
 export const useStage = (id: number | null) => useJson<StageDetail>(loader, id == null ? null : `stage/${id}`);
 export const useEnemies = () => useJson<EnemyData>(loader, "enemies");
+export const useEvents = () => useJson<GameEvent[]>(loader, "events");
+
+/** Map background (tools/export_stage_images.py). */
+export const mapImage = (map: number) => `${import.meta.env.BASE_URL}stage-map/${map}.webp`;
 
 export const GROUPS: { k: StageGroup; label: string; jp: string }[] = [
   { k: "enma", label: "Enma", jp: "閻魔" },
   { k: "hel", label: "Hel", jp: "ヘル" },
   { k: "osiris", label: "Osiris", jp: "オシリス" },
-  { k: "abyss", label: "Abyss", jp: "深淵" },
+  // ハデスの死闘場 (Event.atb): its stages are the 深淵 (Abyss) ones
+  { k: "hades", label: "Hades", jp: "ハデス・深淵" },
   { k: "bushin", label: "Bushin", jp: "武神" },
-  { k: "other", label: "Other stages", jp: "" },
+  { k: "events", label: "Events", jp: "イベント" },
+  { k: "story", label: "Main story", jp: "" },
+  { k: "other", label: "Other", jp: "" },
 ];
 
 /** Entry Wait is in frames; the battle runs at 30 per second (DAT_00c6d97c). */

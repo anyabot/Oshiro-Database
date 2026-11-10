@@ -24,7 +24,12 @@ from pathlib import Path
 from oshirore.cache import GameCache
 from oshirore.lazy import LazyArchive
 
-TAB_GROUP = {11: "enma", 12: "hel", 13: "osiris", 23: "abyss", 5: "bushin"}
+TAB_GROUP = {11: "enma", 12: "hel", 13: "osiris", 23: "hades", 5: "bushin"}
+# Event.atb Type -> site group (types with one event are named by it: 6 閻魔の闘技場, 7 ヘルの遊戯場,
+# 8 オシリスの審判場, 15 ハデスの死闘場 = the 深淵 stages, 4 = 武神降臨, 11 第2部「夢幻航海」, 13 天魔大乱, 9 戦術指南)
+EVENT_GROUP = {6: "enma", 7: "hel", 8: "osiris", 15: "hades", 4: "bushin", 11: "story", 13: "story",
+               1: "events", 2: "events", 3: "events", 10: "events", 12: "events", 14: "events", 16: "events",
+               17: "events", 18: "events", 9: "other"}
 
 
 def grouped(rows, key):
@@ -73,20 +78,26 @@ def main() -> None:
             transforms[t["EnemyID"]].append(nz(t))
     missiles = {r["MissileID"]: r for r in c.table("Missile.atb") if r["MissileID"]}
 
+    # Event.atb: every event the game still lists (past ones too) with its quest-ID range
+    events = []
+    for i, e in enumerate(c.table("Event.atb")):
+        if e["HeadBattleID"] and e["TailBattleID"]:
+            events.append({"id": i, "title": e["Title"], "type": e["Type"], "start": e["StartDate"], "end": e["EndDate"],
+                           "head": e["HeadBattleID"], "tail": e["TailBattleID"]})
+
+    def event_of(qid):
+        hit = [e for e in events if e["head"] <= qid <= e["tail"]]
+        return min(hit, key=lambda e: e["tail"] - e["head"]) if hit else None
+
+    def group_of(ev, tab, qid):
+        if ev and ev["type"] in EVENT_GROUP:
+            return EVENT_GROUP[ev["type"]]
+        return TAB_GROUP.get(tab) or ("bushin" if qid in bushin else "other")
+
     used_enemies: set[int] = set()
     stage_list = []
-    for q in quests:
-        qid, map_no = q["QuestID"], q["MapNo"]
-        if not qid or not map_no:
-            continue
-        name = qtext.get(qid, {}).get("QuestName") or f"Quest {qid}"
-        try:
-            arc = LazyArchive(c.read("Map%05d.aar" % map_no))
-        except FileNotFoundError:
-            continue
-        entry_name = "Entry%02d.atb" % (q["EntryNo"] or 1)
-        if entry_name not in arc.offsets:
-            continue
+
+    def spawn_list(arc, entry_name):
         # spawn script: Type 2 = spawn EnemyID on a route; Type 0 = wait (frames, 30 per second)
         spawns, t, counts = [], 0, collections.Counter()
         for e in arc.table(entry_name):
@@ -102,30 +113,60 @@ def main() -> None:
                 if e["Secret"]:
                     s["hid"] = 1
                 spawns.append(s)
-        group = TAB_GROUP.get(q["TabType"]) or ("bushin" if qid in bushin else "other")
+        return spawns, counts
+
+    def singi_of(set_id, qid):
+        if not set_id or set_id not in sets:
+            return None
+        opts = []
+        for r in sets[set_id]:
+            d = details.get(r["SingiSetDetailID"], {})
+            did = d.get("ID", r["SingiSetDetailID"])
+            o = {"id": did, "name": d.get("Name", ""), "text": d.get("Explanation", ""),
+                 "pts": r["Singi"], "grp": r["SingiGroup"]}
+            if did < 20000 and did in map_effect:
+                o["rows"] = [nz(x) for x in map_effect[did]]
+            opts.append(o)
+        singi = {"set": set_id, "options": opts}
+        if qid in bushin:
+            singi["gold"], singi["silver"] = bushin[qid]["gold"], bushin[qid]["silver"]
+        return singi
+
+    def write_stage(detail, index):
+        (out / "stage" / f"{detail['id']}.json").write_text(json.dumps(detail, ensure_ascii=False), encoding="utf-8")
+        stage_list.append({
+            "id": detail["id"], "name": detail["name"], "group": detail["group"], "event": detail.get("event"),
+            "tab": detail["tab"], "tabNo": detail["tabNo"], "index": index, "map": detail["map"],
+            "enemies": len(detail["counts"]), "spawns": len(detail["spawns"]), "singi": bool(detail["singi"]),
+            "veryHard": detail["veryHard"], "live": detail["live"],
+            **({"recovered": True} if detail.get("recovered") else {}),
+            **({"bushin": detail["bushin"]} if detail.get("bushin") else {}),
+        })
+
+    live_ids = set()
+    for q in quests:
+        qid, map_no = q["QuestID"], q["MapNo"]
+        if not qid or not map_no:
+            continue
+        name = qtext.get(qid, {}).get("QuestName") or f"Quest {qid}"
+        try:
+            arc = LazyArchive(c.read("Map%05d.aar" % map_no))
+        except FileNotFoundError:
+            continue
+        entry_name = "Entry%02d.atb" % (q["EntryNo"] or 1)
+        if entry_name not in arc.offsets:
+            continue
+        spawns, counts = spawn_list(arc, entry_name)
+        ev = event_of(qid)
 
         def rates(prefix):
             a, h, d = q[f"{prefix}AttackRate"], q[f"{prefix}HealthRate"], q[f"{prefix}DefenseRate"]
             return [a, h, d] if (a or h or d) else None
 
-        singi = None
-        if q["SingiID"] and q["SingiID"] in sets:
-            opts = []
-            for r in sets[q["SingiID"]]:
-                d = details.get(r["SingiSetDetailID"], {})
-                did = d.get("ID", r["SingiSetDetailID"])
-                o = {"id": did, "name": d.get("Name", ""), "text": d.get("Explanation", ""),
-                     "pts": r["Singi"], "grp": r["SingiGroup"]}
-                if did < 20000 and did in map_effect:
-                    o["rows"] = [nz(x) for x in map_effect[did]]
-                opts.append(o)
-            singi = {"set": q["SingiID"], "options": opts}
-            if qid in bushin:
-                singi["gold"], singi["silver"] = bushin[qid]["gold"], bushin[qid]["silver"]
-
-        detail = {
-            "id": qid, "name": name, "group": group, "tab": q["TabType"], "tabNo": q["TabNumber"],
-            "type": q["Type"], "map": map_no,
+        live_ids.add(qid)
+        write_stage({
+            "id": qid, "name": name, "group": group_of(ev, q["TabType"], qid), "event": ev["id"] if ev else None,
+            "tab": q["TabType"], "tabNo": q["TabNumber"], "type": q["Type"], "map": map_no, "live": True,
             "description": qtext.get(qid, {}).get("QuestDescription") or "",
             "battlefield": qtext.get(qid, {}).get("BattleFieldDescription") or "",
             "terrain": qtext.get(qid, {}).get("TerrainDescription") or "",
@@ -133,18 +174,55 @@ def main() -> None:
             "veryHard": bool(q["VeryHardEnabled"]),
             "ki": q["InitialKi"], "coreLife": q["CoreLife"],
             "mapEffect": [nz(x) for x in map_effect.get(q["MapEffect"], [])] if q["MapEffect"] else [],
-            "spawns": spawns,
-            "counts": dict(counts),
-            "singi": singi,
+            "spawns": spawns, "counts": dict(counts),
+            "singi": singi_of(q["SingiID"], qid),
             **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
-        }
-        (out / "stage" / f"{qid}.json").write_text(json.dumps(detail, ensure_ascii=False), encoding="utf-8")
-        stage_list.append({
-            "id": qid, "name": name, "group": group, "tab": q["TabType"], "tabNo": q["TabNumber"],
-            "index": q["Index"], "enemies": len(counts), "spawns": len(spawns), "singi": bool(singi),
-            "veryHard": bool(q["VeryHardEnabled"]),
-            **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
-        })
+        }, q["Index"])
+
+    # Stages of past events: their Quest.atb rows are gone, but Event.atb still lists the quest range
+    # and the client cache still holds the maps. Quest ID -> map = (id // 1000) * 100 + id % 100 for
+    # every live quest of every event type except the three Hell arenas (which keep their own maps),
+    # so it is used for those event types only. Live Bushin quests use deliberation set = quest ID.
+    recovered = 0
+    used_maps = {x["map"] for x in stage_list}
+    for ev in events:
+        if ev["type"] in (6, 7, 8):
+            continue
+        ids = [i for i in range(ev["head"], ev["tail"] + 1) if i not in live_ids]
+        if ev["type"] == 4:
+            ids = [i for i in ids if i in bushin]
+        k = 0
+        for qid in ids:
+            # the rule was checked on live quest IDs, which all have 0 as their hundreds digit
+            if (qid // 100) % 10:
+                continue
+            map_no = (qid // 1000) * 100 + qid % 100
+            if map_no in used_maps or not c.has("Map%05d.aar" % map_no) or event_of(qid) is not ev:
+                continue
+            used_maps.add(map_no)
+            arc = LazyArchive(c.read("Map%05d.aar" % map_no))
+            if "Entry01.atb" not in arc.offsets:
+                continue
+            spawns, counts = spawn_list(arc, "Entry01.atb")
+            if not spawns:
+                continue
+            k += 1
+            if qid in bushin:
+                same = sorted(i for i in bushin if bushin[i]["name"] == bushin[qid]["name"])
+                label = f"{same.index(qid) + 1}/{len(same)}"
+            else:
+                label = f"#{k}"
+            live_ids.add(qid)
+            recovered += 1
+            write_stage({
+                "id": qid, "name": f"{ev['title']} {label}", "group": group_of(ev, 0, qid), "event": ev["id"],
+                "tab": 0, "tabNo": 0, "type": 0, "map": map_no, "live": False, "recovered": True,
+                "description": "", "battlefield": "", "terrain": "",
+                "rates": {"normal": None, "hard": None}, "veryHard": False, "ki": 0, "coreLife": 0,
+                "mapEffect": [], "spawns": spawns, "counts": dict(counts),
+                "singi": singi_of(qid, qid) if qid in bushin else None,
+                **({"bushin": bushin[qid]["name"]} if qid in bushin else {}),
+            }, k)
 
     def missile_info(mid):
         m = missiles.get(mid)
@@ -177,7 +255,23 @@ def main() -> None:
             "transforms": transforms.get(eid, []),
         }
 
+    # never drop a stage: one exported before and missing now (removed from the game) keeps its
+    # entry and its stage file, marked not live; its enemies stay in enemies.json too
+    prev_path = out / "stages.json"
+    kept = 0
+    if prev_path.is_file():
+        seen = {x["id"] for x in stage_list}
+        for old in json.loads(prev_path.read_text(encoding="utf-8")):
+            if old["id"] not in seen and (out / "stage" / f"{old['id']}.json").is_file():
+                old["live"] = False
+                stage_list.append(old)
+                kept += 1
+    prev_enemies = out / "enemies.json"
+    if prev_enemies.is_file():
+        for k, v in json.loads(prev_enemies.read_text(encoding="utf-8")).get("enemies", {}).items():
+            enemies.setdefault(int(k), v)
     (out / "stages.json").write_text(json.dumps(stage_list, ensure_ascii=False), encoding="utf-8")
+    (out / "events.json").write_text(json.dumps(events, ensure_ascii=False), encoding="utf-8")
     # target codes that test enemies (data/target_codes.json, read out of the exe): EnemyTypeID/EnemyTypeID2
     # groups (every group must match) and the flying flag; 4 / 6 (敵) are every enemy
     codes = json.loads((Path(__file__).resolve().parent / "data" / "target_codes.json").read_text(encoding="utf-8"))["codes"]
@@ -188,7 +282,7 @@ def main() -> None:
     (out / "enemies.json").write_text(json.dumps({"types": enemy_types, "targets": targets, "enemies": enemies},
                                                  ensure_ascii=False), encoding="utf-8")
     groups = collections.Counter(s["group"] for s in stage_list)
-    print(f"{len(stage_list)} stages {dict(groups)}, {len(enemies)} enemies")
+    print(f"{len(stage_list)} stages {dict(groups)} ({recovered} recovered from the cache, {kept} kept from earlier exports), {len(enemies)} enemies")
 
 
 if __name__ == "__main__":

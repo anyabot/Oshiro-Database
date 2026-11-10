@@ -192,3 +192,16 @@
 .enemy-detail__body { display: grid; gap: 8px; }
 .dot-badge { color: #ff9e64; border-color: #ff9e64; margin-top: 2px; }
 .timeline { margin-top: 8px; }
+.event-sec { border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); margin: 10px 0; background: var(--hub-surface); }
+.event-sec__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; width: 100%; padding: 8px 10px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.event-sec__thumb { width: 96px; height: 54px; object-fit: cover; border-radius: 4px; flex: none; }
+.event-sec__thumb--none, .stage-card__img--none { display: inline-block; background: var(--hub-surface-raised); }
+.event-sec__title { font-weight: 700; flex: 1 1 200px; }
+.event-sec__meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 0 10px 10px; }
+.stage-card { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); overflow: hidden; color: inherit; text-decoration: none; background: var(--hub-bg); }
+.stage-card:hover { border-color: var(--hub-accent-line); }
+.stage-card__img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.stage-card__name { font-weight: 600; padding: 0 8px; font-size: 13px; }
+.stage-card__meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 0 8px 8px; }
+.stage-hero { width: 100%; max-width: 720px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--hub-radius-sm); display: block; margin: 8px 0; }
