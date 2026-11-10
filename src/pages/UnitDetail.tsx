@@ -11,7 +11,7 @@ import { DEFAULT_META } from "../meta";
 import { unitName } from "../labels";
 import { usePageMeta } from "../usePageMeta";
 import { combinedLines, type Fact } from "../combine";
-import { describeRow, rowBases, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
+import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind } from "../effects";
 import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
 
 const renderLink = routerLinks(Link, "to");
@@ -118,11 +118,7 @@ function AbilityBlock({ label, a, kind = "ability", defs, from }: {
 function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; from?: string }) {
   const { data: index } = useUnits();
   // EnchantEffect.TargetType 2 = 自分のみ: the effect sets' "target" is the user herself
-  const setCtx: RowContext = {
-    selfOnly: !!s.effect && defs?.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ",
-    // FieldEffectType 3: the stratagem's effects land on every unit in its area
-    fieldArea: Number(s.field?.field.FieldEffectType) === 3,
-  };
+  const setCtx: RowContext = defs ? stratagemContext(defs, s) : {};
   if (s.missing) {
     return <div className="ability"><div className="ability__head"><span className="ability__label">Stratagem</span><span className="ability__name">(not in Gimmick.atb)</span><span className="ability__id">#{s.id}</span></div></div>;
   }

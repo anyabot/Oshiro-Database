@@ -4,7 +4,7 @@
 // by pattern with examples.   node scripts/humanize.mjs <out.md>   (npm run humanize)
 import fs from "node:fs";
 import path from "node:path";
-import { describeRow, rowBases, type RowKind } from "../src/effects";
+import { describeRow, rowBases, stratagemContext, type RowKind } from "../src/effects";
 import { enemyAbilityRows, withTargets } from "../src/stages";
 
 const root = path.resolve(".");
@@ -21,7 +21,7 @@ const STATES = new Set(Object.keys(defs.labels).filter((k) => k.startsWith("stat
   .map((k) => defs.labels[`status:${k.slice(11)}`]?.jp).filter(Boolean));
 
 const CHECKS: [string, RegExp | ((s: string) => boolean)][] = [
-  ["raw code", /\b(stat|target|effect|modifier|unit effect( type)?|ability type|value type|flag|bit|area|trigger|crowd control|motion|expr)\s#?\d/i],
+  ["raw code", /\b(stat|target( type)?|set(?= #)|effect|modifier|unit effect( type)?|ability type|value type|flag|bit|area|trigger|crowd control|motion|expr)\s#?\d/i],
   ["condition op", /\bop\d/],
   ["undefined / NaN", /undefined|NaN|null|\[object/],
   ["broken punctuation", /, ,|: :|,\s*$|:\s*$|\(\s*\)|\s{2,}|,\)|\(,/],
@@ -31,6 +31,7 @@ const CHECKS: [string, RegExp | ((s: string) => boolean)][] = [
   // Japanese outside the parenthesized / quoted / bracketed originals the sentences keep on purpose
   ["untranslated Japanese", (s) => /[぀-ヿ一-鿿]/.test(s.replace(/\([^)]*\)|「[^」]*」|\[[^\]]*\]/g, ""))],
   ["clause with no amount or verb", (s) => {
+    if (/^Can be used on/.test(s)) return false;
     // the effect part of each sentence piece: after its receiver ("Castle girls in range: …")
     return s.split(/ · |; /).some((piece) => {
       const eff = piece.includes(": ") ? piece.slice(piece.indexOf(": ") + 2) : piece;
@@ -82,7 +83,7 @@ for (const e of units) {
     for (const s of f.stratagems ?? []) {
       if (!s.effect || doneAb.has(`g${s.id}`)) continue;
       doneAb.add(`g${s.id}`);
-      const ctx = { selfOnly: defs.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ", fieldArea: Number(s.field?.field.FieldEffectType) === 3 };
+      const ctx = stratagemContext(defs, s);
       if (s.field) rows(`${at} ${s.name}`, [{ AbilityType: 21 }], "ability", { 0: s.field });
       rows(`${at} ${s.name}`, [s.effect.row], "enchant", undefined, ctx);
       rows(`${at} ${s.name}`, s.effect.AllyEffectSetID, "enchant_set", undefined, ctx);

@@ -366,6 +366,49 @@ const CLASS_ABILITY: Record<number, (v: number, d: number) => string> = {
 // ability 301-313 order (111 = 軍船: "軍船と大砲城娘が対象"); 201-211 = ranged weapons in ability 400-410
 // order (202 = 石弓, 204 = 大砲); 401-414 = regions (set 601 skips 412/413 = "海外・その他以外");
 // 1100-1106 = ★1-★7 (set 504 = 1100-1103 = "元が★4以下"); 2, 31 and 8xx are the ability codes.
+// TargetTypes with no ability-registry twin, named by their stratagems' 「(…が対象)」 texts (strict
+// majority): 51 殿/城娘/伏兵/蔵 (11 of 12), 52 城娘/伏兵/蔵 (3 of 3), 53 殿/城娘/伏兵 (8 of 13)
+const ENCHANT_TEXT_TARGETS: Record<number, string> = {
+  51: "the lord, castle girls, ambush units or storehouses (殿/城娘/伏兵/蔵)",
+  52: "castle girls, ambush units or storehouses (城娘/伏兵/蔵)",
+  53: "the lord, castle girls or ambush units (殿/城娘/伏兵)",
+};
+
+/** Who a stratagem's TargetType / TargetSet admits, in English (undefined: anyone, or not named). */
+export function enchantTargetName(defs: EffectDefs, row: RawRow, field: boolean): string | undefined {
+  const en = (code: number) => {
+    const jp = targetJp(defs, enchantTarget(code));
+    return jp ? (JP_EN[jp] ?? tagEN(jp) ?? jp) : undefined;
+  };
+  const ts = Number(row.TargetSet) || 0;
+  if (ts) {
+    const names = (defs.target_sets?.[ts] ?? []).map((t) => (t === 2 ? "self" : en(t) ?? `target type ${t}`));
+    // "A, B or C": a unit counts if it is any of them
+    return names.length ? names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names[names.length - 1]}` : names[0] : undefined;
+  }
+  const tt = Number(row.TargetType) || 0;
+  // 6: 「対象の特技が発動 … (最大化城娘は対象外)」 4 of 4 (the ability code 6 is 敵: not this registry)
+  if (tt === 6) return "castle girls not at max giantification (最大化城娘は対象外)";
+  // inside a field, 1 and 54 are 「範囲内の城娘」 (41 of 44, 2 of 2); outside one, 1 has no text: anyone
+  if (field && (tt === 1 || tt === 54)) return "castle girls";
+  if (tt === 1 || tt === 2 || tt === 3) return undefined;
+  return ENCHANT_TEXT_TARGETS[tt] ?? en(tt);
+}
+
+/** Context for a stratagem's rows: whether "the target" is its user and whether its field covers an area. */
+export function stratagemContext(defs: EffectDefs, s: { effect?: { row: RawRow }; field?: { field: RawRow } }): RowContext {
+  const row = s.effect?.row;
+  // FieldEffectType 3: the stratagem's effects land on every unit in its area that its TargetType admits
+  const fieldArea = Number(s.field?.field.FieldEffectType) === 3;
+  const who = row && fieldArea ? enchantTargetName(defs, row, true) : undefined;
+  return {
+    // TargetType 2 = 自分のみ, unless a TargetSet widens it (set 1 = [2, 100]: 「自身と近接城娘が対象」)
+    selfOnly: !!row && defs.labels[`etarget:${row.TargetType}`]?.jp === "自分のみ" && !row.TargetSet,
+    fieldArea,
+    areaWho: who ? `${cap(who)} in the area` : undefined,
+  };
+}
+
 function enchantTarget(t: number): number {
   if (t === 100) return 12;
   if (t === 200) return 13;
@@ -415,6 +458,8 @@ export interface RowContext {
   enemyOwner?: boolean;
   /** a stratagem whose field (FieldEffectType 3) applies its EnchantEffect to every unit in an area */
   fieldArea?: boolean;
+  /** who in that area gets it ("Cannon castle girls in the area"), from the stratagem's TargetType */
+  areaWho?: string;
 }
 
 // Side-relative target codes as enemy abilities use them, named by their own texts (strict majority):
@@ -957,8 +1002,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const dur = secs ? `, for ${fmt(secs)}s` : "";
     // TargetType 2: the stratagem only targets its user (its texts say 自分のみ)
     const tt = num("TargetType");
-    const ally = ctx.fieldArea ? "Units in the area"
-      : defs.labels[`etarget:${tt}`]?.jp === "自分のみ" ? (word(`etarget:${tt}`, ""), "Self") : "Target";
+    const ally = ctx.fieldArea ? ctx.areaWho ?? "Units in the area"
+      : defs.labels[`etarget:${tt}`]?.jp === "自分のみ" && !num("TargetSet") ? (word(`etarget:${tt}`, ""), "Self") : "Target";
     for (const i of [1, 2, 3]) {
       const code = num(`AllyModifierType${i}`), v = num(`AllyEffectValue${i}`);
       if (code) { const m = modifier(code, v); take(ally, "ally", dur); text.push(`${ally}: ${m}${dur}`); }
@@ -977,12 +1022,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (sa) text.push(`${ally}: uses special attack #${sa} (特殊攻撃ID)`);
     const ohd = num("OnHitEffectDuration");
     if (ohd) text.push(`on-hit effects last ${fmt(ohd / 1000)}s (着弾効果時間)`);
-    const ts = num("TargetSet");
-    if (ts) {
-      const codes = defs.target_sets?.[ts] ?? [];
-      const names = codes.map((t) => word(`target:${enchantTarget(t)}`, `target ${t}`));
-      text.push(`Can be used on (発動対象): ${names.length ? names.join(", ") : `set #${ts}`}`);
-    }
+    // who it can be used on (TargetSet members, else the TargetType: 「(近接城娘が対象)」); a field's
+    // receivers already say it ("Cannon castle girls in the area")
+    num("TargetSet");
+    const usable = ctx.fieldArea ? undefined : enchantTargetName(defs, r, false);
+    if (usable) text.push(`Can be used on (発動対象): ${usable}`);
     // named by the game's own field: the stratagem can't be used while a special attack is running
     if (num("SpecialAttackingInvalidActivate")) text.push("Can't be used during a special attack");
     // the effect-set rows listed below this one
@@ -1008,12 +1052,23 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (area) word(`sarea:${sa}`, "");
     const t = defs.labels[`starget:${st}`] ? word(`starget:${st}`, "") : "";
     let subject = "";
-    if (area === "対象" && (!t || t === "対象")) subject = ctx.fieldArea ? "Units in the area" : "Target";
+    // the receiver code, by the ability-target registry the sets share (exe); code 2 = the target itself
+    // code 1 alone is the lord, as in abilities: 「殿と全ての城娘の回復が150上昇」 (3/1 + 3/11 rows)
+    const recv = st !== 2 && st !== 1 ? targetJp(defs, st) : undefined;
+    const recvEn = st === 1 ? "the lord (殿)" : recv ? (JP_EN[recv] ?? tagEN(recv) ?? recv) : undefined;
+    // generic group words read lower-case after "all"; proper names (Hokkaido, New Year, weapons) keep theirs
+    const lower = (x: string) => (/^(Castle|Melee|Ranged|Ambush|Allies|Enemies|Enemy|Units|Flying)/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x);
+    // EffectAreaType 3 reaches every such unit on the map: its texts say 全ての / 全城娘 / 全敵, or name
+    // the owner's ambush units wherever they stand (sarea:3's mined 「対象」 only echoes 「対象の…」)
+    if (sa === 3 && recvEn) subject = /^(Own |the lord)/.test(recvEn) ? cap(recvEn) : `all ${lower(recvEn)}`;
+    // area 対象: the target itself, whatever the code. Its codes there are not receivers: they tell the
+    // rows of one decaying ladder apart (九鬼の大鉄甲 「防御が1000上昇（5秒毎に200低下)」 = DEF +200 for
+    // 5/10/15/20/25 s under codes 2/12/402/403/303; 久留米城 2/13/402/403/806 = 4/8/12/16/20 s)
+    else if (area === "対象") subject = ctx.fieldArea ? ctx.areaWho ?? "Units in the area" : "Target";
     else if (area === "対象の射程内") {
       // set targets share the ability-target registry (exe): 15 城娘(自身を除く), 33 伏兵, 867 [夏]城娘,
       // 32 own ambush units. Their mined 「対象」 label only echoes the stratagem's own target word.
-      const jp = st !== 2 ? targetJp(defs, st) : undefined;
-      const who = jp ? (JP_EN[jp] ?? tagEN(jp) ?? jp) : t && t !== "対象" ? t : "units";
+      const who = recvEn ?? (t && t !== "対象" ? t : "units");
       subject = `${who} in ${ctx.selfOnly ? "range" : "the target's range"}`;
     }
     else if (t) subject = t;

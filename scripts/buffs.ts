@@ -4,7 +4,7 @@
 // Writes public/data/buffs.json, read by src/pages/Buffs.tsx.
 import fs from "node:fs";
 import path from "node:path";
-import { describeRow, rowBases, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
+import { describeRow, rowBases, stratagemContext, type RowContext, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
 import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
 import type { Ability, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
@@ -56,12 +56,12 @@ function statName(key: string): string {
 }
 
 function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, kind: RowKind, name: string | undefined,
-  side?: "ally" | "enemy", links?: Ability["field_links"], selfOnly = false, fieldArea = false) {
+  side?: "ally" | "enemy", links?: Ability["field_links"], ctx: RowContext = {}) {
   if (!rowsIn) return;
   const bases = rowBases(rowsIn);
   const all: Fact[] = [];
   rowsIn.forEach((r, i) => {
-    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly, fieldArea });
+    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
     for (const f of s.facts as BuffFact[]) all.push({ ...f, text: s.text[f.line] ?? "" });
   });
   // a narrower group that also gets the group row (「[夏]は加算値1.5倍」): ranked with its total too
@@ -102,11 +102,10 @@ for (const entry of index) {
     for (const s of f.stratagems ?? []) {
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
-      const selfOnly = defs.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ";
-      const fieldArea = Number(s.field?.field.FieldEffectType) === 3;
-      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, selfOnly, fieldArea);
-      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, selfOnly, fieldArea);
-      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, selfOnly, fieldArea);
+      const ctx = stratagemContext(defs, s);
+      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, ctx);
+      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, ctx);
+      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, ctx);
     }
     // ambush units (伏兵) a stratagem places: their own abilities buff and debuff too
     for (const s of f.stratagems ?? []) {
