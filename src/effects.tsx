@@ -193,6 +193,11 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
   return `${table} ${v}`;
 }
 
+// UnitEffect types that mirror an AbilityType trigger (see unitEffect in describeRow)
+const UNIT_EFFECT_TRIGGER: Record<number, string> = {
+  2: "on hit", 11: "each attack it makes", 12: "each time it is attacked", 17: "while blocked (足止め時)", 19: "every second",
+};
+
 // UnitEffect.UnitEffectType -> the table its ActualEffectID is always found in
 // Type 8 ids are OnGiveDamageEffect rows: their texts give the OGD row's amount and direction
 // (5001 -> OGD 11 type 1, v 50 = 与ダメージ1.5倍; 5002 -> OGD 13 type 2, v 60 = 与ダメージ60%低下).
@@ -336,7 +341,8 @@ export interface RowContext {
 // Side-relative target codes as enemy abilities use them, named by their own texts (strict majority):
 // 3 = 敵軍ユニット (the enemy army, the owner's side: 117 of 144 texts), 4 = 殿側ユニット (the player's
 // side: 45 of 85). Code 3 never appears on a castle girl; the other codes keep their usual words.
-const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side (殿側ユニット)" };
+// 14 = 城娘 (28 of the 34 enemy abilities that use it say 城娘)
+const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side (殿側ユニット)", 14: "castle girls (城娘)" };
 
 export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow, ctx: RowContext = {}): Sentence {
   const used = new Set<string>();
@@ -510,9 +516,22 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const [type, actual] = ue;
     if (type === 1) return modifier(actual, v);
     if (type === 22 && defs.attack_bonus[actual]) return attackBonus(defs.attack_bonus[actual], v);
-    // type 19: its one row (enemy ability 3588) points at modifier 52 (Range, flat) and its text says
-    // 「自身の射程が時間経過で徐々に減少」: worded as that modifier, the type kept visible
-    if (type === 19 && defs.smt[actual]) return `${modifier(actual, v)} (unit effect type 19)`;
+    // Types 2, 11, 12, 17 and 19 mirror the AbilityType of the same number, and ActualEffectID is a
+    // StatusModifierType code; every row's text agrees with that reading:
+    //   2  攻撃する度に対象の…低下: 104 DEF −, 54 Range −, 3 ATK −% on the unit it hits (AbilityType 2 攻撃した敵)
+    //   11 攻撃する度に/攻撃毎に自身の…: 41 Targets +, 71 attack gap −%, 32 attack speed +, 1 ATK +%
+    //   12 攻撃を受ける度に…上昇: 1 ATK +%, 101 DEF +%, 305 move +, 52 range +, 102 DEF +
+    //   17 足止め時のみ…低下 / 足止め中は0: 3 ATK −%, 103 DEF −%, 204 regen −
+    //   19 時間経過で徐々に (the 1 s timer of AbilityType 19): 52 range
+    const smtTrigger = UNIT_EFFECT_TRIGGER[type];
+    if (smtTrigger && defs.smt[actual]) {
+      const m = modifier(actual, v);
+      return type === 2 ? `on the unit it hits: ${m}` : `${smtTrigger}: ${m}`;
+    }
+    // type 5 mirrors AbilityType 5 (Ki): 4 = natural Ki gain −% (「気の自然回復量が50%低下」 with 50,
+    // 「…100%低下」 with 100), 5 = Ki taken on appearing (「登場時に気を20減らし」 with 20, returned on defeat)
+    if (type === 5 && actual === 4) return `natural Ki gain −${v}%`;
+    if (type === 5 && actual === 5) return `Ki −${v} when it appears (given back when it is defeated)`;
     const table = UNIT_EFFECT_TABLE[type];
     const row = table ? defs.effect_tables?.[table]?.[actual] : undefined;
     last = null;
