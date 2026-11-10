@@ -364,7 +364,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   // the last stat change modifier() worded; take() files it under the sentence about to be pushed
   let last: Omit<BuffFact, "who" | "side" | "line"> | null = null;
   // unit of the row's amount, for its LimitValue cap (same scale as EffectValue, FUN_00ae8700)
-  let limitUnit = "";
+  let limitFmt = (lim: number): string => `${lim}`;
   const take = (who: string, side: "ally" | "enemy", note = "") => {
     // a change can carry its own condition (attack bonus: "while own ATK ≥ 10000"); it leads the note
     const n = [last?.note, note.replace(/^, /, "")].filter(Boolean).join(", ");
@@ -456,7 +456,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const sign = dir === "+" ? "+" : dir === "-" ? "−" : "";
     // statuses that hold a percentage (防御を20%無視): their flat amounts print as % (statunit, mined)
     const pctStatus = vt === 1 && (defs.labels[`statunit:${status}`]?.unit === "%" || /%\s*(\(|$)/.test(defs.labels[`status:${status}`]?.jp ?? ""));
-    limitUnit = w?.unit === "秒" || w?.unit === "倍" ? "" : vt === 2 || vt === 4 || pctStatus ? "%" : "";
+    // a × row's cap is on the same scale as its value (上限30% with ×1.01 steps = up to ×1.3)
+    limitFmt = w?.unit === "倍" && w.form === "add" && dir !== "-" ? (lim) => `×${fmt(1 + lim / 100)}`
+      : w?.unit === "倍" && w.form === "mul" ? (lim) => `×${fmt(lim / 100)}`
+      : w?.unit === "秒" || w?.unit === "倍" ? (lim) => `${lim}`
+      : vt === 2 || vt === 4 || pctStatus ? (lim) => `${lim}%` : (lim) => `${lim}`;
     let amount: string;
     if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
@@ -625,7 +629,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const p = num("ProbabilityOfActivation");
     if (p) parts.push(`${p}% chance`);
     const lim = num("LimitValue");
-    if (lim) parts.push(`up to ${lim}${limitUnit}`);
+    if (lim) parts.push(`up to ${limitFmt(lim)}`);
     if (lim > 0 && (growing || (kind === "ability" && KIND_TYPES.has(Number(r.AbilityType)) && PER_COUNT.has(Number(r.AbilityTypeDetail))))) rowMax = lim;
     // Ability.atb bool columns, worded from their own header names (tools/data/column_names.json)
     if (num("GrowUpLimitOnly")) parts.push("only at max giantification (最大化)");

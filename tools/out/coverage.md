@@ -1,10 +1,10 @@
 # Description coverage
 
-Numbers in descriptions: 16805. Shown 78.8%, shown elsewhere on the page 1.8%, data-only 16.3%, absent 3.1%.
-Items with every number shown: 3136 of 5197 (60.3%).
+Numbers in descriptions: 16805. Shown 78.6%, shown elsewhere on the page 1.8%, data-only 16.5%, absent 3.1%.
+Items with every number shown: 3124 of 5197 (60.1%).
 
 - specialty: 1695/2372 fully covered
-- stratagem: 1077/2322 fully covered
+- stratagem: 1065/2322 fully covered
 - class: 12/18 fully covered
 - formation: 171/227 fully covered
 - possession: 126/127 fully covered
@@ -114,11 +114,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 
 40%､自身は70%上昇
   > Self: DEF ignore +75%, doesn't stack
-  > Self: damage ×1.11 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.12 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.12 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.13 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.13 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.11 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≥ 30%
   > All enemies: DEF −45%, doesn't stack
   > Self: ATK +105%, doesn't stack
   > Castle girls in range: ATK +60%, doesn't stack
@@ -265,7 +265,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: damage dealt +60%
   > Self: Targets +3, stacks
   > All melee castle girls: ATK +60%, doesn't stack
-  > Self: damage ×1.6
+  > Self: damage dealt ×1.6
 
 ## card 16091 · specialty specialty#64091 水鏡の浮城
 ```
@@ -330,11 +330,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
 - [ABSENT] 内の城娘の攻撃が35%､自
   > Self: DEF ignore +60%, doesn't stack
-  > Self: damage ×1.1 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 30%
   > Self: ATK +90%, doesn't stack
   > Castle girls in range: ATK +53%, doesn't stack
 
@@ -379,15 +379,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: ATK +63%, doesn't stack
   > Castle girls in range: damage dealt +63%
   > Enemies in range: independent damage 1.44× ATK (magic, ranged, vs specters, min damage, every 2s)
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 2000
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 1500
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 1000
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 750
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 500
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 400
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 250
-  > Castle girls in range: damage ×1.03 against enemies with Move speed ≤ 150
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 2000
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 1500
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 1000
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 750
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 500
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 400
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 250
+  > Castle girls in range: damage dealt ×1.03 against enemies with Move speed ≤ 150
 
 ## card 7734 · general general#7734 家康計略
 ```
@@ -487,15 +487,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 2倍、貫通しない2連続
 - [data-only] た敵の攻撃速度が3秒間7
 - [ABSENT] 攻撃速度が3秒間70%低下
-  > Self: damage ×1.07 against enemies with Move speed ≥ 150
-  > Self: damage ×1.08 against enemies with Move speed ≥ 250
-  > Self: damage ×1.08 against enemies with Move speed ≥ 400
-  > Self: damage ×1.08 against enemies with Move speed ≥ 500
-  > Self: damage ×1.09 against enemies with Move speed ≥ 750
-  > Self: damage ×1.09 against enemies with Move speed ≥ 1000
-  > Self: damage ×1.09 against enemies with Move speed ≥ 1500
-  > Self: damage ×1.09 against enemies with Move speed ≥ 2000
-  > Self: damage ×1.09 against enemies with Move speed ≥ 3000
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 250
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 400
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 500
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 750
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 1000
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 1500
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 2000
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 3000
   > All Castle Princess castle girls: Attack speed +50%, doesn't stack
   > All Castle Princess castle girls: Attack gap −50%, doesn't stack
   > All melee castle girls: Attack speed +50%, doesn't stack
@@ -914,7 +914,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 後10秒間攻撃が70%上昇
 - [ABSENT] 自身の被ダメージ80％軽減
   > Field effect #9060: damage ×0.1 ATK, re-applied every 0.5s
-  > Self: damage ×1.3
+  > Self: damage dealt ×1.3
 
 ## card 9262 · stratagem stratagem#99262 タマとったるどー！
 ```
@@ -1101,7 +1101,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 の1.2倍の値
   > Castle girls in range: ATK +120% of the giver's ATK
   > The castle girl named in the text: ATK −120% of the giver's ATK
-  > The castle girl named in the text: damage ×1.8
+  > The castle girl named in the text: damage dealt ×1.8
   > Self: HP +10000
 
 ## card 3150 · formation formation#3150 舞台祝祭典劇
@@ -1191,7 +1191,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 4s
   > Target: Attack gap set to 100, for 0.5s
   > Units in the target's range: attack properties (add): magic (ignores DEF), anti-yokai
-  > Target: damage ×1.5
+  > Target: damage dealt ×1.5
 
 ## card 580 · stratagem stratagem#9580 月弓の天衣
 ```
@@ -1212,7 +1212,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 4s
   > Target: Attack gap set to 100, for 0.5s
   > Units in the target's range: attack properties (add): magic (ignores DEF), anti-yokai
-  > Target: damage ×1.5
+  > Target: damage dealt ×1.5
 
 ## card 795 · stratagem stratagem#9795 カズィクル・ブラッド
 ```
@@ -1410,16 +1410,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +140%, doesn't stack
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.05 while own Attack speed ≥ 160
-  > Self: damage ×1.05 while own Attack speed ≥ 180
-  > Self: damage ×1.04 while own Attack speed ≥ 200
-  > Self: damage ×1.04 while own Attack speed ≥ 220
-  > Self: damage ×1.04 while own Attack speed ≥ 240
-  > Self: damage ×1.04 while own Attack speed ≥ 260
-  > Self: damage ×1.04 while own Attack speed ≥ 280
-  > Self: damage ×1.05 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 300
   > Self: ATK +20%, stacks, at giantification stage 1
   > Self: DEF +20%, stacks, at giantification stage 1
 
@@ -1462,7 +1462,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
 - [data-only] 搭乗」中は効果が2倍とな
   > Self: ATK +400, stacks, per ally in range, up to 2000
-  > Self: damage ×1.3 against enemies with Current HP ≥ 50%
+  > Self: damage dealt ×1.3 against enemies with Current HP ≥ 50%
   > Self: DEF ignore +50%, doesn't stack
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +400%, doesn't stack
@@ -1824,12 +1824,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack properties (add): direct-hit bonus
   > All Cannon castle girls: Splash damage rate ×1.2, stacks
   > All Bridal castle girls: ATK +50%, doesn't stack
-  > Self: damage ×1.07 against enemies with Current HP = 100%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.07 against enemies with Current HP = 100%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 30%
 
 ## card 3053 · stratagem stratagem#4053 不動の鷹匠
 ```
@@ -1892,15 +1892,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: damage dealt +72%
   > Enemies in range: independent damage 1.8× ATK (magic, ranged, vs specters, min damage, every 2s)
   > Self: Targets +2, stacks
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 2000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 1500
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 750
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 500
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 400
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 250
-  > Castle girls in range: damage ×1.06 against enemies with Move speed ≤ 150
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 2000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 1500
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 500
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Castle girls in range: damage dealt ×1.06 against enemies with Move speed ≤ 150
 
 ## card 3126 · stratagem stratagem#3126 綺麗さびの極意
 ```
@@ -1915,23 +1915,23 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 40s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
   > Self: Attack speed +80%, doesn't stack, for 35s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
   > Self: Attack speed +80%, doesn't stack, for 30s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
   > Self: Attack speed +80%, doesn't stack, for 25s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
   > Self: Attack speed +80%, doesn't stack, for 20s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3126 · stratagem stratagem#8420 綺麗さびの極意
 ```
@@ -1946,7 +1946,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 40s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3126 · stratagem stratagem#8421 綺麗さびの極意
 ```
@@ -1961,7 +1961,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 35s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3126 · stratagem stratagem#8422 綺麗さびの極意
 ```
@@ -1976,7 +1976,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 30s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3126 · stratagem stratagem#8423 綺麗さびの極意
 ```
@@ -1991,7 +1991,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 25s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3126 · stratagem stratagem#8424 綺麗さびの極意
 ```
@@ -2006,7 +2006,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +80%, doesn't stack, for 20s
   > Self: missile #4429
   > Target: evades attacks
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 3135 · specialty specialty#93135 泰平の夏舞台
 ```
@@ -2231,7 +2231,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +150%, doesn't stack, for 40s
   > Self: Targets set to 1, for 40s
   > Self: transforms, for 40s
-  > Target: damage ×1.2
+  > Target: damage dealt ×1.2
 
 ## card 510 · stratagem stratagem#510 ビルケバイネル
 ```
@@ -2744,13 +2744,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] ージが上昇(最大1.7倍)
 
 - [data-only, other item] 与えるダメージが1.3倍、射
-  > Self: damage ×1.09 while own Current HP ≥ 100%
-  > Self: damage ×1.09 while own Current HP ≥ 90%
-  > Self: damage ×1.08 while own Current HP ≥ 75%
-  > Self: damage ×1.08 while own Current HP ≥ 60%
-  > Self: damage ×1.08 while own Current HP ≥ 45%
-  > Self: damage ×1.08 while own Current HP ≥ 30%
-  > Self: damage ×1.08 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.09 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.09 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.08 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.08 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.08 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.08 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.08 while own Current HP ≥ 10%
   > Special attack, self: Direct-hit bonus +650%, doesn't stack
   > All melee castle girls: ATK +120, stacks
   > Enemies in range: damage taken +35%
@@ -2821,7 +2821,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 60秒間敵
 - [data-only] 行う
 水上以外に6倍ダメ
-  > Self: damage ×1.5
+  > Self: damage dealt ×1.5
   > Field effect #59: damage ×0.18 ATK, re-applied every 0.75s
   > Enemies in range: Ki per kill +1, doesn't stack
   > Self: Can't be targeted: on
@@ -2871,13 +2871,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Can target (発動対象): melee castle girls, tokens
   > Target: ATK +50%, doesn't stack
   > Target: Range ×1.5, doesn't stack
-  > Target: damage ×1.11
-  > Target: damage ×1.11 while own Current HP ≤ 90%
-  > Target: damage ×1.11 while own Current HP ≤ 75%
-  > Target: damage ×1.13 while own Current HP ≤ 60%
-  > Target: damage ×1.13 while own Current HP ≤ 45%
-  > Target: damage ×1.13 while own Current HP ≤ 30%
-  > Target: damage ×1.14 while own Current HP ≤ 15%
+  > Target: damage dealt ×1.11
+  > Target: damage dealt ×1.11 while own Current HP ≤ 90%
+  > Target: damage dealt ×1.11 while own Current HP ≤ 75%
+  > Target: damage dealt ×1.13 while own Current HP ≤ 60%
+  > Target: damage dealt ×1.13 while own Current HP ≤ 45%
+  > Target: damage dealt ×1.13 while own Current HP ≤ 30%
+  > Target: damage dealt ×1.14 while own Current HP ≤ 15%
 
 ## card 946 · special special#946 最秘曲・啄木
 ```
@@ -2956,8 +2956,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Direct-hit bonus +50%, stacks, for 40s
   > Self: Can't be targeted except by flying enemies: on, for 40s
   > Self: Splash damage rate +50%, doesn't stack, for 40s
-  > Self: missile #4242: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #1046: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4242: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #1046: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 40s
   > Target: Blast radius +50%, doesn't stack
   > Self: can move on all tiles, move speed 1500, walks
@@ -2978,8 +2978,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Direct-hit bonus +70%, stacks, for 40s
   > Self: Can't be targeted except by flying enemies: on, for 40s
   > Self: Splash damage rate +70%, doesn't stack, for 40s
-  > Self: missile #4242: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #1046: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4242: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #1046: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 40s
   > Target: Blast radius +70%, doesn't stack
   > Self: can move on all tiles, move speed 1500, walks
@@ -3101,11 +3101,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +100%, doesn't stack, for 20s
   > Self: Attack gap −70%, doesn't stack, for 20s
   > Enemies in range: Move speed −60%, doesn't stack, for 20s
-  > Target: damage ×1.19 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.2 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.2 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.19 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.19 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.19 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.2 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.2 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.19 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.19 against enemies with Current HP ≥ 30%
 
 ## card 3055 · specialty specialty#93055 黄金楽土
 ```
@@ -3220,7 +3220,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack
   > Self: attack properties (add): DEF ignore
   > Self: Splash damage rate ×2, stacks
-  > Self: damage ×1.2 against enemies with Current HP ≤ 70%
+  > Self: damage dealt ×1.2 against enemies with Current HP ≤ 70%
   > Self: battle motion set → #6098 (its attack animation sets the hit count)
   > Self: plays voice (ボイス再生) #19
 
@@ -3317,7 +3317,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 対象の現在耐久が80%減少
 - [data-only] で
 対象の攻撃が2.5倍(同
-  > Self: missile #4422: ATK +150%, stacks, for 999999.999s; Range +150, stacks, for 999999.999s; damage 0.8× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4422: ATK +150%, stacks, for 999999.999s; Range +150, stacks, for 999999.999s; damage 0.8× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
 
 ## card 3124 · stratagem stratagem#8418 騎士の鉄小片
 ```
@@ -3328,7 +3328,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 対象の現在耐久が80%減少
 - [data-only] で
 対象の攻撃が2.7倍(同
-  > Self: missile #4423: ATK +170%, stacks, for 999999.999s; Range +200, stacks, for 999999.999s; damage 0.8× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4423: ATK +170%, stacks, for 999999.999s; Range +200, stacks, for 999999.999s; damage 0.8× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
 
 ## card 3128 · specialty specialty#94128 七つ星の満喫ヴァカンス
 ```
@@ -3356,10 +3356,10 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Can't be targeted: on, for 50s
   > Self: ATK +100%, doesn't stack, for 50s
   > Self: Attack gap −70%, doesn't stack, for 50s
-  > Self: missile #4434: damage 0.08× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #4435: damage 0.08× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4434: damage 0.08× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4435: damage 0.08× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 50s
-  > Target: damage ×6
+  > Target: damage dealt ×6
 
 ## card 3133 · stratagem stratagem#8428 聖杯の奇跡
 ```
@@ -3512,8 +3512,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Max HP +150%, doesn't stack, for 30s
   > Self: Range ×1.5, doesn't stack, for 30s
   > Self: Direct-hit bonus +400%, doesn't stack, for 30s
-  > Target: unit effect type 2 #106 25, for 3s
-  > Target: unit effect type 2 #313 25, for 3s
+  > Target: on the unit it hits: DEF −25%, stacks, for 3s
+  > Target: on the unit it hits: Move speed −25%, stacks, for 3s
 
 ## card 7703 · stratagem stratagem#7703 武威照炎
 ```
@@ -3800,16 +3800,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] ジが低下
 (上限300%/下
   > Self: Range +100, stacks, for 30s
-  > Target: damage ×1.39 while own Current HP ≥ 100%
-  > Target: damage ×1.29 while own Current HP ≥ 90%
-  > Target: damage ×1.23 while own Current HP ≥ 80%
-  > Target: damage ×1.18 while own Current HP ≥ 70%
-  > Target: damage ×1.16 while own Current HP ≥ 60%
-  > Target: damage ×1 while own Current HP ≤ 50%
-  > Target: damage ×0.75 while own Current HP ≤ 40%
-  > Target: damage ×0.67 while own Current HP ≤ 30%
-  > Target: damage ×0.5 while own Current HP ≤ 20%
-  > Target: damage ×0.4 while own Current HP ≤ 10%
+  > Target: damage dealt ×1.39 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.29 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.23 while own Current HP ≥ 80%
+  > Target: damage dealt ×1.18 while own Current HP ≥ 70%
+  > Target: damage dealt ×1.16 while own Current HP ≥ 60%
+  > Target: damage dealt ×1 while own Current HP ≤ 50%
+  > Target: damage dealt ×0.75 while own Current HP ≤ 40%
+  > Target: damage dealt ×0.67 while own Current HP ≤ 30%
+  > Target: damage dealt ×0.5 while own Current HP ≤ 20%
+  > Target: damage dealt ×0.4 while own Current HP ≤ 10%
 
 ## card 208 · stratagem stratagem#11208 希望の傘連判
 ```
@@ -3955,8 +3955,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +60%, doesn't stack
   > All Okinawa castle girls: Range +80, stacks
   > Own tokens: Range +80, stacks
-  > All Okinawa castle girls: damage ×1.2
-  > Own tokens: damage ×1.2
+  > All Okinawa castle girls: damage dealt ×1.2
+  > Own tokens: damage dealt ×1.2
   > Self: battle motion set → #1452 (its attack animation sets the hit count)
   > On hit, the enemy it attacks: Move speed set to -2000, for 35ms
 
@@ -4766,12 +4766,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Missile #4085: hits 3 times, 0.15s apart
   > Castle girls in range: DEF ignore +30%, doesn't stack
   > Castle girls in range: damage dealt +30%, only at max giantification (最大化)
-  > Self: damage ×1.12 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.13 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.13 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 15%
 
 ## card 858 · specialty specialty#9858 無慈悲ノ離反双心
 ```
@@ -4842,7 +4842,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Own tokens: DEF ignore +20%, doesn't stack, per giantification
   > Own tokens: ATK +40%, doesn't stack
   > Own tokens: Range ×1.4, doesn't stack
-  > Castle girls in range: damage ×1.2
+  > Castle girls in range: damage dealt ×1.2
   > Enemies in range: damage taken +40%
 
 ## card 879 · formation formation#879 氷花の雪片
@@ -4865,7 +4865,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Special gauge gain on attack ×2, doesn't stack
   > Self: Range ×1.3, doesn't stack
   > Self: Stratagem cooldown −10s, stacks
-  > Self: damage 0× own max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
+  > Self: damage 0× the target's max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
 
 ## card 885 · specialty specialty#10885 極星の歌姫
 ```
@@ -4919,15 +4919,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] ージが上昇(最大1.5倍)
 
-  > Self: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 750
-  > Self: damage ×1.05 against enemies with Move speed ≤ 500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 400
-  > Self: damage ×1.05 against enemies with Move speed ≤ 250
-  > Self: damage ×1.06 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 150
   > Self: DEF ignore +45%, doesn't stack
   > Enemies in range: Range −35%, doesn't stack
   > Enemies in range: damage taken +35%
@@ -4951,7 +4951,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] と直撃ボーナスが30%､計
   > Self: damage dealt +50%
   > Self: Direct-hit bonus +50%, doesn't stack
-  > Self: damage ×1.3
+  > Self: damage dealt ×1.3
   > All Summer castle girls: Block +1, stacks
   > Self: Targets +99, stacks
   > Self: Missile #4148
@@ -5002,19 +5002,19 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] ジが上昇
 (最大2.4倍)｡
-  > Self: damage ×1.08
-  > Self: damage ×1.08 while own Current HP ≤ 90%
-  > Self: damage ×1.08 while own Current HP ≤ 75%
-  > Self: damage ×1.08 while own Current HP ≤ 60%
-  > Self: damage ×1.08 while own Current HP ≤ 45%
-  > Self: damage ×1.08 while own Current HP ≤ 30%
-  > Self: damage ×1.09 while own Current HP ≤ 15%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.08
+  > Self: damage dealt ×1.08 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.09 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 15%
   > Self: Stratagem cooldown −4s, stacks, per times this unit was knocked out (大破), up to 20
   > Self: Redeploy time −65%, doesn't stack
   > Self: Ki refund on retreat (% of deploy Ki) +45%, doesn't stack
@@ -5058,7 +5058,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] を与える
 攻撃を8連続
   > Self: Range ×1.5, doesn't stack
-  > Self: damage ×1.3
+  > Self: damage dealt ×1.3
   > Self: battle motion set → #6055 (its attack animation sets the hit count)
   > Self: DEF ignore +50%, doesn't stack
   > Self: HP drain (% of damage dealt) +50%, doesn't stack
@@ -5186,18 +5186,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Self: Range +100, stacks
   > On hit, the enemy it attacks: Move speed −70%, doesn't stack, for 3s
-  > Self: damage ×1.07 against enemies with Move speed ≤ 500
-  > Self: damage ×1.08 against enemies with Move speed ≤ 400
-  > Self: damage ×1.08 against enemies with Move speed ≤ 300
-  > Self: damage ×1.08 against enemies with Move speed ≤ 250
-  > Self: damage ×1.08 against enemies with Move speed ≤ 150
-  > Self: damage ×1.08 against enemies with Move speed ≤ 100
-  > Self: damage ×1.07 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 300
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 100
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 15%
   > Ranged castle girls in range: ATK +100, stacks
   > Test of Courage castle girls in range: ATK +100, stacks
 
@@ -5211,18 +5211,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Self: Range +100, stacks
   > On hit, the enemy it attacks: Move speed −70%, doesn't stack, for 3s
-  > Self: damage ×1.07 against enemies with Move speed ≤ 500
-  > Self: damage ×1.08 against enemies with Move speed ≤ 400
-  > Self: damage ×1.08 against enemies with Move speed ≤ 300
-  > Self: damage ×1.08 against enemies with Move speed ≤ 250
-  > Self: damage ×1.08 against enemies with Move speed ≤ 150
-  > Self: damage ×1.08 against enemies with Move speed ≤ 100
-  > Self: damage ×1.07 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 300
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 100
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 15%
   > Ranged castle girls in range: ATK +200, stacks
   > Test of Courage castle girls in range: ATK +200, stacks
 
@@ -5292,7 +5292,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 射
   > Self: Range +100, stacks
   > Self: ATK +100% of Max HP
-  > Self: damage ×2 while own Range ≥ 1000
+  > Self: damage dealt ×2 while own Range ≥ 1000
 
 ## card 3079 · specialty specialty#94079 毘沙門の化身
 ```
@@ -5418,12 +5418,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +60%, doesn't stack
   > Self: Targets +1, stacks
   > Self: Attack gap −50%, doesn't stack
-  > Self: damage ×1.04 against enemies with DEF ≤ 1000
-  > Self: damage ×1.04 against enemies with DEF ≤ 750
-  > Self: damage ×1.04 against enemies with DEF ≤ 500
-  > Self: damage ×1.04 against enemies with DEF ≤ 250
-  > Self: damage ×1.03 against enemies with DEF ≤ 100
-  > Self: damage ×1.03 against enemies with DEF ≤ 50
+  > Self: damage dealt ×1.04 against enemies with DEF ≤ 1000
+  > Self: damage dealt ×1.04 against enemies with DEF ≤ 750
+  > Self: damage dealt ×1.04 against enemies with DEF ≤ 500
+  > Self: damage dealt ×1.04 against enemies with DEF ≤ 250
+  > Self: damage dealt ×1.03 against enemies with DEF ≤ 100
+  > Self: damage dealt ×1.03 against enemies with DEF ≤ 50
 
 ## card 3102 · specialty specialty#94102 修羅の舞
 ```
@@ -5436,12 +5436,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +70%, doesn't stack
   > Self: Targets +1, stacks
   > Self: Attack gap −60%, doesn't stack
-  > Self: damage ×1.04 against enemies with DEF ≤ 1000
-  > Self: damage ×1.05 against enemies with DEF ≤ 750
-  > Self: damage ×1.05 against enemies with DEF ≤ 500
-  > Self: damage ×1.05 against enemies with DEF ≤ 250
-  > Self: damage ×1.05 against enemies with DEF ≤ 100
-  > Self: damage ×1.06 against enemies with DEF ≤ 50
+  > Self: damage dealt ×1.04 against enemies with DEF ≤ 1000
+  > Self: damage dealt ×1.05 against enemies with DEF ≤ 750
+  > Self: damage dealt ×1.05 against enemies with DEF ≤ 500
+  > Self: damage dealt ×1.05 against enemies with DEF ≤ 250
+  > Self: damage dealt ×1.05 against enemies with DEF ≤ 100
+  > Self: damage dealt ×1.06 against enemies with DEF ≤ 50
   > Each enemy defeated, self: ATK +10%, stacks, grows by that amount each kill, for 30s, up to 100%
 
 ## card 3105 · specialty specialty#94105 雲外蒼天の燦華
@@ -5468,15 +5468,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] 90秒間自
   > Self: Range ×1.3, doesn't stack
   > On hit, the enemy it attacks: Move speed −1%, stacks, grows by that amount each hit, for 1s, up to 80%
-  > Self: damage ×1.09 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.08 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.08 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.08 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.08 against enemies with Move speed ≤ 750
-  > Self: damage ×1.08 against enemies with Move speed ≤ 500
-  > Self: damage ×1.08 against enemies with Move speed ≤ 400
-  > Self: damage ×1.09 against enemies with Move speed ≤ 250
-  > Self: damage ×1.09 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.09 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.09 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.09 against enemies with Move speed ≤ 150
   > Self: Missile #4389: hits 2 times
   > Self: plays voice (ボイス再生) #19
   > Enemies in range: ATK −8%, doesn't stack, per giantification
@@ -5534,13 +5534,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +70%, doesn't stack
   > Self: Attack speed +70%, doesn't stack
   > Self: Attack gap −60%, doesn't stack
-  > Self: damage ×1.13
-  > Self: damage ×1.12 while own Current HP ≤ 90%
-  > Self: damage ×1.12 while own Current HP ≤ 75%
-  > Self: damage ×1.12 while own Current HP ≤ 60%
-  > Self: damage ×1.12 while own Current HP ≤ 45%
-  > Self: damage ×1.13 while own Current HP ≤ 30%
-  > Self: damage ×1.12 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.13
+  > Self: damage dealt ×1.12 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.13 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 15%
 
 ## card 3125 · stratagem stratagem#4125 祝宴の餅投げ
 ```
@@ -5550,18 +5550,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] メージ上昇(最大3.5倍)､
   > Self: Range +200, stacks, for 45s
-  > Target: damage ×1.15 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.15 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.15 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.15 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.15 against enemies with Move speed ≤ 750
-  > Target: damage ×1.15 against enemies with Move speed ≤ 500
-  > Target: damage ×1.15 against enemies with Move speed ≤ 400
-  > Target: damage ×1.16 against enemies with Move speed ≤ 250
-  > Target: damage ×1.16 against enemies with Move speed ≤ 150
-  > Target: unit effect type 2 #105 0, for 5s
-  > Target: unit effect type 2 #302 0, for 5s
-  > Target: unit effect type 2 #3 70, for 5s
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.15 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.16 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.16 against enemies with Move speed ≤ 150
+  > Target: on the unit it hits: DEF set to 0, for 5s
+  > Target: on the unit it hits: Move speed set to 0, for 5s
+  > Target: on the unit it hits: ATK −70%, doesn't stack, for 5s
 
 ## card 3128 · specialty specialty#93128 ボンヌ・ヴァカンス
 ```
@@ -5582,16 +5582,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] %ずつ上昇(最大200%)｡
   > Self: damage dealt +60%
-  > Self: damage ×1.2 while own DEF ≥ 1000
-  > Self: damage ×1.17 while own DEF ≥ 2000
-  > Self: damage ×1.15 while own DEF ≥ 3000
-  > Self: damage ×1.12 while own DEF ≥ 4000
-  > Self: damage ×1.12 while own DEF ≥ 5000
-  > Self: damage ×1.1 while own DEF ≥ 6000
-  > Self: damage ×1.09 while own DEF ≥ 7000
-  > Self: damage ×1.09 while own DEF ≥ 8000
-  > Self: damage ×1.08 while own DEF ≥ 9000
-  > Self: damage ×1.07 while own DEF ≥ 10000
+  > Self: damage dealt ×1.2 while own DEF ≥ 1000
+  > Self: damage dealt ×1.17 while own DEF ≥ 2000
+  > Self: damage dealt ×1.15 while own DEF ≥ 3000
+  > Self: damage dealt ×1.12 while own DEF ≥ 4000
+  > Self: damage dealt ×1.12 while own DEF ≥ 5000
+  > Self: damage dealt ×1.1 while own DEF ≥ 6000
+  > Self: damage dealt ×1.09 while own DEF ≥ 7000
+  > Self: damage dealt ×1.09 while own DEF ≥ 8000
+  > Self: damage dealt ×1.08 while own DEF ≥ 9000
+  > Self: damage dealt ×1.07 while own DEF ≥ 10000
   > All castle girls: DEF +20%, stacks
   > Enemies in range: damage dealt −40%
 
@@ -5603,16 +5603,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] %ずつ上昇(最大250%)｡
   > Self: damage dealt +70%
-  > Self: damage ×1.25 while own DEF ≥ 1000
-  > Self: damage ×1.2 while own DEF ≥ 2000
-  > Self: damage ×1.17 while own DEF ≥ 3000
-  > Self: damage ×1.15 while own DEF ≥ 4000
-  > Self: damage ×1.12 while own DEF ≥ 5000
-  > Self: damage ×1.12 while own DEF ≥ 6000
-  > Self: damage ×1.1 while own DEF ≥ 7000
-  > Self: damage ×1.09 while own DEF ≥ 8000
-  > Self: damage ×1.08 while own DEF ≥ 9000
-  > Self: damage ×1.08 while own DEF ≥ 10000
+  > Self: damage dealt ×1.25 while own DEF ≥ 1000
+  > Self: damage dealt ×1.2 while own DEF ≥ 2000
+  > Self: damage dealt ×1.17 while own DEF ≥ 3000
+  > Self: damage dealt ×1.15 while own DEF ≥ 4000
+  > Self: damage dealt ×1.12 while own DEF ≥ 5000
+  > Self: damage dealt ×1.12 while own DEF ≥ 6000
+  > Self: damage dealt ×1.1 while own DEF ≥ 7000
+  > Self: damage dealt ×1.09 while own DEF ≥ 8000
+  > Self: damage dealt ×1.08 while own DEF ≥ 9000
+  > Self: damage dealt ×1.08 while own DEF ≥ 10000
   > All castle girls: DEF +25%, stacks
   > Enemies in range: damage dealt −50%
   > Enemies in range: damage taken +40%
@@ -5643,24 +5643,24 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Own tokens: ATK +60%, doesn't stack
   > Self: Targets +1, stacks
   > Own tokens: Targets +1, stacks
-  > Self: damage ×1.07 against enemies with Move speed ≤ 3000
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.07 against enemies with Move speed ≤ 2000
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.07 against enemies with Move speed ≤ 1500
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.07 against enemies with Move speed ≤ 1000
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.07 against enemies with Move speed ≤ 750
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 750
-  > Self: damage ×1.07 against enemies with Move speed ≤ 500
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 500
-  > Self: damage ×1.07 against enemies with Move speed ≤ 400
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 400
-  > Self: damage ×1.07 against enemies with Move speed ≤ 250
-  > Own tokens: damage ×1.07 against enemies with Move speed ≤ 250
-  > Self: damage ×1.08 against enemies with Move speed ≤ 150
-  > Own tokens: damage ×1.08 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 3000
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 2000
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 1500
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 1000
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 750
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 500
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 400
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 250
+  > Own tokens: damage dealt ×1.07 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.08 against enemies with Move speed ≤ 150
+  > Own tokens: damage dealt ×1.08 against enemies with Move speed ≤ 150
 
 ## card 3162 · stratagem stratagem#8460 石上げ祭の御加護
 ```
@@ -5673,8 +5673,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Max HP +200%, doesn't stack, for 30s
   > Self: Range ×1.5, doesn't stack, for 30s
   > Self: Direct-hit bonus +400%, doesn't stack, for 30s
-  > Target: unit effect type 2 #106 35, for 3s
-  > Target: unit effect type 2 #313 35, for 3s
+  > Target: on the unit it hits: DEF −35%, stacks, for 3s
+  > Target: on the unit it hits: Move speed −35%, stacks, for 3s
 
 ## card 7725 · specialty specialty#7725 朱塗大天衝形桃兜
 ```
@@ -5711,13 +5711,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [ABSENT] メージ上昇(最大1.5倍)
 
-  > Self: damage ×1.07 while own Current HP ≥ 100%
-  > Self: damage ×1.07 while own Current HP ≥ 90%
-  > Self: damage ×1.06 while own Current HP ≥ 75%
-  > Self: damage ×1.06 while own Current HP ≥ 60%
-  > Self: damage ×1.06 while own Current HP ≥ 45%
-  > Self: damage ×1.06 while own Current HP ≥ 30%
-  > Self: damage ×1.06 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 10%
   > Self: ATK +2%, doesn't stack, grows by that amount every 2s, up to 100%
   > Self: Attack gap −7%, doesn't stack, grows by that amount every 10s, up to 70%
   > Enemies in range: damage dealt −60%
@@ -5842,13 +5842,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Each enemy defeated, self: ATK +5%, doesn't stack, grows by that amount each kill, up to 100%
   > Self: when attacked: counter for 80% of own ATK
-  > Self: damage ×1.05
-  > Self: damage ×1.05 while own Current HP ≤ 90%
-  > Self: damage ×1.07 while own Current HP ≤ 75%
-  > Self: damage ×1.07 while own Current HP ≤ 60%
-  > Self: damage ×1.07 while own Current HP ≤ 45%
-  > Self: damage ×1.07 while own Current HP ≤ 30%
-  > Self: damage ×1.07 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.05
+  > Self: damage dealt ×1.05 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 15%
 
 ## card 993 · stratagem stratagem#9993 救国の基地
 ```
@@ -6097,13 +6097,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [ABSENT] ージが上昇(上限200％)
 
   > Self: Crowd-control immunity: gains Deadly Poison
-  > Self: damage ×1.17
-  > Self: damage ×1.17 while own Current HP ≤ 90%
-  > Self: damage ×1.17 while own Current HP ≤ 75%
-  > Self: damage ×1.17 while own Current HP ≤ 60%
-  > Self: damage ×1.17 while own Current HP ≤ 45%
-  > Self: damage ×1.18 while own Current HP ≤ 30%
-  > Self: damage ×1.18 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.17
+  > Self: damage dealt ×1.17 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.17 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.17 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.17 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.18 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.18 while own Current HP ≤ 15%
   > Enemies it blocks: ATK −50%, doesn't stack
 
 ## card 9201 · special special#99201 城姫改築
@@ -6202,7 +6202,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 の1.3倍の値
   > Castle girls in range: ATK +130% of the giver's ATK
   > The castle girl named in the text: ATK −130% of the giver's ATK
-  > The castle girl named in the text: damage ×2
+  > The castle girl named in the text: damage dealt ×2
   > Self: HP +10000
 
 ## card 773 · stratagem stratagem#773 赤竜の福音
@@ -6944,12 +6944,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: uses special attack #3069 (特殊攻撃ID)
   > Can't be used during a special attack
   > Target: damage dealt +150%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 90%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 75%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 60%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 45%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 30%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 15%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 90%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 75%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 60%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 45%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 30%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 15%
 
 ## card 3069 · stratagem stratagem#4069 断崖絶壁に咲くアザミ
 ```
@@ -6970,12 +6970,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: Direct-hit bonus +100%, doesn't stack, at giantification stage 5
   > Target: Direct-hit bonus +30%, stacks, at giantification stage 5
   > Target: Splash damage rate ×1.3, stacks, at giantification stage 5
-  > Target: damage ×1.16 against enemies with Current HP ≤ 90%
-  > Target: damage ×1.17 against enemies with Current HP ≤ 75%
-  > Target: damage ×1.17 against enemies with Current HP ≤ 60%
-  > Target: damage ×1.17 against enemies with Current HP ≤ 45%
-  > Target: damage ×1.17 against enemies with Current HP ≤ 30%
-  > Target: damage ×1.17 against enemies with Current HP ≤ 15%
+  > Target: damage dealt ×1.16 against enemies with Current HP ≤ 90%
+  > Target: damage dealt ×1.17 against enemies with Current HP ≤ 75%
+  > Target: damage dealt ×1.17 against enemies with Current HP ≤ 60%
+  > Target: damage dealt ×1.17 against enemies with Current HP ≤ 45%
+  > Target: damage dealt ×1.17 against enemies with Current HP ≤ 30%
+  > Target: damage dealt ×1.17 against enemies with Current HP ≤ 15%
 
 ## card 3073 · stratagem stratagem#3073 温泉袈裟斬り
 ```
@@ -7054,21 +7054,21 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 40s
   > Enemies in range: DEF −40%, doesn't stack, for 40s
   > Enemies in range: Range −40%, doesn't stack, for 40s
-  > Target: damage ×1.06 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.06 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 750
-  > Target: damage ×1.06 against enemies with Move speed ≤ 500
-  > Target: damage ×1.07 against enemies with Move speed ≤ 400
-  > Target: damage ×1.07 against enemies with Move speed ≤ 250
-  > Target: damage ×1.07 against enemies with Move speed ≤ 150
-  > Target: damage ×1.07 against enemies with DEF ≤ 1000
-  > Target: damage ×1.07 against enemies with DEF ≤ 750
-  > Target: damage ×1.07 against enemies with DEF ≤ 500
-  > Target: damage ×1.07 against enemies with DEF ≤ 250
-  > Target: damage ×1.07 against enemies with DEF ≤ 100
-  > Target: damage ×1.07 against enemies with DEF ≤ 50
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 150
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 1000
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 750
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 500
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 250
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 100
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 50
   > Target: Targets +99, stacks
 
 ## card 3119 · stratagem stratagem#4119 死の牢獄ライブ！
@@ -7090,21 +7090,21 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 40s
   > Enemies in range: DEF −50%, doesn't stack, for 40s
   > Enemies in range: Range −50%, doesn't stack, for 40s
-  > Target: damage ×1.06 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.06 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.06 against enemies with Move speed ≤ 750
-  > Target: damage ×1.06 against enemies with Move speed ≤ 500
-  > Target: damage ×1.07 against enemies with Move speed ≤ 400
-  > Target: damage ×1.07 against enemies with Move speed ≤ 250
-  > Target: damage ×1.07 against enemies with Move speed ≤ 150
-  > Target: damage ×1.07 against enemies with DEF ≤ 1000
-  > Target: damage ×1.07 against enemies with DEF ≤ 750
-  > Target: damage ×1.07 against enemies with DEF ≤ 500
-  > Target: damage ×1.07 against enemies with DEF ≤ 250
-  > Target: damage ×1.07 against enemies with DEF ≤ 100
-  > Target: damage ×1.07 against enemies with DEF ≤ 50
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 150
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 1000
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 750
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 500
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 250
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 100
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 50
   > Target: Targets +99, stacks
 
 ## card 3120 · stratagem stratagem#8411 追尾型平蜘蛛茶釜
@@ -7152,7 +7152,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms
   > Target: damage dealt +100%
   > Target: Splash damage rate +300%, doesn't stack
-  > Target: damage ×1.7 while own stat 10302 ≥ 5
+  > Target: damage dealt ×1.7 while own stat 10302 ≥ 5
 
 ## card 3128 · stratagem stratagem#4128 熱波水砕拳
 ```
@@ -7173,7 +7173,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms
   > Target: damage dealt +100%
   > Target: Splash damage rate +300%, doesn't stack
-  > Target: damage ×1.8 while own stat 10302 ≥ 5
+  > Target: damage dealt ×1.8 while own stat 10302 ≥ 5
 
 ## card 3136 · stratagem stratagem#3136 水遊の使徒
 ```
@@ -7187,7 +7187,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 大化毎に計略回数1増加
   > Self: damage dealt +100%
   > The castle girl named in the text: damage dealt +100%
-  > The castle girl named in the text: damage ×1.2 against enemies with Current HP ≥ 50%
+  > The castle girl named in the text: damage dealt ×1.2 against enemies with Current HP ≥ 50%
 
 ## card 3136 · stratagem stratagem#4136 常夏海遊の使徒
 ```
@@ -7201,7 +7201,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 大化毎に計略回数1増加
   > Self: damage dealt +120%
   > The castle girl named in the text: damage dealt +120%
-  > The castle girl named in the text: damage ×1.2 against enemies with Current HP ≥ 50%
+  > The castle girl named in the text: damage dealt ×1.2 against enemies with Current HP ≥ 50%
 
 ## card 7749 · specialty specialty#7749 嘱望の織田木瓜紋前立兜
 ```
@@ -7281,12 +7281,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack attribute: fire, for 20s
   > Target: Range ×1.3, doesn't stack
   > Target: damage dealt +120%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 90%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 75%
-  > Target: damage ×1.13 against enemies with Current HP ≤ 60%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 45%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 30%
-  > Target: damage ×1.12 against enemies with Current HP ≤ 15%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 90%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 75%
+  > Target: damage dealt ×1.13 against enemies with Current HP ≤ 60%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 45%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 30%
+  > Target: damage dealt ×1.12 against enemies with Current HP ≤ 15%
 
 ## card 9273 · special special#99273 戦車搭乗
 ```
@@ -7303,10 +7303,10 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: Attack gap −50%, doesn't stack
   > Allies in range: Attack gap −50%, doesn't stack
   > Ambush units (token type 1) in range: Attack gap −50%, doesn't stack
-  > Castle girls in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Allies in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Ambush units (token type 1) in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Self: damage ×1.16 against enemies with Priority target (taunt) ≥ 100
+  > Castle girls in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Allies in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Ambush units (token type 1) in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Self: damage dealt ×1.16 against enemies with Priority target (taunt) ≥ 100
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +500%, doesn't stack
   > Self: Splash damage rate +200%, doesn't stack
@@ -7649,7 +7649,23 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 行う伏兵を配置(1体まで
   > The castle girl named in the text: Range +100, stacks
   > The castle girl named in the text: ATK +100, stacks
-  > The castle girl named in the text: damage ×1.3
+  > The castle girl named in the text: damage dealt ×1.3
+
+## card 586 · stratagem stratagem#586 打遍蹴下
+```
+25秒間対象の攻撃が2倍、与ダメージが1.4倍
+2連続で攻撃し、敵を後退させる
+(自分のみが対象)
+```
+- [data-only] 秒間対象の攻撃が2倍、与
+- [data-only] 倍、与ダメージが1.4倍
+2
+- [data-only] ージが1.4倍
+2連続
+  > Self: ATK +100%, doesn't stack, for 25s
+  > Self: transforms, for 25s
+  > Target: on the unit it hits: Move speed set to -2000, for 80ms
+  > Target: damage dealt +40%
 
 ## card 587 · stratagem stratagem#9587 竜炎のノスフェラトゥ
 ```
@@ -8026,11 +8042,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +200%, doesn't stack
   > Self: DEF ignore +60%, doesn't stack
-  > Self: damage ×1.1 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.1 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≥ 30%
   > Self: ATK +90%, doesn't stack
   > Castle girls in range: ATK +53%, doesn't stack
   > Self: Can't be targeted: on
@@ -8097,7 +8113,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > The castle girl named in the text: Time until stratagem −40%, doesn't stack
   > Castle girls in range: Attack gap −40%, doesn't stack
   > The castle girl named in the text: Attack gap −40%, doesn't stack
-  > The castle girl named in the text: damage ×1.4
+  > The castle girl named in the text: damage dealt ×1.4
 
 ## card 936 · stratagem stratagem#9936 喧嘩ねぷた
 ```
@@ -8114,7 +8130,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > The castle girl named in the text: Attack gap −40%, doesn't stack
   > Castle girls in range: ATK +120, stacks
   > The castle girl named in the text: ATK +120, stacks
-  > The castle girl named in the text: damage ×1.5
+  > The castle girl named in the text: damage dealt ×1.5
 
 ## card 943 · stratagem stratagem#943 道後の温泉
 ```
@@ -8158,13 +8174,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] に10秒間攻撃が1.5倍(自
   > Self: ATK +70%, doesn't stack, for 30s
   > Target: damage taken −60%
-  > Target: damage ×1.05
-  > Target: damage ×1.05 while own Current HP ≥ 90%
-  > Target: damage ×1.05 while own Current HP ≥ 75%
-  > Target: damage ×1.04 while own Current HP ≥ 60%
-  > Target: damage ×1.04 while own Current HP ≥ 45%
-  > Target: damage ×1.04 while own Current HP ≥ 30%
-  > Target: damage ×1.03 while own Current HP ≥ 15%
+  > Target: damage dealt ×1.05
+  > Target: damage dealt ×1.05 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.05 while own Current HP ≥ 75%
+  > Target: damage dealt ×1.04 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.04 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.04 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.03 while own Current HP ≥ 15%
   > Target: unit effect type 13 #6 50, for 10s
 
 ## card 954 · specialty specialty#10954 鷹石の騎士城
@@ -8434,13 +8450,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 内敵の被ダメージ1.5倍(自
   > Self: ATK +20%, stacks, for 30s
   > Self: DEF +20%, stacks, for 30s
-  > Target: damage ×1.1 while own Current HP ≥ 100%
-  > Target: damage ×1.09 while own Current HP ≥ 90%
-  > Target: damage ×1.09 while own Current HP ≥ 75%
-  > Target: damage ×1.09 while own Current HP ≥ 60%
-  > Target: damage ×1.09 while own Current HP ≥ 45%
-  > Target: damage ×1.09 while own Current HP ≥ 30%
-  > Target: damage ×1.09 while own Current HP ≥ 15%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 75%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 15%
   > Units in the target's range: damage taken +50%
 
 ## card 3023 · stratagem stratagem#4023 黎明の荒星
@@ -8455,13 +8471,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 内敵の被ダメージ1.5倍(自
   > Self: ATK +20%, stacks, for 40s
   > Self: DEF +20%, stacks, for 40s
-  > Target: damage ×1.11 while own Current HP ≥ 100%
-  > Target: damage ×1.11 while own Current HP ≥ 90%
-  > Target: damage ×1.11 while own Current HP ≥ 75%
-  > Target: damage ×1.11 while own Current HP ≥ 60%
-  > Target: damage ×1.11 while own Current HP ≥ 45%
-  > Target: damage ×1.1 while own Current HP ≥ 30%
-  > Target: damage ×1.1 while own Current HP ≥ 15%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 75%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 15%
   > Units in the target's range: damage taken +50%
 
 ## card 3023 · special special#3023 暁星天駆
@@ -8567,8 +8583,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > The castle girl named in the text: ATK +250, stacks
   > Self: DEF +250, stacks
   > The castle girl named in the text: DEF +250, stacks
-  > Self: damage ×1.7
-  > The castle girl named in the text: damage ×1.7
+  > Self: damage dealt ×1.7
+  > The castle girl named in the text: damage dealt ×1.7
   > Self: damage taken −50%
   > The castle girl named in the text: damage taken −50%
   > Self: can move on all tiles, move speed 1000, walks
@@ -8674,12 +8690,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack
   > Self: Attack gap −60%, doesn't stack
   > Self: Splash damage rate +50%, doesn't stack
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 1000
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 750
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 500
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 250
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 100
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 50
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 1000
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 750
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 500
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 250
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 100
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 50
   > Ki +2 every 5s
 
 ## card 16131 · specialty specialty#64131 幻影の巡洋戦艦
@@ -8696,12 +8712,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack gap −60%, doesn't stack
   > Self: Splash damage rate +50%, doesn't stack
   > Self: Direct-hit bonus +25%, stacks
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 1000
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 750
-  > Castle girls in range: damage ×1.1 against enemies with DEF ≤ 500
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 250
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 100
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 50
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 1000
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 750
+  > Castle girls in range: damage dealt ×1.1 against enemies with DEF ≤ 500
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 250
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 100
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 50
   > Ki +2 every 5s
 
 ## card 3141 · stratagem stratagem#3141 駿河富士の眺め
@@ -8719,13 +8735,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Special gauge gain when hit +100%, doesn't stack, for 50s
   > Self: Direct-hit bonus +1000%, doesn't stack, for 50s
   > Target: damage dealt +100%
-  > Target: damage ×1.1 while own Current HP ≥ 100%
-  > Target: damage ×1.09 while own Current HP ≥ 90%
-  > Target: damage ×1.1 while own Current HP ≥ 75%
-  > Target: damage ×1.09 while own Current HP ≥ 60%
-  > Target: damage ×1.09 while own Current HP ≥ 45%
-  > Target: damage ×1.09 while own Current HP ≥ 30%
-  > Target: damage ×1.09 while own Current HP ≥ 15%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 75%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.09 while own Current HP ≥ 15%
 
 ## card 3141 · stratagem stratagem#4141 駿河富士の天下大眺
 ```
@@ -8742,13 +8758,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Special gauge gain when hit +100%, doesn't stack, for 50s
   > Self: Direct-hit bonus +1100%, doesn't stack, for 50s
   > Target: damage dealt +120%
-  > Target: damage ×1.11 while own Current HP ≥ 100%
-  > Target: damage ×1.11 while own Current HP ≥ 90%
-  > Target: damage ×1.11 while own Current HP ≥ 75%
-  > Target: damage ×1.11 while own Current HP ≥ 60%
-  > Target: damage ×1.11 while own Current HP ≥ 45%
-  > Target: damage ×1.1 while own Current HP ≥ 30%
-  > Target: damage ×1.1 while own Current HP ≥ 15%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 90%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 75%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.11 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 15%
 
 ## card 3143 · formation formation#3143 鉄器の白湯
 ```
@@ -8870,12 +8886,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range +100, stacks
   > Self: Attack gap −70%, doesn't stack
   > Self: Targets +2, stacks
-  > Self: damage ×1.4
+  > Self: damage dealt ×1.4
   > Own tokens: ATK +70%, doesn't stack
   > Own tokens: Range +100, stacks
   > Own tokens: Attack gap −70%, doesn't stack
   > Own tokens: Targets +2, stacks
-  > Own tokens: damage ×1.4
+  > Own tokens: damage dealt ×1.4
   > Own tokens: HP: on
 
 ## card 7737 · stratagem stratagem#8317 海道一の弓取り
@@ -8893,16 +8909,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +140%, doesn't stack
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.05 while own Attack speed ≥ 160
-  > Self: damage ×1.05 while own Attack speed ≥ 180
-  > Self: damage ×1.04 while own Attack speed ≥ 200
-  > Self: damage ×1.04 while own Attack speed ≥ 220
-  > Self: damage ×1.04 while own Attack speed ≥ 240
-  > Self: damage ×1.04 while own Attack speed ≥ 260
-  > Self: damage ×1.04 while own Attack speed ≥ 280
-  > Self: damage ×1.05 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 300
   > Self: ATK +20%, stacks, at giantification stage 1
   > Self: DEF +20%, stacks, at giantification stage 1
 
@@ -9057,7 +9073,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 攻
   > Self: plays voice (ボイス再生) #19
   > Self: ATK +400, stacks, per ally in range, up to 2000
-  > Self: damage ×1.3 against enemies with Current HP ≥ 50%
+  > Self: damage dealt ×1.3 against enemies with Current HP ≥ 50%
   > Self: DEF ignore +50%, doesn't stack
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +400%, doesn't stack
@@ -9169,7 +9185,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] (上限2000｡4体まで
   > Self: HP drain (% of damage dealt) +50%, doesn't stack
   > Self: Targets +3, stacks
-  > Self: damage ×1.5
+  > Self: damage dealt ×1.5
   > Self: ATK +10, stacks, grows by that amount every second, up to 2000
 
 ## card 215 · stratagem stratagem#215 八八式速射砲台
@@ -9195,6 +9211,23 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: DEF +200%, doesn't stack, for 40s
   > Target: Healing received +100%, doesn't stack, for 40s
   > Target: damage taken −70%, for 40s
+
+## card 262 · stratagem stratagem#11262 肥後の鬼猛虎
+```
+40秒間対象が射程内の全敵に2倍のダメージを与える
+攻撃を行い､5秒間移動速度を40%低下させる(効果重複)
+対象の攻撃2倍､攻撃と射程が150上昇(自分のみ)
+```
+- [data-only] が射程内の全敵に2倍のダ
+- [data-only] 複)
+対象の攻撃2倍､攻
+  > Self: Targets +100, stacks, for 40s
+  > Self: Range +150, stacks, for 40s
+  > Self: ATK +150, stacks, for 40s
+  > Target: ATK +100%, doesn't stack
+  > Target: attack properties (add): direct-hit bonus
+  > Target: Direct-hit bonus +200%, doesn't stack
+  > Target: on the unit it hits: Move speed −40%, stacks, for 5s
 
 ## card 277 · stratagem stratagem#277 蛇胴舞
 ```
@@ -9306,11 +9339,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: ATK +100%, doesn't stack, for 60s
   > Target: ATK +250, stacks, for 60s
   > Units in the target's range: ATK +250, stacks
-  > Target: damage ×1.08 while own Current HP ≥ 100%
-  > Target: damage ×1.08 while own Current HP ≥ 80%
-  > Target: damage ×1.1 while own Current HP ≥ 60%
-  > Target: damage ×1.08 while own Current HP ≥ 45%
-  > Target: damage ×1.1 while own Current HP ≥ 30%
+  > Target: damage dealt ×1.08 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.08 while own Current HP ≥ 80%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 60%
+  > Target: damage dealt ×1.08 while own Current HP ≥ 45%
+  > Target: damage dealt ×1.1 while own Current HP ≥ 30%
 
 ## card 309 · specialty specialty#11309 清正流三日月弧扇石垣
 ```
@@ -9633,7 +9666,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] せる伏兵を配置(3体まで
   > On hit, the enemy it attacks: Move speed set to -2000, for 0.1s
   > The castle girl named in the text: Range +30, stacks
-  > The castle girl named in the text: damage ×1.2
+  > The castle girl named in the text: damage dealt ×1.2
   > Yokai in range: ATK −50%, doesn't stack
 
 ## card 445 · stratagem stratagem#445 リンナンサーリ
@@ -9839,12 +9872,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #60
   > Target: Direct-hit bonus +300%, doesn't stack
   > Target: attack properties (add): direct-hit bonus
-  > Target: damage ×1.13 against enemies with DEF ≤ 1000
-  > Target: damage ×1.13 against enemies with DEF ≤ 750
-  > Target: damage ×1.13 against enemies with DEF ≤ 500
-  > Target: damage ×1.12 against enemies with DEF ≤ 250
-  > Target: damage ×1.12 against enemies with DEF ≤ 100
-  > Target: damage ×1.12 against enemies with DEF ≤ 50
+  > Target: damage dealt ×1.13 against enemies with DEF ≤ 1000
+  > Target: damage dealt ×1.13 against enemies with DEF ≤ 750
+  > Target: damage dealt ×1.13 against enemies with DEF ≤ 500
+  > Target: damage dealt ×1.12 against enemies with DEF ≤ 250
+  > Target: damage dealt ×1.12 against enemies with DEF ≤ 100
+  > Target: damage dealt ×1.12 against enemies with DEF ≤ 50
 
 ## card 535 · stratagem stratagem#535 武田四天王
 ```
@@ -10034,7 +10067,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Direct-hit bonus +500%, doesn't stack, for 40s
   > Self: Splash damage rate +150%, doesn't stack, for 40s
   > Self: transforms, for 40s
-  > Target: unit effect type 2 #302 0, for 0.3s
+  > Target: on the unit it hits: Move speed set to 0, for 0.3s
 
 ## card 615 · stratagem stratagem#615 風魔党乱破
 ```
@@ -10053,7 +10086,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 自身の2倍の耐
 - [data-only] 久が減少し､最長120秒で消
-  > Self: damage ×3 while own Current HP ≤ 30%
+  > Self: damage dealt ×3 while own Current HP ≤ 30%
 
 ## card 616 · stratagem stratagem#616 鬼一口
 ```
@@ -10184,7 +10217,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 被攻撃時に3倍のダ
   > Target: ATK +100% of DEF, for 45s
   > Target: when attacked: counter for 300% of own ATK
-  > Target: unit effect type 12 #102 300, grows by that amount each trigger, up to 1500
+  > Target: each time it is attacked: DEF +300, stacks, grows by that amount each trigger, up to 1500
 
 ## card 655 · stratagem stratagem#655 黄金夏囃子
 ```
@@ -11048,8 +11081,23 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 内の城娘の防御が1.7倍(自
   > Lasts 30s; effects listed below
   > Target: Blast radius +70%, doesn't stack
-  > Target: unit effect type 2 #302 0, for 1s
+  > Target: on the unit it hits: Move speed set to 0, for 1s
   > Units in the target's range: DEF +70%, doesn't stack
+
+## card 874 · stratagem stratagem#8143 辰・偉鑒大門
+```
+30秒間対象の防御と槍の貫通距離が2倍
+攻撃した敵の移動速度を1秒間0にする
+対象の射程内の城娘の防御が1.8倍(自分のみが対象)
+```
+- [data-only] と槍の貫通距離が2倍
+攻
+- [data-only] 内の城娘の防御が1.8倍(自
+  > Lasts 30s; effects listed below
+  > Target: Blast radius +100%, doesn't stack
+  > Target: on the unit it hits: Move speed set to 0, for 1s
+  > Target: DEF +100%, doesn't stack
+  > Units in the target's range: DEF +80%, doesn't stack
 
 ## card 879 · stratagem stratagem#8155 霜雪の花
 ```
@@ -11281,13 +11329,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
 - [data-only, other item] 与えるダメージが1.2倍
 全
-  > Self: damage ×1.07 while own Current HP ≥ 100%
-  > Self: damage ×1.07 while own Current HP ≥ 90%
-  > Self: damage ×1.06 while own Current HP ≥ 75%
-  > Self: damage ×1.06 while own Current HP ≥ 60%
-  > Self: damage ×1.06 while own Current HP ≥ 45%
-  > Self: damage ×1.06 while own Current HP ≥ 30%
-  > Self: damage ×1.06 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 10%
   > Special attack, self: Direct-hit bonus +480%, doesn't stack
   > All melee castle girls: ATK +100, stacks
 
@@ -11420,13 +11468,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Can target (発動対象): melee castle girls, tokens
   > Target: ATK +50%, doesn't stack
   > Target: Range ×1.5, doesn't stack
-  > Target: damage ×1.1
-  > Target: damage ×1.1 while own Current HP ≤ 90%
-  > Target: damage ×1.1 while own Current HP ≤ 75%
-  > Target: damage ×1.11 while own Current HP ≤ 60%
-  > Target: damage ×1.11 while own Current HP ≤ 45%
-  > Target: damage ×1.11 while own Current HP ≤ 30%
-  > Target: damage ×1.12 while own Current HP ≤ 15%
+  > Target: damage dealt ×1.1
+  > Target: damage dealt ×1.1 while own Current HP ≤ 90%
+  > Target: damage dealt ×1.1 while own Current HP ≤ 75%
+  > Target: damage dealt ×1.11 while own Current HP ≤ 60%
+  > Target: damage dealt ×1.11 while own Current HP ≤ 45%
+  > Target: damage dealt ×1.11 while own Current HP ≤ 30%
+  > Target: damage dealt ×1.12 while own Current HP ≤ 15%
 
 ## card 947 · special special#947 桜の朱槍
 ```
@@ -11464,15 +11512,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] ージが上昇(最大1.5倍)
 
   > Self: ATK +60%, doesn't stack, for 30s
-  > Target: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.04 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.04 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.05 against enemies with Move speed ≤ 750
-  > Target: damage ×1.05 against enemies with Move speed ≤ 500
-  > Target: damage ×1.05 against enemies with Move speed ≤ 400
-  > Target: damage ×1.06 against enemies with Move speed ≤ 250
-  > Target: damage ×1.06 against enemies with Move speed ≤ 150
+  > Target: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.04 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.04 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.05 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.06 against enemies with Move speed ≤ 150
 
 ## card 950 · stratagem stratagem#950 祝夜の号砲
 ```
@@ -11534,7 +11582,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All Mountain castle girls: DEF +70%, doesn't stack
   > All Mountain castle girls: HP drain (% of damage dealt) +35%, doesn't stack
   > Self: DEF +100%, doesn't stack
-  > Self: damage ×1.4
+  > Self: damage dealt ×1.4
 
 ## card 955 · stratagem stratagem#955 防人の水盾
 ```
@@ -11709,7 +11757,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 秒間自身が攻撃の1.5倍で射
 - [data-only] 程内全敵に攻撃の2倍のダ
   > Self: attack method (攻撃方法) → #1101
-  > Self: damage ×10 against enemies with Current HP ≤ 25%
+  > Self: damage dealt ×10 against enemies with Current HP ≤ 25%
   > Self: Healing given +50%, stacks
   > Self: Direct-hit bonus +200%, doesn't stack
   > Self: Targets +99, stacks
@@ -11755,12 +11803,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Splash damage rate +50%, doesn't stack
   > Self: attack properties (add): direct-hit bonus
   > All Bridal castle girls: ATK +40%, doesn't stack
-  > Self: damage ×1.04 against enemies with Current HP = 100%
-  > Self: damage ×1.05 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.05 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.05 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.05 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.05 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.04 against enemies with Current HP = 100%
+  > Self: damage dealt ×1.05 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.05 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.05 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.05 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.05 against enemies with Current HP ≥ 30%
 
 ## card 3031 · specialty specialty#93031 常夏の紅眼
 ```
@@ -11875,7 +11923,22 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +80%, doesn't stack, for 40s
   > Self: Special gauge gain when hit +80%, doesn't stack, for 40s
   > Target: damage dealt +80%
-  > Target: unit effect type 2 #302 -1000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -1000, for 0.1s
+  > Target: Targets +99, stacks
+
+## card 3038 · stratagem stratagem#4038 大銀杏の響枝
+```
+40秒間対象が射程内全敵を攻撃し､少し後退させる
+攻撃と与ダメージ2倍
+特殊攻撃ゲージの蓄積量が1.8倍(自分のみが対象)
+```
+- [data-only] 攻撃と与ダメージ2倍
+特
+- [data-only] ゲージの蓄積量が1.8倍(自
+  > Self: ATK +100%, doesn't stack, for 40s
+  > Self: Special gauge gain when hit +80%, doesn't stack, for 40s
+  > Target: damage dealt +100%
+  > Target: on the unit it hits: Move speed set to -1000, for 0.1s
   > Target: Targets +99, stacks
 
 ## card 3039 · specialty specialty#93039 戦場の悪党
@@ -11948,12 +12011,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Direct-hit bonus +150%, doesn't stack
   > Self: can move on all tiles, move speed 1500, walks
   > Self: can move on water tiles (水上), move speed 1500, walks
-  > Self: damage ×1.1 against enemies with Current HP ≤ 90%, only at max giantification (最大化)
-  > Self: damage ×1.1 against enemies with Current HP ≤ 75%, only at max giantification (最大化)
-  > Self: damage ×1.1 against enemies with Current HP ≤ 60%, only at max giantification (最大化)
-  > Self: damage ×1.11 against enemies with Current HP ≤ 45%, only at max giantification (最大化)
-  > Self: damage ×1.11 against enemies with Current HP ≤ 30%, only at max giantification (最大化)
-  > Self: damage ×1.11 against enemies with Current HP ≤ 15%, only at max giantification (最大化)
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 90%, only at max giantification (最大化)
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 75%, only at max giantification (最大化)
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 60%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 against enemies with Current HP ≤ 45%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 against enemies with Current HP ≤ 30%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 against enemies with Current HP ≤ 15%, only at max giantification (最大化)
 
 ## card 3042 · stratagem stratagem#3042 撃ちます……わん！
 ```
@@ -11982,12 +12045,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: can move on all tiles, move speed 1500, walks
   > Self: can move on water tiles (水上), move speed 1500, walks
   > All enemies: damage taken +35%, only at max giantification (最大化)
-  > Self: damage ×1.12 against enemies with Current HP ≤ 90%, only at max giantification (最大化)
-  > Self: damage ×1.12 against enemies with Current HP ≤ 75%, only at max giantification (最大化)
-  > Self: damage ×1.13 against enemies with Current HP ≤ 60%, only at max giantification (最大化)
-  > Self: damage ×1.13 against enemies with Current HP ≤ 45%, only at max giantification (最大化)
-  > Self: damage ×1.13 against enemies with Current HP ≤ 30%, only at max giantification (最大化)
-  > Self: damage ×1.12 against enemies with Current HP ≤ 15%, only at max giantification (最大化)
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 90%, only at max giantification (最大化)
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 75%, only at max giantification (最大化)
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 60%, only at max giantification (最大化)
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 45%, only at max giantification (最大化)
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 30%, only at max giantification (最大化)
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 15%, only at max giantification (最大化)
 
 ## card 3042 · stratagem stratagem#4042 乱れ撃ち……だわん！
 ```
@@ -12086,11 +12149,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +100%, doesn't stack, for 20s
   > Self: Attack gap −70%, doesn't stack, for 20s
   > Enemies in range: Move speed −50%, doesn't stack, for 20s
-  > Target: damage ×1.15 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.15 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.15 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.15 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.16 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.15 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.15 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.15 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.15 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.16 against enemies with Current HP ≥ 30%
 
 ## card 3048 · special special#3048 喰尽・曲刃奪霊
 ```
@@ -12106,7 +12169,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack
   > Self: Targets +99, stacks
   > Self: independent damage 0.05× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage, every 1s)
-  > Field effect #96: damage 0.01× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage), re-applied every 0.5s
+  > Field effect #96: damage 0.01× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage), re-applied every 0.5s
   > Self: battle motion set → #6086 (its attack animation sets the hit count)
   > Self: HP drain (% of damage dealt) +40%, doesn't stack, only at max giantification (最大化)
   > Each attack, self: ATK +10%, doesn't stack, grows by that amount each attack, for 10s, up to 100%, only at max giantification (最大化)
@@ -12257,13 +12320,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Block +10, stacks, for 30s
   > Enemies in range: Move speed −60%, doesn't stack, for 30s
   > Target: Can't be destroyed (HP stays at 1): on
-  > Target: damage ×1.14
-  > Target: damage ×1.14 while own Current HP ≤ 90%
-  > Target: damage ×1.14 while own Current HP ≤ 75%
-  > Target: damage ×1.14 while own Current HP ≤ 60%
-  > Target: damage ×1.14 while own Current HP ≤ 45%
-  > Target: damage ×1.15 while own Current HP ≤ 30%
-  > Target: damage ×1.15 while own Current HP ≤ 15%
+  > Target: damage dealt ×1.14
+  > Target: damage dealt ×1.14 while own Current HP ≤ 90%
+  > Target: damage dealt ×1.14 while own Current HP ≤ 75%
+  > Target: damage dealt ×1.14 while own Current HP ≤ 60%
+  > Target: damage dealt ×1.14 while own Current HP ≤ 45%
+  > Target: damage dealt ×1.15 while own Current HP ≤ 30%
+  > Target: damage dealt ×1.15 while own Current HP ≤ 15%
 
 ## card 3062 · specialty specialty#93062 赤月の吸血鬼
 ```
@@ -12275,13 +12338,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
 - [data-only] で与えるダメージ1.3倍
 射
-  > Self: damage ×1.06 while own Current HP ≥ 100%
-  > Self: damage ×1.06 while own Current HP ≥ 90%
-  > Self: damage ×1.05 while own Current HP ≥ 75%
-  > Self: damage ×1.05 while own Current HP ≥ 60%
-  > Self: damage ×1.05 while own Current HP ≥ 45%
-  > Self: damage ×1.05 while own Current HP ≥ 30%
-  > Self: damage ×1.05 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.05 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.05 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.05 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.05 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.05 while own Current HP ≥ 10%
   > Self: Range ×1.2, doesn't stack
   > Self: Direct-hit bonus +325%, doesn't stack
   > Castle girls in range: HP drain (% of damage dealt) +30%, doesn't stack
@@ -12297,13 +12360,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
 - [data-only] で与えるダメージ1.4倍
 射
-  > Self: damage ×1.07 while own Current HP ≥ 100%
-  > Self: damage ×1.07 while own Current HP ≥ 90%
-  > Self: damage ×1.06 while own Current HP ≥ 75%
-  > Self: damage ×1.06 while own Current HP ≥ 60%
-  > Self: damage ×1.06 while own Current HP ≥ 45%
-  > Self: damage ×1.06 while own Current HP ≥ 30%
-  > Self: damage ×1.06 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 10%
   > Self: Range ×1.3, doesn't stack
   > Self: Attack speed +40%, doesn't stack
   > Self: Direct-hit bonus +350%, doesn't stack
@@ -12501,8 +12564,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > The castle girl named in the text: ATK +350, stacks
   > Self: DEF +350, stacks
   > The castle girl named in the text: DEF +350, stacks
-  > Self: damage ×1.7
-  > The castle girl named in the text: damage ×1.7
+  > Self: damage dealt ×1.7
+  > The castle girl named in the text: damage dealt ×1.7
   > Self: damage taken −50%
   > The castle girl named in the text: damage taken −50%
   > Self: can move on all tiles, move speed 1000, walks
@@ -12623,7 +12686,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 2連続
   > Self: Attack gap −80%, doesn't stack
   > Self: plays voice (ボイス再生) #19
-  > Self: damage ×1.2
+  > Self: damage dealt ×1.2
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +250%, doesn't stack
   > Self: battle motion set → #6094 (its attack animation sets the hit count)
@@ -12664,6 +12727,24 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] ージと与回復量が1.2倍
   > Enemies in range: DEF −20% of the giver's ATK
   > Self: ATK +20%, doesn't stack, per enemy in range, up to 100%
+
+## card 3080 · stratagem stratagem#3080 燃楓の鋭葉
+```
+30秒間対象の攻撃速度が2倍､攻撃対象の
+防御が低い程与えるダメージ上昇(最大1.5倍)
+攻撃毎に攻撃が100ずつ上昇(自分のみ)
+```
+- [data-only] 対象の攻撃速度が2倍､攻
+- [data-only, other item] メージ上昇(最大1.5倍)
+
+  > Self: Attack speed +100%, doesn't stack, for 30s
+  > Target: damage dealt ×1.08 against enemies with DEF ≤ 1000
+  > Target: damage dealt ×1.08 against enemies with DEF ≤ 750
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 500
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 250
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 100
+  > Target: damage dealt ×1.07 against enemies with DEF ≤ 50
+  > Target: each attack it makes: ATK +100, stacks, grows by that amount each trigger, up to 999999
 
 ## card 3080 · specialty specialty#94080 楓の炎恨
 ```
@@ -12928,7 +13009,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack properties (add): DEF ignore, direct-hit bonus
   > Self: transforms
   > Target: Direct-hit bonus +700%, doesn't stack
-  > Target: unit effect type 2 #301 80, for 7s
+  > Target: on the unit it hits: Move speed −80%, doesn't stack, for 7s
   > Target: unit effect type 13 #2 50, grows by that amount each trigger, for 99999.999s, up to 999999
   > Field effect #193: damage ×7 ATK; Move speed −95%, doesn't stack, for 4s; Attack speed −50%, doesn't stack, for 4s
 
@@ -12946,7 +13027,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack properties (add): DEF ignore, direct-hit bonus
   > Self: transforms
   > Target: Direct-hit bonus +800%, doesn't stack
-  > Target: unit effect type 2 #301 80, for 7s
+  > Target: on the unit it hits: Move speed −80%, doesn't stack, for 7s
   > Target: unit effect type 13 #2 70, grows by that amount each trigger, for 99999.999s, up to 999999
   > Field effect #9193: damage ×7 ATK; Move speed −95%, doesn't stack, for 7s; Attack speed −50%, doesn't stack, for 7s
 
@@ -13051,16 +13132,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] メージ上昇(最大1.5倍)
 
 - [data-only] 時､15秒間攻撃1.4倍(効
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.05 while own Attack speed ≥ 160
-  > Self: damage ×1.05 while own Attack speed ≥ 180
-  > Self: damage ×1.04 while own Attack speed ≥ 200
-  > Self: damage ×1.04 while own Attack speed ≥ 220
-  > Self: damage ×1.04 while own Attack speed ≥ 240
-  > Self: damage ×1.04 while own Attack speed ≥ 260
-  > Self: damage ×1.04 while own Attack speed ≥ 280
-  > Self: damage ×1.05 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 300
   > Each time attacked, self: DEF +20%, doesn't stack, grows by that amount each time it is attacked, for 20s, up to 120%
   > Each time attacked, self: Attack speed +20%, doesn't stack, grows by that amount each time it is attacked, for 20s, up to 120%
   > Each enemy defeated, self: ATK +40%, stacks, for 15s
@@ -13074,16 +13155,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] メージ上昇(最大1.7倍)
 
 - [data-only] ､20秒間攻撃が1.5倍(効
-  > Self: damage ×1.06 while own Attack speed ≥ 120
-  > Self: damage ×1.06 while own Attack speed ≥ 140
-  > Self: damage ×1.06 while own Attack speed ≥ 160
-  > Self: damage ×1.06 while own Attack speed ≥ 180
-  > Self: damage ×1.06 while own Attack speed ≥ 200
-  > Self: damage ×1.06 while own Attack speed ≥ 220
-  > Self: damage ×1.06 while own Attack speed ≥ 240
-  > Self: damage ×1.05 while own Attack speed ≥ 260
-  > Self: damage ×1.05 while own Attack speed ≥ 280
-  > Self: damage ×1.06 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 300
   > Each time attacked, self: ATK +25%, doesn't stack, grows by that amount each time it is attacked, for 20s, up to 150%
   > Each time attacked, self: DEF +25%, doesn't stack, grows by that amount each time it is attacked, for 20s, up to 150%
   > Each time attacked, self: Attack speed +25%, doesn't stack, grows by that amount each time it is attacked, for 20s, up to 150%
@@ -13173,7 +13254,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Splash damage rate +400%, doesn't stack
   > Self: Max HP +70%, doesn't stack
   > Enemies in range: Move speed −70%, doesn't stack
-  > Self: damage ×2
+  > Self: damage dealt ×2
   > Self: ATK +40%, stacks
 
 ## card 3131 · stratagem stratagem#4131 破壊の四連電砲
@@ -13191,7 +13272,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #4440
   > Self: transforms, for 40s
   > Target: damage dealt +120%
-  > Target: unit effect type 2 #103 25, grows by that amount each trigger, for 15s, up to 100
+  > Target: on the unit it hits: DEF −25%, doesn't stack, grows by that amount each trigger, for 15s, up to 100%
 
 ## card 3133 · stratagem stratagem#8425 アリマタヤの盾
 ```
@@ -13331,7 +13412,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Targets +99, stacks
   > Self: damage taken −70%
   > The castle girl named in the text: damage taken −70%
-  > Castle girls in range: damage ×1.2
+  > Castle girls in range: damage dealt ×1.2
   > Castle girls in range: ATK +200, stacks
   > Castle girls in range: DEF +200, stacks
 
@@ -13367,7 +13448,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Targets +99, stacks
   > Self: damage taken −70%
   > The castle girl named in the text: damage taken −70%
-  > Castle girls in range: damage ×1.3
+  > Castle girls in range: damage dealt ×1.3
   > Castle girls in range: ATK +250, stacks
   > Castle girls in range: DEF +250, stacks
 
@@ -13423,11 +13504,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +60%, doesn't stack
   > Self: Attack gap −60%, doesn't stack
   > Self: Targets +1, stacks
-  > Self: damage ×1.3
+  > Self: damage dealt ×1.3
   > Own tokens: ATK +60%, doesn't stack
   > Own tokens: Attack gap −60%, doesn't stack
   > Own tokens: Targets +1, stacks
-  > Own tokens: damage ×1.3
+  > Own tokens: damage dealt ×1.3
   > Own tokens: HP: on
 
 ## card 3161 · stratagem stratagem#3161 湯霞の大蛇
@@ -13899,7 +13980,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Blast radius +100%, doesn't stack, for 30s
   > Self: attack properties (add): magic (ignores DEF), ranged, anti-yokai, for 30s
   > Self: transforms, for 30s
-  > Target: damage ×3
+  > Target: damage dealt ×3
 
 ## card 995 · stratagem stratagem#8103 自由の翼
 ```
@@ -14023,11 +14104,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99438
   > Target: Direct-hit bonus +350%, doesn't stack
   > Target: Splash damage rate +250%, doesn't stack
-  > Target: damage ×1.08 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.08 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 30%
   > Target: Direct-hit bonus +450%, doesn't stack, at giantification stage 5
   > Target: Splash damage rate +350%, doesn't stack, at giantification stage 5
   > Target: ATK +70%, doesn't stack, at giantification stage 5
@@ -14039,7 +14120,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99439
   > Target: Direct-hit bonus +350%, doesn't stack
   > Target: Splash damage rate +100%, doesn't stack
-  > Target: unit effect type 2 #301 75, for 5s
+  > Target: on the unit it hits: Move speed −75%, doesn't stack, for 5s
   > Units in the target's range: damage taken −50%
   > Units in the target's range: damage taken −50%
   > Units in the target's range: damage taken −50%
@@ -14073,15 +14154,38 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99438
   > Target: Direct-hit bonus +350%, doesn't stack
   > Target: Splash damage rate +250%, doesn't stack
-  > Target: damage ×1.08 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.08 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 30%
   > Target: Direct-hit bonus +450%, doesn't stack, at giantification stage 5
   > Target: Splash damage rate +350%, doesn't stack, at giantification stage 5
   > Target: ATK +70%, doesn't stack, at giantification stage 5
   > Units in the target's range: damage taken +50%
+
+## card 997 · stratagem stratagem#20003 能力開発:念動使い
+```
+40秒間対象の射程1.4倍､標的に3.5倍､その周囲に2倍の
+防御無視攻撃を行い､5秒間移動速度75%低下
+射程内の味方の被ダメージ50%軽減(自分のみ)
+```
+- [data-only] 1.4倍､標的に3.5倍､そ
+- [data-only] 5倍､その周囲に2倍の
+
+  > Self: Range ×1.4, doesn't stack, for 40s
+  > Self: attack properties (add): DEF ignore, direct-hit bonus, for 40s
+  > Self: attack properties (remove): magic (ignores DEF), anti-yokai, for 40s
+  > Self: missile #99422
+  > Self: missile #99439
+  > Target: Direct-hit bonus +350%, doesn't stack
+  > Target: Splash damage rate +100%, doesn't stack
+  > Target: on the unit it hits: Move speed −75%, doesn't stack, for 5s
+  > Units in the target's range: damage taken −50%
+  > Units in the target's range: damage taken −50%
+  > Units in the target's range: damage taken −50%
+  > Target: Blast radius +50%, doesn't stack, at giantification stage 5
+  > Target: ATK +70%, doesn't stack, at giantification stage 5
 
 ## card 997 · stratagem stratagem#20006 超能力開発:電撃使い
 ```
@@ -14099,15 +14203,38 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99438
   > Target: Direct-hit bonus +400%, doesn't stack
   > Target: Splash damage rate +300%, doesn't stack
-  > Target: damage ×1.08 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.08 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 30%
   > Target: Direct-hit bonus +500%, doesn't stack, at giantification stage 5
   > Target: Splash damage rate +400%, doesn't stack, at giantification stage 5
   > Target: ATK +80%, doesn't stack, at giantification stage 5
   > Units in the target's range: damage taken +50%
+
+## card 997 · stratagem stratagem#20007 超能力開発:念動使い
+```
+40秒間対象の射程1.4倍､標的に4倍､その周囲に2倍の
+防御無視攻撃を行い､10秒間移動速度75%低下
+射程内の味方の被ダメージ50%軽減(自分のみ)
+```
+- [data-only] 1.4倍､標的に4倍､そ
+- [data-only] 4倍､その周囲に2倍の
+
+  > Self: Range ×1.4, doesn't stack, for 40s
+  > Self: attack properties (add): DEF ignore, direct-hit bonus, for 40s
+  > Self: attack properties (remove): magic (ignores DEF), anti-yokai, for 40s
+  > Self: missile #99422
+  > Self: missile #99439
+  > Target: Direct-hit bonus +400%, doesn't stack
+  > Target: Splash damage rate +100%, doesn't stack
+  > Target: on the unit it hits: Move speed −75%, doesn't stack, for 10s
+  > Units in the target's range: damage taken −50%
+  > Units in the target's range: damage taken −50%
+  > Units in the target's range: damage taken −50%
+  > Target: Blast radius +50%, doesn't stack, at giantification stage 5
+  > Target: ATK +80%, doesn't stack, at giantification stage 5
 
 ## card 9241 · special special#99241 学生寮のルームメイト
 ```
@@ -14492,15 +14619,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] ージが上昇(最大1.5倍)
   > On hit, the enemy it attacks: Move speed −60%, doesn't stack, for 3s
   > Enemies in range: Move speed −40%, doesn't stack
-  > Self: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.04 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.04 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.04 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 750
-  > Self: damage ×1.05 against enemies with Move speed ≤ 500
-  > Self: damage ×1.06 against enemies with Move speed ≤ 400
-  > Self: damage ×1.06 against enemies with Move speed ≤ 250
-  > Self: damage ×1.06 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 150
 
 ## card 124 · stratagem stratagem#124 物見櫓
 ```
@@ -14627,8 +14754,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 秒間対象の攻撃が1.6倍
 耐
   > Target: ATK +60%, doesn't stack, for 40s
-  > Target: damage ×1.2 while own Current HP ≥ 80%
-  > Target: damage ×1.2 while own Current HP ≥ 100%
+  > Target: damage dealt ×1.2 while own Current HP ≥ 80%
+  > Target: damage dealt ×1.2 while own Current HP ≥ 100%
 
 ## card 162 · stratagem stratagem#162 海賊
 ```
@@ -14756,8 +14883,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 秒間対象の攻撃が1.6倍
 耐
   > Target: ATK +60%, doesn't stack, for 40s
-  > Target: damage ×1.4 while own Current HP ≤ 50%
-  > Target: damage ×1.4 while own Current HP ≤ 25%
+  > Target: damage dealt ×1.4 while own Current HP ≤ 50%
+  > Target: damage dealt ×1.4 while own Current HP ≤ 25%
 
 ## card 197 · stratagem stratagem#11197 海女の剣舞
 ```
@@ -14769,7 +14896,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range −90%, doesn't stack, for 20s
   > Self: Targets +5, stacks, for 20s
   > Self: ATK +200%, doesn't stack, for 20s
-  > Target: damage ×2 against enemies with ATK ≤ 300
+  > Target: damage dealt ×2 against enemies with ATK ≤ 300
 
 ## card 198 · stratagem stratagem#198 招福　招き猫
 ```
@@ -15038,16 +15165,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] ージが上昇(最大1.5倍)
 
   > Self: Attack speed +6%, stacks, per giantification
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.05 while own Attack speed ≥ 160
-  > Self: damage ×1.05 while own Attack speed ≥ 180
-  > Self: damage ×1.04 while own Attack speed ≥ 200
-  > Self: damage ×1.04 while own Attack speed ≥ 220
-  > Self: damage ×1.04 while own Attack speed ≥ 240
-  > Self: damage ×1.04 while own Attack speed ≥ 260
-  > Self: damage ×1.04 while own Attack speed ≥ 280
-  > Self: damage ×1.05 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 300
 
 ## card 228 · stratagem stratagem#11228 河童伝説
 ```
@@ -15225,7 +15352,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Max HP −80%, doesn't stack, for 40s
   > Self: ATK +100%, doesn't stack, for 40s
   > Self: Range ×1.5, doesn't stack, for 40s
-  > Target: damage ×8
+  > Target: damage dealt ×8
 
 ## card 253 · stratagem stratagem#253 浜松出世城
 ```
@@ -15432,7 +15559,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Area +50%, doesn't stack
   > All castle girls: Crowd-control immunity: gains Paralysis
   > All Loire Valley castle girls: ATK +100%, doesn't stack
-  > Great Magic, all enemies: damage 0.4× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage, inflicts Paralysis), for 15s
+  > Great Magic, all enemies: damage 0.4× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage, inflicts Paralysis), for 15s
 
 ## card 280 · stratagem stratagem#280 千万狭間
 ```
@@ -15717,12 +15844,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: DEF +70%, doesn't stack
   > Self: damage taken −75%
   > Self: Block +5, stacks
-  > Self: damage ×1.13 against enemies with ATK ≤ 5000
-  > Self: damage ×1.12 against enemies with ATK ≤ 2500
-  > Self: damage ×1.12 against enemies with ATK ≤ 2000
-  > Self: damage ×1.12 against enemies with ATK ≤ 1500
-  > Self: damage ×1.13 against enemies with ATK ≤ 1000
-  > Self: damage ×1.13 against enemies with ATK ≤ 500
+  > Self: damage dealt ×1.13 against enemies with ATK ≤ 5000
+  > Self: damage dealt ×1.12 against enemies with ATK ≤ 2500
+  > Self: damage dealt ×1.12 against enemies with ATK ≤ 2000
+  > Self: damage dealt ×1.12 against enemies with ATK ≤ 1500
+  > Self: damage dealt ×1.13 against enemies with ATK ≤ 1000
+  > Self: damage dealt ×1.13 against enemies with ATK ≤ 500
   > Enemies in range: ATK −25%, stacks
 
 ## card 320 · specialty specialty#11320 打遍天上天下無敵手
@@ -16198,8 +16325,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: Blast radius +200%, doesn't stack, for 50s
   > Target: Attack speed +100%, doesn't stack, for 50s
   > Target: DEF ignore +100%, doesn't stack, for 50s
-  > Target: unit effect type 19 #19 20, grows by that amount every 10 triggers (seconds when timed), up to 100
-  > Target: unit effect type 19 #33 20, grows by that amount every 10 triggers (seconds when timed), up to 100
+  > Target: every second: DEF ignore −20%, doesn't stack, grows by that amount every 10 triggers (seconds when timed), up to 100%
+  > Target: every second: Attack speed −20%, doesn't stack, grows by that amount every 10 triggers (seconds when timed), up to 100%
 
 ## card 375 · specialty specialty#11375 ストーン・オブ・スクーン
 ```
@@ -16758,7 +16885,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 35秒間対
   > Target: missile #260: hits 3 times, 0.2s apart
-  > Target: damage ×1.2
+  > Target: damage dealt ×1.2
 
 ## card 449 · specialty specialty#9449 晴天の朱夏備え
 ```
@@ -17015,12 +17142,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Self: Range +50, stacks
   > Castle girls in range: Range +25, stacks
-  > Self: damage ×1.08 against enemies with DEF ≤ 1000
-  > Self: damage ×1.08 against enemies with DEF ≤ 750
-  > Self: damage ×1.07 against enemies with DEF ≤ 500
-  > Self: damage ×1.07 against enemies with DEF ≤ 250
-  > Self: damage ×1.07 against enemies with DEF ≤ 100
-  > Self: damage ×1.07 against enemies with DEF ≤ 50
+  > Self: damage dealt ×1.08 against enemies with DEF ≤ 1000
+  > Self: damage dealt ×1.08 against enemies with DEF ≤ 750
+  > Self: damage dealt ×1.07 against enemies with DEF ≤ 500
+  > Self: damage dealt ×1.07 against enemies with DEF ≤ 250
+  > Self: damage dealt ×1.07 against enemies with DEF ≤ 100
+  > Self: damage dealt ×1.07 against enemies with DEF ≤ 50
   > Self: damage dealt +50%
   > Castle girls in range: damage dealt +30%
 
@@ -17648,7 +17775,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 秒間対象の攻撃が1.5倍、2
   > Self: ATK +50%, doesn't stack, for 90s
   > Self: transforms, for 90s
-  > Target: unit effect type 19 #213 3, grows by that amount every 2 triggers (seconds when timed), up to 90
+  > Target: every second: Max HP −3%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 90%
 
 ## card 571 · stratagem stratagem#571 太閤鷹
 ```
@@ -17659,7 +17786,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 攻撃の貫通距離が1.5倍
 対
   > Self: Blast radius +50%, doesn't stack, for 15s
-  > Target: unit effect type 2 #302 -3000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -3000, for 0.1s
 
 ## card 573 · specialty specialty#9573 妖精の岩
 ```
@@ -17804,19 +17931,6 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack method (攻撃方法) → #101
   > Self: Missile #90: Move speed set to -2000
 
-## card 586 · stratagem stratagem#586 打遍蹴下
-```
-25秒間対象の攻撃が2倍、与ダメージが1.4倍
-2連続で攻撃し、敵を後退させる
-(自分のみが対象)
-```
-- [data-only] 倍、与ダメージが1.4倍
-2
-  > Self: ATK +100%, doesn't stack, for 25s
-  > Self: transforms, for 25s
-  > Target: unit effect type 2 #302 -2000, for 80ms
-  > Target: damage dealt +40%
-
 ## card 587 · specialty specialty#9587 パンプキン・ツェペシュ
 ```
 自身の攻撃が45％､射程が50上昇
@@ -17932,15 +18046,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Self: ATK +50%, doesn't stack
   > Self: Attack speed +50%, doesn't stack
-  > Self: damage ×1.05 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 750
-  > Self: damage ×1.04 against enemies with Move speed ≤ 500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 400
-  > Self: damage ×1.05 against enemies with Move speed ≤ 250
-  > Self: damage ×1.05 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 150
   > Enemies in range: Attack speed −50%, doesn't stack
 
 ## card 598 · stratagem stratagem#598 マイェスタス・カロリーナ
@@ -18044,7 +18158,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 秒間対象の攻撃が1.7倍
 3
   > Self: ATK +70%, doesn't stack, for 25s
-  > Target: unit effect type 11 #33 5, grows by that amount every 3 triggers (seconds when timed), up to 20
+  > Target: each attack it makes: Attack speed −5%, doesn't stack, grows by that amount every 3 triggers (seconds when timed), up to 20%
 
 ## card 608 · stratagem stratagem#608 春雷歳徳
 ```
@@ -18362,6 +18476,32 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: HP drain (% of damage dealt) +50%, doesn't stack, for 40s
   > Target: Special attack stock set to 1, for 35ms
 
+## card 640 · stratagem stratagem#640 モンテ・エポメオ
+```
+40秒間対象の攻撃速度と特殊攻撃の
+ゲージ蓄積量が2倍、攻撃が敵を少し後退させる
+特殊攻撃が敵の防御を80%無視(自分のみが対象)
+```
+- [data-only] 
+ゲージ蓄積量が2倍、攻
+  > Self: Attack speed +100%, doesn't stack, for 40s
+  > Self: Special gauge gain when hit +100%, doesn't stack, for 40s
+  > Target: on the unit it hits: Move speed set to -1000, for 0.1s
+  > Target: unit effect type 14 #16 80
+
+## card 640 · stratagem stratagem#9640 イスキアの岩漿
+```
+45秒間対象の攻撃速度と特殊攻撃の
+ゲージ蓄積量が2倍、攻撃が敵を少し後退させる
+特殊攻撃が敵の防御を90%無視(自分のみが対象)
+```
+- [data-only] 
+ゲージ蓄積量が2倍、攻
+  > Self: Attack speed +100%, doesn't stack, for 45s
+  > Self: Special gauge gain when hit +100%, doesn't stack, for 45s
+  > Target: on the unit it hits: Move speed set to -1000, for 0.1s
+  > Target: unit effect type 14 #16 90
+
 ## card 641 · stratagem stratagem#641 センナケリブ・プリズム
 ```
 範囲内の敵に攻撃の3.5倍のダメージを与え
@@ -18461,7 +18601,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: ATK +70%, doesn't stack, for 30s
   > Target: Range ×1.2, doesn't stack, for 30s
   > Target: damage taken +50%
-  > Target: damage ×2 against enemies with Current HP ≤ 30%
+  > Target: damage dealt ×2 against enemies with Current HP ≤ 30%
 
 ## card 653 · specialty specialty#9653 真夏の大帝
 ```
@@ -19770,6 +19910,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Enemies in range: damage taken +50%
   > Self: Can't be targeted: on
 
+## card 757 · stratagem stratagem#757 邪鬼祓いの鬼瓦
+```
+30秒間対象の範囲攻撃の範囲が2倍
+攻撃が術攻撃になり、攻撃した敵の攻撃速度が
+5秒間50%低下(自分のみが対象)
+```
+- [data-only] 範囲攻撃の範囲が2倍
+攻
+  > Self: attack properties (add): magic (ignores DEF), ranged, anti-yokai, for 30s
+  > Self: Blast radius +100%, doesn't stack, for 30s
+  > Target: on the unit it hits: Attack speed −50%, doesn't stack, for 5s
+
 ## card 758 · stratagem stratagem#758 天運の桶狭間
 ```
 30秒間対象の攻撃が1.7倍
@@ -19893,12 +20045,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] ージが上昇(最大1.8倍)
 
   > Self: ATK +30%, doesn't stack
-  > Self: damage ×1.1 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 15%
   > All enemies: damage taken +20%
 
 ## card 767 · stratagem stratagem#767 ニュクスの夜霧
@@ -19922,12 +20074,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] ダメが上昇(最大2倍)
 
   > Self: ATK +35%, doesn't stack
-  > Self: damage ×1.12 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.12 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.13 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.13 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.12 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.13 against enemies with Current HP ≤ 15%
   > Self: Stratagem cooldown −5s, stacks
   > All enemies: damage taken +25%
 
@@ -20023,7 +20175,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Giantify Ki −50%, doesn't stack, for 30s
   > Self: Attack gap +30%, doesn't stack, for 30s
   > Self: transforms, for 30s
-  > Target: damage ×4
+  > Target: damage dealt ×4
   > Self: Missile #4024
 
 ## card 778 · stratagem stratagem#778 上野御成街道
@@ -20714,7 +20866,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 (
   > Self: Blast radius +100%, doesn't stack, for 40s
   > Self: attack properties (add): DEF ignore, for 40s
-  > Target: damage ×2
+  > Target: damage dealt ×2
   > Target: unit effect type 13 #6 40, for 10s
 
 ## card 841 · stratagem stratagem#841 琵琶聖域の加護
@@ -20777,7 +20929,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 対象の攻撃速度が2.5倍、攻
   > Self: Attack speed +150%, doesn't stack, for 30s
   > Self: Attack gap −80%, doesn't stack, for 30s
-  > Target: damage ×1.7 against enemies with Current HP ≤ 50%
+  > Target: damage dealt ×1.7 against enemies with Current HP ≤ 50%
 
 ## card 846 · stratagem stratagem#8110 蒼吹・剛射
 ```
@@ -20790,7 +20942,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.5, doesn't stack, for 30s
   > Self: Attack gap +50%, doesn't stack, for 30s
   > Self: missile #1036
-  > Target: damage ×1.8 against enemies with Current HP ≥ 50%
+  > Target: damage dealt ×1.8 against enemies with Current HP ≥ 50%
 
 ## card 846 · stratagem stratagem#8117 蒼吹・速撃
 ```
@@ -20801,7 +20953,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 対象の攻撃速度が2.5倍、攻
   > Self: Attack speed +150%, doesn't stack, for 30s
   > Self: Attack gap −80%, doesn't stack, for 30s
-  > Target: damage ×1.7 against enemies with Current HP ≤ 60%
+  > Target: damage dealt ×1.7 against enemies with Current HP ≤ 60%
 
 ## card 846 · stratagem stratagem#8118 蒼吹・剛撃
 ```
@@ -20814,7 +20966,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.5, doesn't stack, for 30s
   > Self: Attack gap +30%, doesn't stack, for 30s
   > Self: missile #1036
-  > Target: damage ×1.8 against enemies with Current HP ≥ 40%
+  > Target: damage dealt ×1.8 against enemies with Current HP ≥ 40%
 
 ## card 847 · specialty specialty#9847 忍の浮き城
 ```
@@ -21084,6 +21236,34 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Own tokens: DEF ignore +40%, doesn't stack
   > All melee castle girls: DEF ignore +40%, doesn't stack
 
+## card 871 · stratagem stratagem#871 蛇竜の新年祭
+```
+対象の耐久が与ダメージの40%回復
+時間経過で攻撃と耐久と防御が上昇(上限100%)
+射程が上昇(上限30%)。(自分のみ。効果時間無限)
+```
+- [data-only] 射程が上昇(上限30%)。
+  > Self: HP drain (% of damage dealt) +40%, doesn't stack
+  > Target: every second: ATK +2%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 100%
+  > Target: every second: Max HP +2%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 100%
+  > Target: every second: DEF +2%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 100%
+  > Target: every second: Range ×1.01, doesn't stack, grows by that amount every 4 triggers (seconds when timed), up to ×1.3
+
+## card 871 · stratagem stratagem#9871 邪竜の新年祭
+```
+対象が与ダメージの50%回復､妖怪に対して攻撃が1.5倍
+時間経過で耐久と攻撃と防御上昇(上限150%)
+射程が上昇(上限40%)。(自分のみ。効果時間無限)
+```
+- [data-only] 射程が上昇(上限40%)。
+  > Self: HP drain (% of damage dealt) +50%, doesn't stack
+  > Self: attack properties (add): anti-yokai
+  > Self: Anti-yokai bonus ×1.5, doesn't stack
+  > Target: every second: ATK +3%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 150%
+  > Target: every second: Max HP +3%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 150%
+  > Target: every second: DEF +3%, doesn't stack, grows by that amount every 2 triggers (seconds when timed), up to 150%
+  > Target: every second: Range ×1.01, doesn't stack, grows by that amount every 4 triggers (seconds when timed), up to ×1.4
+
 ## card 873 · specialty specialty#9873 冥府の暁光
 ```
 自身の耐久が低い程与えるダメージが上昇(最大1.8倍)
@@ -21092,13 +21272,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only, other item] ージが上昇(最大1.8倍)
 
-  > Self: damage ×1.05
-  > Self: damage ×1.07 while own Current HP ≤ 90%
-  > Self: damage ×1.1 while own Current HP ≤ 75%
-  > Self: damage ×1.1 while own Current HP ≤ 60%
-  > Self: damage ×1.11 while own Current HP ≤ 45%
-  > Self: damage ×1.11 while own Current HP ≤ 30%
-  > Self: damage ×1.12 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.05
+  > Self: damage dealt ×1.07 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 15%
   > All New Year castle girls: Attack gap −35%, doesn't stack
   > All Hell castle girls: Attack gap −35%, doesn't stack
   > All New Year castle girls: Ki refund on retreat (% of deploy Ki) +40%, doesn't stack
@@ -21114,7 +21294,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 攻撃と与ダメージ1.8倍
 射
-  > Target: missile #2114: damage 0.6× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Target: missile #2114: damage 0.6× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Enemies in range: Move speed −50%, doesn't stack, for 30s
   > Target: Targets +3, stacks
   > Target: Range ×1.4, doesn't stack
@@ -21129,13 +21309,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージが上昇(最大2倍)
 
-  > Self: damage ×1.08
-  > Self: damage ×1.1 while own Current HP ≤ 90%
-  > Self: damage ×1.1 while own Current HP ≤ 75%
-  > Self: damage ×1.1 while own Current HP ≤ 60%
-  > Self: damage ×1.1 while own Current HP ≤ 45%
-  > Self: damage ×1.14 while own Current HP ≤ 30%
-  > Self: damage ×1.14 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.08
+  > Self: damage dealt ×1.1 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.14 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.14 while own Current HP ≤ 15%
   > All New Year castle girls: Attack gap −40%, doesn't stack
   > All Hell castle girls: Attack gap −40%, doesn't stack
   > All New Year castle girls: Ki refund on retreat (% of deploy Ki) +45%, doesn't stack
@@ -21153,7 +21333,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 攻撃と与ダメージ2倍
 射
-  > Target: missile #2114: damage 0.6× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Target: missile #2114: damage 0.6× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Enemies in range: Move speed −50%, doesn't stack, for 30s
   > Target: Targets +3, stacks
   > Target: Range ×1.5, doesn't stack
@@ -21198,19 +21378,6 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All castle girls: ATK +150, stacks
   > All New Year castle girls: Range +50, stacks
   > All New Year castle girls: ATK +150, stacks
-
-## card 874 · stratagem stratagem#8143 辰・偉鑒大門
-```
-30秒間対象の防御と槍の貫通距離が2倍
-攻撃した敵の移動速度を1秒間0にする
-対象の射程内の城娘の防御が1.8倍(自分のみが対象)
-```
-- [data-only] 内の城娘の防御が1.8倍(自
-  > Lasts 30s; effects listed below
-  > Target: Blast radius +100%, doesn't stack
-  > Target: unit effect type 2 #302 0, for 1s
-  > Target: DEF +100%, doesn't stack
-  > Units in the target's range: DEF +80%, doesn't stack
 
 ## card 875 · stratagem stratagem#8145 新・忠信
 ```
@@ -21257,7 +21424,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 敵に対する攻撃が1倍にな
   > Self: Targets set to 99, for 25s
   > Self: attack properties (remove): vs flying, for 25s
-  > Target: damage ×1.8
+  > Target: damage dealt ×1.8
 
 ## card 877 · stratagem stratagem#8153 天上のアストラ
 ```
@@ -21268,7 +21435,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 敵に対する攻撃が1倍にな
   > Self: Targets set to 99, for 30s
   > Self: attack properties (remove): vs flying, for 30s
-  > Target: damage ×2
+  > Target: damage dealt ×2
 
 ## card 878 · on-defeat on-defeat#878 彼岸の花殻
 ```
@@ -21277,7 +21444,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 与え
 現在耐久を20%減少
-  > Field effect #42: damage ×5 ATK; damage 0.2× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage); Move speed set to 0, for 5s
+  > Field effect #42: damage ×5 ATK; damage 0.2× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage); Move speed set to 0, for 5s
 
 ## card 878 · stratagem stratagem#878 此岸の刈刃
 ```
@@ -21299,7 +21466,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 与え
 現在耐久を20%減少
-  > Field effect #43: damage ×6 ATK; damage 0.2× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage); Move speed set to 0, for 6s
+  > Field effect #43: damage ×6 ATK; damage 0.2× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage); Move speed set to 0, for 6s
 
 ## card 878 · stratagem stratagem#9878 此岸の冥刃
 ```
@@ -21495,8 +21662,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All Splendor castle girls: ATK +80, stacks
   > Self: Splash damage rate −20%, doesn't stack, only at max giantification (最大化)
   > Self: Missile #4130
-  > Self: damage ×1.3, only at max giantification (最大化)
-  > Self: damage ×1.6
+  > Self: damage dealt ×1.3, only at max giantification (最大化)
+  > Self: damage dealt ×1.6
 
 ## card 6887 · specialty specialty#97887 花香の大宰
 ```
@@ -21515,8 +21682,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All Plain castle girls: ATK +100, stacks
   > All Splendor castle girls: ATK +100, stacks
   > Self: Missile #4130
-  > Self: damage ×1.4, only at max giantification (最大化)
-  > Self: damage ×1.8
+  > Self: damage dealt ×1.4, only at max giantification (最大化)
+  > Self: damage dealt ×1.8
 
 ## card 888 · specialty specialty#10888 日向の大都
 ```
@@ -21754,8 +21921,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 発動時､全双剣､鞭城娘の特殊攻撃ゲージが即時回復
 ```
 - [data-only] 射程が1.8倍､4連続
-  > All dual-sword castle girls: damage 0× own max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
-  > All Whip castle girls: damage 0× own max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
+  > All dual-sword castle girls: damage 0× the target's max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
+  > All Whip castle girls: damage 0× the target's max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
   > All dual-sword castle girls: Special gauge set to 1000, for 35ms
   > All Whip castle girls: Special gauge set to 1000, for 35ms
   > All castle girls except self: ATK +25% of the giver's ATK
@@ -21774,11 +21941,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] ージが上昇(最大1.4倍)
 
   > Self: DEF ignore +40%, doesn't stack
-  > Self: damage ×1.07 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.07 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.07 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.08 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.08 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≥ 30%
   > Self: ATK +60%, doesn't stack
   > Castle girls in range: ATK +35%, doesn't stack
 
@@ -21790,11 +21957,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージが上昇(最大1.5倍)｡
   > Self: DEF ignore +50%, doesn't stack
-  > Self: damage ×1.08 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.09 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.09 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.09 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.09 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≥ 30%
   > All enemies: DEF −30%, doesn't stack
   > Self: ATK +70%, doesn't stack
   > Castle girls in range: ATK +40%, doesn't stack
@@ -21807,15 +21974,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージが上昇(最大1.4倍)
 
-  > Self: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.04 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.04 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.04 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.04 against enemies with Move speed ≤ 750
-  > Self: damage ×1.04 against enemies with Move speed ≤ 500
-  > Self: damage ×1.04 against enemies with Move speed ≤ 400
-  > Self: damage ×1.05 against enemies with Move speed ≤ 250
-  > Self: damage ×1.05 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 150
   > Self: DEF ignore +40%, doesn't stack
   > Enemies in range: damage taken +30%
 
@@ -21980,7 +22147,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 内の城娘の攻撃が1.2倍(同
   > Self: barrier (バリア) blocks up to 20000 damage, for 50s
   > Self: transforms, for 50s
-  > Target: damage ×1.5
+  > Target: damage dealt ×1.5
   > Units in the target's range: ATK +20%, stacks
 
 ## card 913 · stratagem stratagem#9913 大海より生まれし者
@@ -21993,7 +22160,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range +80, stacks, for 50s
   > Self: barrier (バリア) blocks up to 20000 damage, for 50s
   > Self: transforms, for 50s
-  > Target: damage ×1.7
+  > Target: damage dealt ×1.7
   > Units in the target's range: ATK +20%, stacks
 
 ## card 6913 · specialty specialty#96913 夏海のアプサラス
@@ -22100,6 +22267,20 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All melee castle girls: ATK +120, stacks
   > All Summer castle girls: ATK +120, stacks
 
+## card 916 · stratagem stratagem#916 炎天下の試練
+```
+40秒間対象の攻撃が敵の防御を無視
+攻撃速度と特殊攻撃時の攻撃が2倍
+攻撃した敵の移動速度を少しの間0にする(自分のみ)
+```
+- [data-only] 殊攻撃時の攻撃が2倍
+攻
+  > Lasts 40s; effects listed below
+  > Target: attack properties (add): DEF ignore
+  > Target: Attack speed +100%, doesn't stack
+  > Target: unit effect type 14 #1 100
+  > Target: on the unit it hits: Move speed set to 0, for 0.3s
+
 ## card 916 · specialty specialty#10916 夏夜の十二神
 ```
 自身の攻撃対象が2増加、攻撃後の隙が35%短縮
@@ -22115,6 +22296,20 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All Summer castle girls: Range +40, stacks
   > All melee castle girls: ATK +150, stacks
   > All Summer castle girls: ATK +150, stacks
+
+## card 916 · stratagem stratagem#9916 宵月夜の試練
+```
+45秒間対象の攻撃が敵の防御を無視
+攻撃速度と特殊攻撃時の攻撃が2倍
+攻撃した敵の移動速度を1秒間0にする(自分のみ)
+```
+- [data-only] 殊攻撃時の攻撃が2倍
+攻
+  > Lasts 45s; effects listed below
+  > Target: attack properties (add): DEF ignore
+  > Target: Attack speed +100%, doesn't stack
+  > Target: unit effect type 14 #1 100
+  > Target: on the unit it hits: Move speed set to 0, for 1s
 
 ## card 917 · specialty specialty#9917 苛烈なる夏
 ```
@@ -22243,13 +22438,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Lasts 30s; effects listed below
   > Target: Range ×1.3, doesn't stack
   > Target: Can't be destroyed (HP stays at 1): on
-  > Target: damage ×1.06
-  > Target: damage ×1.06 while own Current HP ≤ 90%
-  > Target: damage ×1.06 while own Current HP ≤ 75%
-  > Target: damage ×1.06 while own Current HP ≤ 60%
-  > Target: damage ×1.06 while own Current HP ≤ 45%
-  > Target: damage ×1.07 while own Current HP ≤ 30%
-  > Target: damage ×1.07 while own Current HP ≤ 15%
+  > Target: damage dealt ×1.06
+  > Target: damage dealt ×1.06 while own Current HP ≤ 90%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 75%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 60%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 45%
+  > Target: damage dealt ×1.07 while own Current HP ≤ 30%
+  > Target: damage dealt ×1.07 while own Current HP ≤ 15%
 
 ## card 921 · stratagem stratagem#9921 抗う不屈の精神
 ```
@@ -22263,13 +22458,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: Range ×1.5, doesn't stack
   > Target: damage dealt +50%
   > Target: Can't be destroyed (HP stays at 1): on
-  > Target: damage ×1.06
-  > Target: damage ×1.06 while own Current HP ≤ 90%
-  > Target: damage ×1.06 while own Current HP ≤ 75%
-  > Target: damage ×1.06 while own Current HP ≤ 60%
-  > Target: damage ×1.06 while own Current HP ≤ 45%
-  > Target: damage ×1.07 while own Current HP ≤ 30%
-  > Target: damage ×1.07 while own Current HP ≤ 15%
+  > Target: damage dealt ×1.06
+  > Target: damage dealt ×1.06 while own Current HP ≤ 90%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 75%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 60%
+  > Target: damage dealt ×1.06 while own Current HP ≤ 45%
+  > Target: damage dealt ×1.07 while own Current HP ≤ 30%
+  > Target: damage dealt ×1.07 while own Current HP ≤ 15%
 
 ## card 922 · stratagem stratagem#8190 奪・侵掠如火
 ```
@@ -22281,16 +22476,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 (最大2.2倍)､
   > Enemies in range: Can't be blocked: off, for 40s
   > Target: unit effect type 16 #3 50
-  > Target: damage ×1.08 while own Block ≥ 1
-  > Target: damage ×1.08 while own Block ≥ 2
-  > Target: damage ×1.08 while own Block ≥ 3
-  > Target: damage ×1.08 while own Block ≥ 4
-  > Target: damage ×1.09 while own Block ≥ 5
-  > Target: damage ×1.09 while own Block ≥ 6
-  > Target: damage ×1.09 while own Block ≥ 7
-  > Target: damage ×1.09 while own Block ≥ 8
-  > Target: damage ×1.08 while own Block ≥ 9
-  > Target: damage ×1.08 while own Block ≥ 10
+  > Target: damage dealt ×1.08 while own Block ≥ 1
+  > Target: damage dealt ×1.08 while own Block ≥ 2
+  > Target: damage dealt ×1.08 while own Block ≥ 3
+  > Target: damage dealt ×1.08 while own Block ≥ 4
+  > Target: damage dealt ×1.09 while own Block ≥ 5
+  > Target: damage dealt ×1.09 while own Block ≥ 6
+  > Target: damage dealt ×1.09 while own Block ≥ 7
+  > Target: damage dealt ×1.09 while own Block ≥ 8
+  > Target: damage dealt ×1.08 while own Block ≥ 9
+  > Target: damage dealt ×1.08 while own Block ≥ 10
 
 ## card 925 · stratagem stratagem#925 海に浮かぶ城
 ```
@@ -22304,8 +22499,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: Attack gap −40%, doesn't stack
   > Target: ATK +15%, doesn't stack, per enemy in range, up to 100%
   > Target: Attack speed +15%, doesn't stack, per enemy in range, up to 100%
-  > Target: unit effect type 2 #301 40, for 3s
-  > Target: unit effect type 2 #33 40, for 3s
+  > Target: on the unit it hits: Move speed −40%, doesn't stack, for 3s
+  > Target: on the unit it hits: Attack speed −40%, doesn't stack, for 3s
 
 ## card 925 · special special#925 願い受ける背
 ```
@@ -22320,7 +22515,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Splash damage rate ×1.3, stacks
   > Self: Blast radius +30%, stacks
   > On hit, the enemy it attacks: Move speed −90%, doesn't stack, for 1s
-  > Self: damage 0× own max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
+  > Self: damage 0× the target's max HP (magic, true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers)
 
 ## card 928 · stratagem stratagem#9928 美しき偽りの刑部姫
 ```
@@ -22332,7 +22527,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Can't be targeted: on, for 30s
   > Self: transforms, for 30s
   > Enemies in range: Attack gap +100%, doesn't stack, for 30s
-  > Target: damage ×6
+  > Target: damage dealt ×6
   > Target: Attack gap +100%, doesn't stack
 
 ## card 929 · specialty specialty#9929 蒼き霊魂
@@ -22440,7 +22635,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 30秒間対
   > Self: missile #4203: hits 2 times, 0.2s apart
-  > Target: damage ×0.6
+  > Target: damage dealt ×0.6
   > Target: attack properties (add): magic (ignores DEF), ranged, anti-yokai
 
 ## card 933 · specialty specialty#10933 玉藻に映る夜月
@@ -22578,13 +22773,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージが上昇(最大1.6倍)
 
-  > Self: damage ×1.07
-  > Self: damage ×1.07 while own Current HP ≤ 90%
-  > Self: damage ×1.07 while own Current HP ≤ 75%
-  > Self: damage ×1.07 while own Current HP ≤ 60%
-  > Self: damage ×1.07 while own Current HP ≤ 45%
-  > Self: damage ×1.08 while own Current HP ≤ 30%
-  > Self: damage ×1.08 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.07
+  > Self: damage dealt ×1.07 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.07 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.08 while own Current HP ≤ 15%
   > Self: Stratagem cooldown −3s, stacks, per times this unit was knocked out (大破), up to 15
   > Self: Redeploy time −60%, doesn't stack
   > Self: Ki refund on retreat (% of deploy Ki) +40%, doesn't stack
@@ -22733,7 +22928,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack attribute: fire, for 30s
   > Self: stat 222: on (the game client never reads it), for 30s
   > Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s
-  > Target: damage ×2
+  > Target: damage dealt ×2
   > Target: Attack gap −40%, doesn't stack, at giantification stage 5
   > Target: Targets +1, stacks, at giantification stage 5
 
@@ -22760,7 +22955,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack attribute: fire, for 30s
   > Self: stat 222: on (the game client never reads it), for 30s
   > Self: missile #4220: inflicts Burn (5s); ATK −10%, doesn't stack, for 5s
-  > Target: damage ×2.2
+  > Target: damage dealt ×2.2
   > Units in the target's range: ATK +200, stacks
   > Target: Attack gap −50%, doesn't stack, at giantification stage 5
   > Target: Targets +2, stacks, at giantification stage 5
@@ -22834,12 +23029,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージが上昇(最大1.5倍)
 
-  > Self: damage ×1.07 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.08 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.08 against enemies with Current HP ≤ 15%
   > Enemies in range: damage taken +30%
   > Great Magic, all enemies: Move speed −80%, doesn't stack, for 10s
   > Great Magic, all enemies: Range −50%, doesn't stack, for 10s
@@ -22852,12 +23047,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only, other item] ージが上昇(最大1.7倍)
 
-  > Self: damage ×1.09 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.09 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.1 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.09 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.1 against enemies with Current HP ≤ 15%
   > Enemies in range: damage taken +30%
   > Great Magic, all enemies: Move speed −80%, doesn't stack, for 15s
   > Great Magic, all enemies: Range −50%, doesn't stack, for 15s
@@ -22887,7 +23082,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #4230: inflicts Freeze (5s); Attack speed −50%, doesn't stack, for 5s; Move speed −50%, doesn't stack, for 5s
   > Self: damage taken −70%, for 20s
   > Target: damage dealt +100%
-  > Target: damage ×1.2
+  > Target: damage dealt ×1.2
 
 ## card 952 · stratagem stratagem#9952 聖夜の白樺
 ```
@@ -22919,7 +23114,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Magic damage reduction set to 50%
   > All Mountain castle girls: DEF +50%, doesn't stack
   > All Mountain castle girls: HP drain (% of damage dealt) +30%, doesn't stack
-  > Self: damage ×1.3
+  > Self: damage dealt ×1.3
 
 ## card 955 · specialty specialty#9955 筑紫の大堤
 ```
@@ -23672,7 +23867,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Enemies in range: Ki per kill +1, doesn't stack, for 40s
   > Target: Splash damage rate +300%, doesn't stack
   > Target: Direct-hit bonus +400%, doesn't stack
-  > Target: damage ×1.25
+  > Target: damage dealt ×1.25
   > Target: stat 222: on (the game client never reads it)
 
 ## card 3014 · stratagem stratagem#8269 神裁の波濤
@@ -23706,8 +23901,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 標的とその周囲に2倍の
 
   > Self: Range ×1.3, doesn't stack, for 45s
-  > Self: missile #3562: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #3563: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #3562: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #3563: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 45s
   > Target: attack properties (add): direct-hit bonus
   > Target: Direct-hit bonus +200%, doesn't stack
@@ -23722,8 +23917,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 標的とその周囲に2.4倍の
 
   > Self: Range ×1.4, doesn't stack, for 45s
-  > Self: missile #3562: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #3563: damage 0.05× own current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #3562: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #3563: damage 0.05× the target's current HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 45s
   > Target: attack properties (add): direct-hit bonus
   > Target: Direct-hit bonus +240%, doesn't stack
@@ -23893,7 +24088,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All castle girls: DEF +30%, doesn't stack
   > Castle girls in range: ATK +40%, doesn't stack
   > Castle girls in range: DEF +40%, doesn't stack
-  > All Splendor castle girls: damage ×1.2
+  > All Splendor castle girls: damage dealt ×1.2
 
 ## card 3019 · specialty specialty#94019 箱館の政権
 ```
@@ -23908,7 +24103,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > All castle girls: DEF +35%, doesn't stack
   > Castle girls in range: ATK +50%, doesn't stack
   > Castle girls in range: DEF +50%, doesn't stack
-  > All Splendor castle girls: damage ×1.25
+  > All Splendor castle girls: damage dealt ×1.25
 
 ## card 3020 · specialty specialty#93020 伊賀流兵術・秘伝
 ```
@@ -23919,16 +24114,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] ージが上昇(上限1.5倍)
 
   > Each attack, self: Attack gap −6%, doesn't stack, grows by that amount each attack, for 10s, up to 60%
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.05 while own Attack speed ≥ 160
-  > Self: damage ×1.05 while own Attack speed ≥ 180
-  > Self: damage ×1.04 while own Attack speed ≥ 200
-  > Self: damage ×1.04 while own Attack speed ≥ 220
-  > Self: damage ×1.04 while own Attack speed ≥ 240
-  > Self: damage ×1.04 while own Attack speed ≥ 260
-  > Self: damage ×1.04 while own Attack speed ≥ 280
-  > Self: damage ×1.05 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.04 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 300
   > Castle girls in range: Range +40, stacks
   > Allies in range: Range +40, stacks
   > Ambush units (token type 1) in range: Range +40, stacks
@@ -23942,16 +24137,16 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] ージが上昇(上限1.7倍)
 
   > Each attack, self: Attack gap −7%, doesn't stack, grows by that amount each attack, for 10s, up to 70%
-  > Self: damage ×1.05 while own Attack speed ≥ 120
-  > Self: damage ×1.05 while own Attack speed ≥ 140
-  > Self: damage ×1.06 while own Attack speed ≥ 160
-  > Self: damage ×1.06 while own Attack speed ≥ 180
-  > Self: damage ×1.06 while own Attack speed ≥ 200
-  > Self: damage ×1.06 while own Attack speed ≥ 220
-  > Self: damage ×1.06 while own Attack speed ≥ 240
-  > Self: damage ×1.06 while own Attack speed ≥ 260
-  > Self: damage ×1.06 while own Attack speed ≥ 280
-  > Self: damage ×1.06 while own Attack speed ≥ 300
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 120
+  > Self: damage dealt ×1.05 while own Attack speed ≥ 140
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 160
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 180
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 200
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 220
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 240
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 260
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 280
+  > Self: damage dealt ×1.06 while own Attack speed ≥ 300
   > Castle girls in range: Range +50, stacks
   > Allies in range: Range +50, stacks
   > Ambush units (token type 1) in range: Range +50, stacks
@@ -24209,6 +24404,21 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Enemies in range: DEF −40%, doesn't stack
   > Enemies in range: Move speed −40%, doesn't stack
 
+## card 3028 · stratagem stratagem#4028 比翼連射・無尽
+```
+45秒間対象の射程1.3倍､攻撃後の隙が0､攻撃の1倍の
+わずかに後退させる連続攻撃を行う｡攻撃する度攻撃と攻撃
+速度が3秒間15%ずつ上昇(最大150%｡自分のみ)
+```
+- [data-only] の隙が0､攻撃の1倍の
+
+  > Self: Range ×1.3, doesn't stack, for 45s
+  > Self: Attack gap set to 0, for 45s
+  > Self: missile #4283: Move speed set to -500
+  > Self: transforms, for 45s
+  > Target: each attack it makes: Attack speed +15%, doesn't stack, grows by that amount each trigger, for 3s, up to 150%
+  > Target: each attack it makes: ATK +15%, doesn't stack, grows by that amount each trigger, for 3s, up to 150%
+
 ## card 3029 · stratagem stratagem#4029 紫陽の契り
 ```
 40秒間対象の爆風範囲が2.5倍
@@ -24369,8 +24579,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 攻撃を6連続
   > Self: Range ×1.3, doesn't stack, for 30s
   > Self: transforms, for 30s
-  > Target: damage ×1.2
-  > Target: damage ×1.5 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.2
+  > Target: damage dealt ×1.5 against enemies with Current HP ≥ 75%
 
 ## card 3037 · stratagem stratagem#4037 四十伊賀衆
 ```
@@ -24382,21 +24592,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 攻撃を6連続
   > Self: Range ×1.4, doesn't stack, for 35s
   > Self: transforms, for 35s
-  > Target: damage ×1.2
-  > Target: damage ×1.5 against enemies with Current HP ≥ 75%
-
-## card 3038 · stratagem stratagem#4038 大銀杏の響枝
-```
-40秒間対象が射程内全敵を攻撃し､少し後退させる
-攻撃と与ダメージ2倍
-特殊攻撃ゲージの蓄積量が1.8倍(自分のみが対象)
-```
-- [data-only] ゲージの蓄積量が1.8倍(自
-  > Self: ATK +100%, doesn't stack, for 40s
-  > Self: Special gauge gain when hit +80%, doesn't stack, for 40s
-  > Target: damage dealt +100%
-  > Target: unit effect type 2 #302 -1000, for 0.1s
-  > Target: Targets +99, stacks
+  > Target: damage dealt ×1.2
+  > Target: damage dealt ×1.5 against enemies with Current HP ≥ 75%
 
 ## card 3041 · stratagem stratagem#8303 此なるは天上の伏華
 ```
@@ -24429,13 +24626,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 上昇(最大2倍)｡
   > Self: Weather immunity: all weather
   > Self: Can't be targeted except by flying enemies: on
-  > Self: damage ×1.1 while own Current HP ≥ 100%, only at max giantification (最大化)
-  > Self: damage ×1.11 while own Current HP ≥ 90%, only at max giantification (最大化)
-  > Self: damage ×1.11 while own Current HP ≥ 75%, only at max giantification (最大化)
-  > Self: damage ×1.11 while own Current HP ≥ 60%, only at max giantification (最大化)
-  > Self: damage ×1.11 while own Current HP ≥ 45%, only at max giantification (最大化)
-  > Self: damage ×1.11 while own Current HP ≥ 30%, only at max giantification (最大化)
-  > Self: damage ×1.1 while own Current HP ≥ 10%, only at max giantification (最大化)
+  > Self: damage dealt ×1.1 while own Current HP ≥ 100%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 while own Current HP ≥ 90%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 while own Current HP ≥ 75%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 while own Current HP ≥ 60%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 while own Current HP ≥ 45%, only at max giantification (最大化)
+  > Self: damage dealt ×1.11 while own Current HP ≥ 30%, only at max giantification (最大化)
+  > Self: damage dealt ×1.1 while own Current HP ≥ 10%, only at max giantification (最大化)
   > Enemies in range: Move speed −40%, doesn't stack, only at max giantification (最大化)
   > Enemies in range: damage dealt −40%, only at max giantification (最大化)
 
@@ -24482,18 +24679,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 
   > Self: Range +80, stacks
   > On hit, the enemy it attacks: Move speed −60%, doesn't stack, for 3s
-  > Self: damage ×1.06 against enemies with Move speed ≤ 500
-  > Self: damage ×1.06 against enemies with Move speed ≤ 400
-  > Self: damage ×1.06 against enemies with Move speed ≤ 300
-  > Self: damage ×1.06 against enemies with Move speed ≤ 250
-  > Self: damage ×1.07 against enemies with Move speed ≤ 150
-  > Self: damage ×1.07 against enemies with Move speed ≤ 100
-  > Self: damage ×1.06 against enemies with Current HP ≤ 90%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 75%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 60%
-  > Self: damage ×1.06 against enemies with Current HP ≤ 45%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 30%
-  > Self: damage ×1.07 against enemies with Current HP ≤ 15%
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 300
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.07 against enemies with Move speed ≤ 100
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 90%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 75%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 60%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≤ 45%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 30%
+  > Self: damage dealt ×1.07 against enemies with Current HP ≤ 15%
   > Ranged castle girls in range: ATK +90, stacks
   > Test of Courage castle girls in range: ATK +90, stacks
 
@@ -24805,7 +25002,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +80%, doesn't stack, for 40s
   > Self: Range +150, stacks, for 40s
   > Self: Special gauge gain when hit +100%, doesn't stack, for 40s
-  > Target: damage ×2 against enemies with Current HP ≥ 50%
+  > Target: damage dealt ×2 against enemies with Current HP ≥ 50%
 
 ## card 3056 · specialty specialty#93056 風神の勲
 ```
@@ -25088,13 +25285,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 敵の移動速度が高い程与えるダメージ上昇(最大1.5倍)
 ```
 - [data-only, other item] メージ上昇(最大1.5倍)
-  > Self: damage ×1.2 while own Current HP ≥ 80%
-  > Self: damage ×1.08 against enemies with Move speed ≥ 150
-  > Self: damage ×1.08 against enemies with Move speed ≥ 250
-  > Self: damage ×1.07 against enemies with Move speed ≥ 300
-  > Self: damage ×1.07 against enemies with Move speed ≥ 400
-  > Self: damage ×1.07 against enemies with Move speed ≥ 500
-  > Self: damage ×1.07 against enemies with Move speed ≥ 750
+  > Self: damage dealt ×1.2 while own Current HP ≥ 80%
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 250
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 300
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 400
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 500
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 750
 
 ## card 3064 · specialty specialty#94064 騎士の無敗伝説
 ```
@@ -25104,13 +25301,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only, other item] メージ上昇(最大1.5倍)
 
-  > Self: damage ×1.3 while own Current HP ≥ 80%
-  > Self: damage ×1.08 against enemies with Move speed ≥ 150
-  > Self: damage ×1.08 against enemies with Move speed ≥ 250
-  > Self: damage ×1.07 against enemies with Move speed ≥ 300
-  > Self: damage ×1.07 against enemies with Move speed ≥ 400
-  > Self: damage ×1.07 against enemies with Move speed ≥ 500
-  > Self: damage ×1.07 against enemies with Move speed ≥ 750
+  > Self: damage dealt ×1.3 while own Current HP ≥ 80%
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 250
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 300
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 400
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 500
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 750
   > Enemies in range: damage taken +35%
 
 ## card 3065 · stratagem stratagem#3065 アンテラ・ミューロス
@@ -25337,7 +25534,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] を除く射程内味方1体毎に
   > Self: ATK +50, stacks, per ally in range
   > Self: Giantify Ki −10%, doesn't stack, per ally in range, up to 50%
-  > Self: damage ×1.5 while own Current HP ≥ 100%, only at max giantification (最大化)
+  > Self: damage dealt ×1.5 while own Current HP ≥ 100%, only at max giantification (最大化)
 
 ## card 3077 · stratagem stratagem#3077 リオン・デ・ルミエール
 ```
@@ -25350,7 +25547,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Max HP +150%, doesn't stack, for 30s
   > Self: ATK +150%, doesn't stack, for 30s
   > Self: missile #4339: Current HP +100% of Max HP, for 0.035s
-  > Target: damage ×1.5 against enemies with Current HP ≥ 50%
+  > Target: damage dealt ×1.5 against enemies with Current HP ≥ 50%
 
 ## card 3077 · specialty specialty#94077 獅子心王の伝説
 ```
@@ -25362,7 +25559,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +60, stacks, per ally in range
   > Self: Giantify Ki −13%, doesn't stack, per ally in range, up to 50%
   > Castle girls in range: ATK +150, stacks
-  > Self: damage ×2 while own Current HP ≥ 100%, only at max giantification (最大化)
+  > Self: damage dealt ×2 while own Current HP ≥ 100%, only at max giantification (最大化)
 
 ## card 3077 · stratagem stratagem#4077 サクレ・デ・ルミエール
 ```
@@ -25375,7 +25572,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Max HP +200%, doesn't stack, for 30s
   > Self: ATK +200%, doesn't stack, for 30s
   > Self: missile #4339: Current HP +100% of Max HP, for 0.035s
-  > Target: damage ×2 against enemies with Current HP ≥ 50%
+  > Target: damage dealt ×2 against enemies with Current HP ≥ 50%
 
 ## card 3079 · stratagem stratagem#3079 北天招来
 ```
@@ -25402,23 +25599,6 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Units in the target's range: when attacked: 50% of the damage taken
   > Units in the target's range: ATK +30% of the giver's ATK
   > Units in the target's range: DEF +30% of the giver's ATK
-
-## card 3080 · stratagem stratagem#3080 燃楓の鋭葉
-```
-30秒間対象の攻撃速度が2倍､攻撃対象の
-防御が低い程与えるダメージ上昇(最大1.5倍)
-攻撃毎に攻撃が100ずつ上昇(自分のみ)
-```
-- [data-only, other item] メージ上昇(最大1.5倍)
-
-  > Self: Attack speed +100%, doesn't stack, for 30s
-  > Target: damage ×1.08 against enemies with DEF ≤ 1000
-  > Target: damage ×1.08 against enemies with DEF ≤ 750
-  > Target: damage ×1.07 against enemies with DEF ≤ 500
-  > Target: damage ×1.07 against enemies with DEF ≤ 250
-  > Target: damage ×1.07 against enemies with DEF ≤ 100
-  > Target: damage ×1.07 against enemies with DEF ≤ 50
-  > Target: unit effect type 11 #2 100, grows by that amount each trigger, up to 999999
 
 ## card 3081 · stratagem stratagem#3081 ホーリー・ノエル
 ```
@@ -25538,13 +25718,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +50%, doesn't stack
   > Self: Attack speed +50%, doesn't stack
   > Each attack, self: ATK +10%, stacks, grows by that amount each attack, for 10s, up to 70%
-  > Self: damage ×1.09
-  > Self: damage ×1.09 while own Current HP ≤ 90%
-  > Self: damage ×1.09 while own Current HP ≤ 75%
-  > Self: damage ×1.09 while own Current HP ≤ 60%
-  > Self: damage ×1.09 while own Current HP ≤ 45%
-  > Self: damage ×1.09 while own Current HP ≤ 30%
-  > Self: damage ×1.1 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.09
+  > Self: damage dealt ×1.09 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.09 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.09 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.09 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.09 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 15%
 
 ## card 3089 · specialty specialty#94089 貴賎同座の饗宴
 ```
@@ -25557,13 +25737,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Attack speed +60%, doesn't stack
   > Self: DEF ignore +50%, doesn't stack
   > Each attack, self: ATK +10%, stacks, grows by that amount each attack, for 10s, up to 80%
-  > Self: damage ×1.1
-  > Self: damage ×1.1 while own Current HP ≤ 90%
-  > Self: damage ×1.1 while own Current HP ≤ 75%
-  > Self: damage ×1.1 while own Current HP ≤ 60%
-  > Self: damage ×1.11 while own Current HP ≤ 45%
-  > Self: damage ×1.11 while own Current HP ≤ 30%
-  > Self: damage ×1.12 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.1
+  > Self: damage dealt ×1.1 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.12 while own Current HP ≤ 15%
 
 ## card 3090 · specialty specialty#93090 下剋の嚆矢
 ```
@@ -25901,7 +26081,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: attack properties (add): DEF ignore, direct-hit bonus
   > Self: transforms
   > Target: Direct-hit bonus +800%, doesn't stack
-  > Target: unit effect type 2 #301 80, for 7s
+  > Target: on the unit it hits: Move speed −80%, doesn't stack, for 7s
   > Target: unit effect type 13 #2 70, grows by that amount each trigger, for 99999.999s, up to 999999
   > Self: ATK +10%, stacks, per other castle girl in range
   > Self: can move on all tiles, move speed 1000, walks
@@ -25997,9 +26177,9 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] 自身の攻撃の2.2倍で敵
   > Self: Natural Ki gain +40% (+0.4 Ki per tick; a 2nd/3rd such unit counts ½/¼)
-  > Castle girls in range: damage ×1.2 while own Current HP ≥ 80%
-  > Allies in range: damage ×1.2 while own Current HP ≥ 80%
-  > Ambush units (token type 1) in range: damage ×1.2 while own Current HP ≥ 80%
+  > Castle girls in range: damage dealt ×1.2 while own Current HP ≥ 80%
+  > Allies in range: damage dealt ×1.2 while own Current HP ≥ 80%
+  > Ambush units (token type 1) in range: damage dealt ×1.2 while own Current HP ≥ 80%
 
 ## card 3107 · specialty specialty#93107 禁忌の稀覯本
 ```
@@ -26114,7 +26294,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: damage dealt +100%
   > Target: Direct-hit bonus +300%, doesn't stack
   > Target: Splash damage rate +200%, doesn't stack
-  > Target: unit effect type 2 #105 0, for 3s
+  > Target: on the unit it hits: DEF set to 0, for 3s
 
 ## card 3109 · stratagem stratagem#4109 百万一心・三矢の魔球
 ```
@@ -26132,7 +26312,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: damage dealt +100%
   > Target: Direct-hit bonus +350%, doesn't stack
   > Target: Splash damage rate +250%, doesn't stack
-  > Target: unit effect type 2 #105 0, for 3s
+  > Target: on the unit it hits: DEF set to 0, for 3s
 
 ## card 3110 · stratagem stratagem#8392 感覚的ペインティング
 ```
@@ -26160,15 +26340,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Targets +2, stacks
   > Self: ATK +20%, doesn't stack, per other castle girl in range
   > Castle girls in range: Healing received +30%, doesn't stack
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 3000
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 2000
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 1500
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 1000
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 750
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 500
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 400
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 250
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 150
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 3000
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 2000
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 1500
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 1000
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 750
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 500
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 400
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 250
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 150
 
 ## card 3111 · formation formation#3111 魂の裁待街
 ```
@@ -26195,6 +26375,19 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Units in the target's range: Ki per kill +1, doesn't stack
   > Units in the target's range: Ki per kill +2, doesn't stack
 
+## card 3111 · stratagem stratagem#8397 五行中央の統治者
+```
+60秒間対象の射程1.4倍､与ダメージ2倍､攻撃した敵の
+移動速度を少しの間0にする｡射程内の城娘の攻撃と
+防御に自身の攻撃の25%の値を加算(自分のみ)
+```
+- [data-only] 4倍､与ダメージ2倍､攻
+  > Self: Range ×1.4, doesn't stack, for 60s
+  > Target: damage dealt +100%
+  > Target: on the unit it hits: Move speed set to 0, for 0.25s
+  > Units in the target's range: ATK +25% of the giver's ATK
+  > Units in the target's range: DEF +25% of the giver's ATK
+
 ## card 3111 · specialty specialty#94111 幽冥の都府
 ```
 自身の攻撃対象3増加､自身を除く射程内城娘1体毎に
@@ -26206,15 +26399,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +20%, doesn't stack, per other castle girl in range
   > Self: ATK +100, stacks, per other castle girl in range
   > Castle girls in range: Healing received +40%, doesn't stack
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 3000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 2000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 1500
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 750
-  > Castle girls in range: damage ×1.04 against enemies with Move speed ≤ 500
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 400
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 250
-  > Castle girls in range: damage ×1.05 against enemies with Move speed ≤ 150
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 3000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 2000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 1500
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Castle girls in range: damage dealt ×1.04 against enemies with Move speed ≤ 500
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Castle girls in range: damage dealt ×1.05 against enemies with Move speed ≤ 150
 
 ## card 3111 · stratagem stratagem#8399 五行中央の土地神
 ```
@@ -26225,7 +26418,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 5倍､与ダメージ2.2倍､攻
   > Self: Range ×1.5, doesn't stack, for 60s
   > Target: damage dealt +120%
-  > Target: unit effect type 2 #302 0, for 0.25s
+  > Target: on the unit it hits: Move speed set to 0, for 0.25s
   > Units in the target's range: ATK +25% of the giver's ATK
   > Units in the target's range: DEF +25% of the giver's ATK
 
@@ -26332,7 +26525,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: Range +15, stacks
   > Idol castle girls in range: ATK +40, stacks
   > Idol castle girls in range: Range +15, stacks
-  > Idol castle girls in range: damage ×1.1
+  > Idol castle girls in range: damage dealt ×1.1
 
 ## card 3117 · specialty specialty#94117 アルビオン・ステージ
 ```
@@ -26348,7 +26541,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Idol castle girls in range: ATK +50, stacks
   > Idol castle girls in range: DEF +50, stacks
   > Idol castle girls in range: Range +20, stacks
-  > Idol castle girls in range: damage ×1.15
+  > Idol castle girls in range: damage dealt ×1.15
 
 ## card 3120 · stratagem stratagem#8410 起爆型九十九髪茄子
 ```
@@ -26520,13 +26713,13 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Redeploy time −65%, doesn't stack
   > Self: ATK +60%, doesn't stack
   > Self: Attack speed +60%, doesn't stack
-  > Self: damage ×1.11
-  > Self: damage ×1.11 while own Current HP ≤ 90%
-  > Self: damage ×1.11 while own Current HP ≤ 75%
-  > Self: damage ×1.11 while own Current HP ≤ 60%
-  > Self: damage ×1.11 while own Current HP ≤ 45%
-  > Self: damage ×1.1 while own Current HP ≤ 30%
-  > Self: damage ×1.1 while own Current HP ≤ 15%
+  > Self: damage dealt ×1.11
+  > Self: damage dealt ×1.11 while own Current HP ≤ 90%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 75%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 60%
+  > Self: damage dealt ×1.11 while own Current HP ≤ 45%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 30%
+  > Self: damage dealt ×1.1 while own Current HP ≤ 15%
 
 ## card 3124 · on-defeat on-defeat#3124 すれ違う二人の霊魂
 ```
@@ -26549,7 +26742,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +180%, stacks, for 5.2s
   > Self: Range +150, stacks, for 5.2s
   > Self: missile #4424: inflicts crowd control 7 (5.1s)
-  > Target: damage ×3
+  > Target: damage dealt ×3
 
 ## card 3124 · on-defeat on-defeat#4124 分かたれし二人の霊魂
 ```
@@ -26561,6 +26754,27 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Field effect #125: damage ×10 ATK; Move speed −100%, doesn't stack, for 15s
   > Field effect #126: inflicts Confusion (15s)
   > Field effect #128: ATK +50%, stacks, for 30s
+
+## card 3125 · stratagem stratagem#3125 婚姻のきめ酒
+```
+30秒間対象の射程200上昇､敵の移動速度が低いほど
+与えるダメージ上昇(最大3倍)､攻撃した敵の移動速度と
+防御を5秒間0にし､攻撃が5秒間70%低下(自分のみ)
+```
+- [data-only] メージ上昇(最大3倍)､
+  > Self: Range +200, stacks, for 30s
+  > Target: damage dealt ×1.14 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.13 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.14 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.14 against enemies with Move speed ≤ 150
+  > Target: on the unit it hits: DEF set to 0, for 5s
+  > Target: on the unit it hits: Move speed set to 0, for 5s
+  > Target: on the unit it hits: ATK −70%, doesn't stack, for 5s
 
 ## card 3127 · stratagem stratagem#3127 自由な海水浴
 ```
@@ -26574,15 +26788,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Targets +2, stacks, for 30s
   > Enemies in range: Range −20%, stacks, for 30s
   > Target: damage dealt +100%
-  > Target: damage ×1.07 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.07 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.07 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.07 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.07 against enemies with Move speed ≤ 750
-  > Target: damage ×1.07 against enemies with Move speed ≤ 500
-  > Target: damage ×1.07 against enemies with Move speed ≤ 400
-  > Target: damage ×1.07 against enemies with Move speed ≤ 250
-  > Target: damage ×1.08 against enemies with Move speed ≤ 150
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.07 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 150
 
 ## card 3127 · stratagem stratagem#4127 完璧な海水浴
 ```
@@ -26595,15 +26809,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Targets +2, stacks, for 30s
   > Enemies in range: Range −20%, stacks, for 30s
   > Target: damage dealt +120%
-  > Target: damage ×1.09 against enemies with Move speed ≤ 3000
-  > Target: damage ×1.08 against enemies with Move speed ≤ 2000
-  > Target: damage ×1.08 against enemies with Move speed ≤ 1500
-  > Target: damage ×1.08 against enemies with Move speed ≤ 1000
-  > Target: damage ×1.08 against enemies with Move speed ≤ 750
-  > Target: damage ×1.08 against enemies with Move speed ≤ 500
-  > Target: damage ×1.08 against enemies with Move speed ≤ 400
-  > Target: damage ×1.09 against enemies with Move speed ≤ 250
-  > Target: damage ×1.09 against enemies with Move speed ≤ 150
+  > Target: damage dealt ×1.09 against enemies with Move speed ≤ 3000
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 2000
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 1500
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 1000
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 750
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 500
+  > Target: damage dealt ×1.08 against enemies with Move speed ≤ 400
+  > Target: damage dealt ×1.09 against enemies with Move speed ≤ 250
+  > Target: damage dealt ×1.09 against enemies with Move speed ≤ 150
 
 ## card 3129 · stratagem stratagem#3129 獄夏のスパイク
 ```
@@ -26616,10 +26830,10 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Can't be targeted: on, for 50s
   > Self: ATK +100%, doesn't stack, for 50s
   > Self: Attack gap −70%, doesn't stack, for 50s
-  > Self: missile #4432: damage 0.05× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
-  > Self: missile #4433: damage 0.05× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4432: damage 0.05× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #4433: damage 0.05× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: transforms, for 50s
-  > Target: damage ×5
+  > Target: damage dealt ×5
 
 ## card 3130 · specialty specialty#93130 七海の英国海軍
 ```
@@ -26707,12 +26921,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only, other item] メージ上昇(最大1.6倍)｡
   > Self: Range ×1.2, doesn't stack
   > Self: Attack gap −50%, doesn't stack
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 1000
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 750
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 500
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 250
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 100
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 50
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 1000
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 750
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 500
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 250
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 100
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 50
   > Ki +2 every 5s
 
 ## card 3131 · stratagem stratagem#3131 破壊の四連砲火
@@ -26729,7 +26943,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #4440
   > Self: transforms, for 40s
   > Target: damage dealt +100%
-  > Target: unit effect type 2 #103 25, grows by that amount each trigger, for 15s, up to 100
+  > Target: on the unit it hits: DEF −25%, doesn't stack, grows by that amount each trigger, for 15s, up to 100%
 
 ## card 16131 · specialty specialty#63131 継承の巡洋戦艦
 ```
@@ -26741,12 +26955,12 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.2, doesn't stack
   > Self: Attack gap −50%, doesn't stack
   > Self: Direct-hit bonus +20%, stacks
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 1000
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 750
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 500
-  > Castle girls in range: damage ×1.08 against enemies with DEF ≤ 250
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 100
-  > Castle girls in range: damage ×1.09 against enemies with DEF ≤ 50
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 1000
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 750
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 500
+  > Castle girls in range: damage dealt ×1.08 against enemies with DEF ≤ 250
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 100
+  > Castle girls in range: damage dealt ×1.09 against enemies with DEF ≤ 50
   > Ki +2 every 5s
 
 ## card 3132 · specialty specialty#93132 丹後水軍
@@ -26808,7 +27022,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 35s
   > Target: damage dealt +120%
   > Target: Targets +99, stacks
-  > Target: damage ×7
+  > Target: damage dealt ×7
   > Target: attack properties (add): direct-hit bonus
   > Target: Direct-hit bonus +100%, doesn't stack
 
@@ -26826,7 +27040,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 35s
   > Target: damage dealt +120%
   > Target: Targets +99, stacks
-  > Target: damage ×8
+  > Target: damage dealt ×8
   > Target: attack properties (add): direct-hit bonus
   > Target: Direct-hit bonus +100%, doesn't stack
 
@@ -26953,8 +27167,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +120%, doesn't stack
   > Self: Range ×1.3, doesn't stack
   > Target: damage dealt +120%
-  > Target: damage ×2 against enemies with Current HP = 100%
-  > Target: unit effect type 19 #10232 1, grows by that amount every 10 triggers (seconds when timed), up to 5
+  > Target: damage dealt ×2 against enemies with Current HP = 100%
+  > Target: every second: Stratagem Ki cost −1, stacks, grows by that amount every 10 triggers (seconds when timed), up to 5
 
 ## card 3140 · stratagem stratagem#8432 天降鬼火のジャンジャン火
 ```
@@ -27116,8 +27330,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack, for 35s
   > Self: Can't be targeted: on, for 35s
   > Self: transforms, for 35s
-  > Target: unit effect type 2 #302 -2000, for 0.1s
-  > Target: damage ×2 while own ATK ≥ 3000
+  > Target: on the unit it hits: Move speed set to -2000, for 0.1s
+  > Target: damage dealt ×2 while own ATK ≥ 3000
   > Self: can move on all tiles, move speed 1000, walks
   > Self: can move on water tiles (水上), move speed 1000, walks
   > Self: Deploy Ki −85%, doesn't stack
@@ -27148,8 +27362,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.3, doesn't stack, for 50s
   > Self: Can't be targeted: on, for 50s
   > Self: transforms, for 50s
-  > Target: unit effect type 2 #302 -2000, for 0.1s
-  > Target: damage ×2.2 while own ATK ≥ 3000
+  > Target: on the unit it hits: Move speed set to -2000, for 0.1s
+  > Target: damage dealt ×2.2 while own ATK ≥ 3000
   > Self: can move on all tiles, move speed 1000, walks
   > Self: can move on water tiles (水上), move speed 1000, walks
   > Self: Deploy Ki −85%, doesn't stack
@@ -27166,7 +27380,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +60%, doesn't stack
   > Self: Anti-air bonus set to 300
   > On hit, the enemy it attacks: Range −40%, doesn't stack, for 10s
-  > Castle girls in range: damage ×1.3 against enemies with Current HP ≤ 25%
+  > Castle girls in range: damage dealt ×1.3 against enemies with Current HP ≤ 25%
   > All enemies: damage taken +30%
 
 ## card 3147 · specialty specialty#94147 三英傑の月見名所
@@ -27180,7 +27394,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +70%, doesn't stack
   > Self: Anti-air bonus set to 350
   > On hit, the enemy it attacks: Range −50%, doesn't stack, for 10s
-  > Castle girls in range: damage ×1.5 against enemies with Current HP ≤ 25%
+  > Castle girls in range: damage dealt ×1.5 against enemies with Current HP ≤ 25%
   > All enemies: damage taken +35%
 
 ## card 3148 · stratagem stratagem#3148 空城の計
@@ -27231,7 +27445,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 果重複)｡与ダメ2倍､敵
   > Self: DEF ignore +80%, doesn't stack
   > Target: damage dealt +100%
-  > Target: unit effect type 12 #107 10, grows by that amount each trigger, for 99999.999s, up to 200
+  > Target: each time it is attacked: DEF +10%, stacks, grows by that amount each trigger, for 99999.999s, up to 200%
   > Target: Time until stratagem −95%, doesn't stack, for 5s
 
 ## card 3150 · stratagem stratagem#8439 黄金の指環の呪い
@@ -27243,8 +27457,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 果重複)｡与ダメ2.2倍､敵
   > Self: DEF ignore +80%, doesn't stack
   > Target: damage dealt +120%
-  > Target: unit effect type 12 #6 12, grows by that amount each trigger, for 99999.999s, up to 240
-  > Target: unit effect type 12 #107 12, grows by that amount each trigger, for 99999.999s, up to 240
+  > Target: each time it is attacked: ATK +12%, stacks, grows by that amount each trigger, for 99999.999s, up to 240%
+  > Target: each time it is attacked: DEF +12%, stacks, grows by that amount each trigger, for 99999.999s, up to 240%
   > Target: Time until stratagem −95%, doesn't stack, for 5s
 
 ## card 3151 · stratagem stratagem#3151 炎の裁き
@@ -27360,8 +27574,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
 - [data-only] 撃と与ダメージが2.2倍､攻
   > Self: ATK +120%, doesn't stack, for 40s
   > Target: damage dealt +120%
-  > Target: damage ×2 while own ATK ≥ 10000
-  > Target: damage ×2 while own Targets ≥ 5
+  > Target: damage dealt ×2 while own ATK ≥ 10000
+  > Target: damage dealt ×2 while own Targets ≥ 5
 
 ## card 3156 · specialty specialty#93156 石見の舞姫
 ```
@@ -27836,15 +28050,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Enemies in range: Ki per kill +2, doesn't stack
   > Self: damage dealt +100%
   > Self: Range ×1.5, doesn't stack
-  > Self: damage ×1.04 against enemies with Move speed ≤ 3000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 2000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 1000
-  > Self: damage ×1.05 against enemies with Move speed ≤ 750
-  > Self: damage ×1.05 against enemies with Move speed ≤ 500
-  > Self: damage ×1.05 against enemies with Move speed ≤ 400
-  > Self: damage ×1.05 against enemies with Move speed ≤ 250
-  > Self: damage ×1.06 against enemies with Move speed ≤ 150
+  > Self: damage dealt ×1.04 against enemies with Move speed ≤ 3000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 2000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 1000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 750
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 400
+  > Self: damage dealt ×1.05 against enemies with Move speed ≤ 250
+  > Self: damage dealt ×1.06 against enemies with Move speed ≤ 150
   > Self: ATK +20%, stacks, at giantification stage 1
   > Self: DEF +20%, stacks, at giantification stage 1
 
@@ -27913,8 +28127,8 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: ATK +400%, doesn't stack, for 60s
   > Self: transforms, for 60s
   > Target: damage dealt +120%
-  > Target: damage ×2.5 against enemies with Current HP ≥ 50%
-  > Target: unit effect type 19 #3 150, grows by that amount every 20 triggers (seconds when timed), up to 300
+  > Target: damage dealt ×2.5 against enemies with Current HP ≥ 50%
+  > Target: every second: ATK −150%, doesn't stack, grows by that amount every 20 triggers (seconds when timed), up to 300%
   > Self: Special attack stock +1, stacks, for 20s
 
 ## card 7801 · specialty specialty#7801 不屈の桃形兜
@@ -27992,7 +28206,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: transforms, for 60s
   > Target: Targets set to 1
   > Target: Range +80, stacks
-  > Target: unit effect type 2 #302 -1000, for 0.1s
+  > Target: on the unit it hits: Move speed set to -1000, for 0.1s
   > Target: ATK +20%, stacks, at giantification stage 1
   > Target: DEF +20%, stacks, at giantification stage 1
 
@@ -28139,7 +28353,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ンダムで選ばれた1種類
   > Self: Attack gap −50%, doesn't stack, for 25s
-  > Self: missile #92011: damage 0.03× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #92011: damage 0.03× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
   > Self: Attack gap −50%, doesn't stack, for 25s
   > Self: missile #92012: damage 3× ATK (ranged, min damage)
   > Self: Attack gap −50%, doesn't stack, for 25s
@@ -28157,7 +28371,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ンダムで選ばれた2種類
   > Self: Attack gap −50%, doesn't stack, for 25s
-  > Self: missile #92011: damage 0.03× own max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
+  > Self: missile #92011: damage 0.03× the target's max HP (true damage, ranged, vs specters, ignores damage-dealt modifiers, ignores damage-taken modifiers, ignores attack bonuses, min damage)
 
 ## card 9057 · stratagem stratagem#9057 地上最強の一撃
 ```
@@ -28218,7 +28432,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.4, doesn't stack, for 20s
   > Self: ATK +40%, doesn't stack, for 20s
   > Self: Attack gap +50%, doesn't stack, for 20s
-  > Target: damage ×2 against enemies with Current HP = 100%
+  > Target: damage dealt ×2 against enemies with Current HP = 100%
 
 ## card 991 · formation formation#991 コロシアイ学園生活校則
 ```
@@ -28311,6 +28525,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 攻
   > Enemies in range: DEF −30% of the giver's ATK
 
+## card 9112 · stratagem stratagem#99112 清嵐舞踊
+```
+20秒間対象の攻撃と射程が2.2倍
+2連続で攻撃を行い、攻撃した敵を後退させる
+(自分のみが対象)
+```
+- [data-only] 射程が2.2倍
+2連続
+  > Self: Range ×2.2, doesn't stack, for 20s
+  > Self: ATK +120%, doesn't stack, for 20s
+  > Target: on the unit it hits: Move speed set to -2000, for 0.1s
+
 ## card 994 · stratagem stratagem#8061 風力発電
 ```
 敵から狙われず攻撃しない伏兵を配置(5体まで)
@@ -28372,7 +28598,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.5, doesn't stack, for 35s
   > Self: ATK +70%, doesn't stack, for 35s
   > Self: transforms, for 35s
-  > Target: unit effect type 2 #302 0, for 0.5s
+  > Target: on the unit it hits: Move speed set to 0, for 0.5s
 
 ## card 9141 · stratagem stratagem#8082 避禍予見の鏡影
 ```
@@ -28395,7 +28621,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: Range ×1.5, doesn't stack, for 30s
   > Self: Blast radius +50%, doesn't stack, for 30s
   > Self: Can't be targeted: on, for 30s
-  > Target: damage ×2
+  > Target: damage dealt ×2
   > Units in the target's range: ATK +15%, stacks
   > Units in the target's range: ATK +15%, stacks
   > Units in the target's range: ATK +15%, stacks
@@ -28536,7 +28762,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
 「絶望」状態時、自身の攻撃が2倍
 ```
 - [data-only] 時、自身の攻撃が2倍
-  > Self: damage ×1.5 against enemies with Current HP ≤ 50%
+  > Self: damage dealt ×1.5 against enemies with Current HP ≤ 50%
   > Self: ATK +100%, doesn't stack
 
 ## card 9202 · specialty specialty#99202 大連結式鯉天守
@@ -28547,15 +28773,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only, other item] ジが上昇
 (最大1.5倍)｡
-  > Self: damage ×1.04 against enemies with Move speed ≥ 150
-  > Self: damage ×1.05 against enemies with Move speed ≥ 250
-  > Self: damage ×1.05 against enemies with Move speed ≥ 400
-  > Self: damage ×1.05 against enemies with Move speed ≥ 500
-  > Self: damage ×1.05 against enemies with Move speed ≥ 750
-  > Self: damage ×1.05 against enemies with Move speed ≥ 1000
-  > Self: damage ×1.05 against enemies with Move speed ≥ 1500
-  > Self: damage ×1.05 against enemies with Move speed ≥ 2000
-  > Self: damage ×1.06 against enemies with Move speed ≥ 3000
+  > Self: damage dealt ×1.04 against enemies with Move speed ≥ 150
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 250
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 400
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 750
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 1000
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 1500
+  > Self: damage dealt ×1.05 against enemies with Move speed ≥ 2000
+  > Self: damage dealt ×1.06 against enemies with Move speed ≥ 3000
   > All Castle Princess castle girls: Attack speed +25%, doesn't stack
   > All Castle Princess castle girls: Attack gap −25%, doesn't stack
   > All melee castle girls: Attack speed +25%, doesn't stack
@@ -28569,15 +28795,15 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ジが上昇
 (最大2倍)｡
-  > Self: damage ×1.07 against enemies with Move speed ≥ 150
-  > Self: damage ×1.08 against enemies with Move speed ≥ 250
-  > Self: damage ×1.08 against enemies with Move speed ≥ 400
-  > Self: damage ×1.08 against enemies with Move speed ≥ 500
-  > Self: damage ×1.09 against enemies with Move speed ≥ 750
-  > Self: damage ×1.09 against enemies with Move speed ≥ 1000
-  > Self: damage ×1.09 against enemies with Move speed ≥ 1500
-  > Self: damage ×1.09 against enemies with Move speed ≥ 2000
-  > Self: damage ×1.09 against enemies with Move speed ≥ 3000
+  > Self: damage dealt ×1.07 against enemies with Move speed ≥ 150
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 250
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 400
+  > Self: damage dealt ×1.08 against enemies with Move speed ≥ 500
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 750
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 1000
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 1500
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 2000
+  > Self: damage dealt ×1.09 against enemies with Move speed ≥ 3000
   > All Castle Princess castle girls: Attack speed +50%, doesn't stack
   > All Castle Princess castle girls: Attack gap −50%, doesn't stack
   > All melee castle girls: Attack speed +50%, doesn't stack
@@ -28628,27 +28854,6 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Academy City castle girls in the formation: ATK +100, stacks
   > Academy City castle girls in the formation: DEF +100, stacks
 
-## card 997 · stratagem stratagem#20003 能力開発:念動使い
-```
-40秒間対象の射程1.4倍､標的に3.5倍､その周囲に2倍の
-防御無視攻撃を行い､5秒間移動速度75%低下
-射程内の味方の被ダメージ50%軽減(自分のみ)
-```
-- [data-only] 1.4倍､標的に3.5倍､そ
-  > Self: Range ×1.4, doesn't stack, for 40s
-  > Self: attack properties (add): DEF ignore, direct-hit bonus, for 40s
-  > Self: attack properties (remove): magic (ignores DEF), anti-yokai, for 40s
-  > Self: missile #99422
-  > Self: missile #99439
-  > Target: Direct-hit bonus +350%, doesn't stack
-  > Target: Splash damage rate +100%, doesn't stack
-  > Target: unit effect type 2 #301 75, for 5s
-  > Units in the target's range: damage taken −50%
-  > Units in the target's range: damage taken −50%
-  > Units in the target's range: damage taken −50%
-  > Target: Blast radius +50%, doesn't stack, at giantification stage 5
-  > Target: ATK +70%, doesn't stack, at giantification stage 5
-
 ## card 997 · stratagem stratagem#10997 常盤台の超能力開発
 ```
 複数の計略を切り替えて使用可能｡最大化時､一部計略が強化
@@ -28668,11 +28873,11 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99438
   > Target: Direct-hit bonus +400%, doesn't stack
   > Target: Splash damage rate +300%, doesn't stack
-  > Target: damage ×1.08 against enemies with Current HP ≥ 90%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 75%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 60%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 45%
-  > Target: damage ×1.09 against enemies with Current HP ≥ 30%
+  > Target: damage dealt ×1.08 against enemies with Current HP ≥ 90%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 75%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 60%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 45%
+  > Target: damage dealt ×1.09 against enemies with Current HP ≥ 30%
   > Target: Direct-hit bonus +500%, doesn't stack, at giantification stage 5
   > Target: Splash damage rate +400%, doesn't stack, at giantification stage 5
   > Target: ATK +80%, doesn't stack, at giantification stage 5
@@ -28684,7 +28889,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Self: missile #99439
   > Target: Direct-hit bonus +400%, doesn't stack
   > Target: Splash damage rate +100%, doesn't stack
-  > Target: unit effect type 2 #301 75, for 10s
+  > Target: on the unit it hits: Move speed −75%, doesn't stack, for 10s
   > Units in the target's range: damage taken −50%
   > Units in the target's range: damage taken −50%
   > Units in the target's range: damage taken −50%
@@ -28700,27 +28905,6 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Units in the target's range: Attack gap −50%, doesn't stack
   > Units in the target's range: Attack gap −50%, doesn't stack
   > Target: Targets +2, stacks, at giantification stage 5
-  > Target: ATK +80%, doesn't stack, at giantification stage 5
-
-## card 997 · stratagem stratagem#20007 超能力開発:念動使い
-```
-40秒間対象の射程1.4倍､標的に4倍､その周囲に2倍の
-防御無視攻撃を行い､10秒間移動速度75%低下
-射程内の味方の被ダメージ50%軽減(自分のみ)
-```
-- [data-only] 1.4倍､標的に4倍､そ
-  > Self: Range ×1.4, doesn't stack, for 40s
-  > Self: attack properties (add): DEF ignore, direct-hit bonus, for 40s
-  > Self: attack properties (remove): magic (ignores DEF), anti-yokai, for 40s
-  > Self: missile #99422
-  > Self: missile #99439
-  > Target: Direct-hit bonus +400%, doesn't stack
-  > Target: Splash damage rate +100%, doesn't stack
-  > Target: unit effect type 2 #301 75, for 10s
-  > Units in the target's range: damage taken −50%
-  > Units in the target's range: damage taken −50%
-  > Units in the target's range: damage taken −50%
-  > Target: Blast radius +50%, doesn't stack, at giantification stage 5
   > Target: ATK +80%, doesn't stack, at giantification stage 5
 
 ## card 997 · stratagem stratagem#20008 超能力開発:空力使い
@@ -28751,18 +28935,18 @@ Items with every number shown: 3136 of 5197 (60.3%).
 ```
 - [data-only] ージ上昇
 (最大2倍)｡
-  > Self: damage ×1.07 while own Current HP ≥ 100%
-  > Self: damage ×1.07 while own Current HP ≥ 90%
-  > Self: damage ×1.07 while own Current HP ≥ 75%
-  > Self: damage ×1.06 while own Current HP ≥ 60%
-  > Self: damage ×1.06 while own Current HP ≥ 45%
-  > Self: damage ×1.06 while own Current HP ≥ 30%
-  > Self: damage ×1.06 while own Current HP ≥ 10%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 90%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 75%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 60%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 45%
-  > Self: damage ×1.06 against enemies with Current HP ≥ 30%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 100%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 90%
+  > Self: damage dealt ×1.07 while own Current HP ≥ 75%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 60%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 45%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 30%
+  > Self: damage dealt ×1.06 while own Current HP ≥ 10%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 90%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 75%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 60%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 45%
+  > Self: damage dealt ×1.06 against enemies with Current HP ≥ 30%
   > Castle girls in range: Attack speed +40%, doesn't stack
   > Allies in range: Attack speed +40%, doesn't stack
   > Ambush units (token type 1) in range: Attack speed +40%, doesn't stack
@@ -28948,10 +29132,10 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Castle girls in range: Attack gap −50%, doesn't stack
   > Allies in range: Attack gap −50%, doesn't stack
   > Ambush units (token type 1) in range: Attack gap −50%, doesn't stack
-  > Castle girls in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Allies in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Ambush units (token type 1) in range: damage ×1.3 against enemies with Priority target (taunt) ≥ 100
-  > Self: damage ×1.16 against enemies with Priority target (taunt) ≥ 100
+  > Castle girls in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Allies in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Ambush units (token type 1) in range: damage dealt ×1.3 against enemies with Priority target (taunt) ≥ 100
+  > Self: damage dealt ×1.16 against enemies with Priority target (taunt) ≥ 100
   > Self: attack properties (add): direct-hit bonus
   > Self: Direct-hit bonus +500%, doesn't stack
   > Self: Splash damage rate +200%, doesn't stack
@@ -28989,7 +29173,7 @@ Items with every number shown: 3136 of 5197 (60.3%).
   > Target: evades attacks
   > Target: damage dealt +120%
   > Target: Direct-hit bonus +50%, stacks
-  > Target: damage ×1.5 while own Current HP ≥ 50%
+  > Target: damage dealt ×1.5 while own Current HP ≥ 50%
 
 ## card 9291 · specialty specialty#99291 ワールド･エンド･レジスタンス
 ```
