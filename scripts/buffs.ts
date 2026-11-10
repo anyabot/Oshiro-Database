@@ -48,11 +48,11 @@ function statName(key: string): string {
 }
 
 function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, kind: RowKind, name: string | undefined,
-  side?: "ally" | "enemy", links?: Ability["field_links"], selfOnly = false) {
+  side?: "ally" | "enemy", links?: Ability["field_links"], selfOnly = false, fieldArea = false) {
   if (!rowsIn) return;
   const bases = rowBases(rowsIn);
   rowsIn.forEach((r, i) => {
-    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly });
+    const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], { selfOnly, fieldArea });
     for (const f of s.facts as BuffFact[]) {
       if (!f.v) continue; // a zero change (empty rows) ranks nothing
       const sd = (side ?? f.side) === "enemy" ? "e" : "a";
@@ -90,9 +90,10 @@ for (const entry of index) {
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
       const selfOnly = defs.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ";
-      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, selfOnly);
-      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, selfOnly);
-      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, selfOnly);
+      const fieldArea = Number(s.field?.field.FieldEffectType) === 3;
+      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, selfOnly, fieldArea);
+      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, selfOnly, fieldArea);
+      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, selfOnly, fieldArea);
     }
   }
   ability(u.id, -1, "class", u.class_ability);

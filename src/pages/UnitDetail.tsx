@@ -105,7 +105,11 @@ function AbilityBlock({ label, a, kind = "ability", defs, from }: {
 function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; from?: string }) {
   const { data: index } = useUnits();
   // EnchantEffect.TargetType 2 = 自分のみ: the effect sets' "target" is the user herself
-  const setCtx: RowContext = { selfOnly: !!s.effect && defs?.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ" };
+  const setCtx: RowContext = {
+    selfOnly: !!s.effect && defs?.labels[`etarget:${s.effect.row.TargetType}`]?.jp === "自分のみ",
+    // FieldEffectType 3: the stratagem's effects land on every unit in its area
+    fieldArea: Number(s.field?.field.FieldEffectType) === 3,
+  };
   if (s.missing) {
     return <div className="ability"><div className="ability__head"><span className="ability__label">Stratagem</span><span className="ability__name">(not in Gimmick.atb)</span><span className="ability__id">#{s.id}</span></div></div>;
   }
@@ -137,7 +141,7 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
           <RawRows title={`TokenConfig #${s.token.token_id}`} rows={[s.token.config]} />
         </div>
       )}
-      {s.effect && <EffectList title={`EnchantEffect #${s.effect.id}`} rows={[s.effect.row]} kind="enchant" defs={defs} />}
+      {s.effect && <EffectList title={`EnchantEffect #${s.effect.id}`} rows={[s.effect.row]} kind="enchant" defs={defs} ctx={setCtx} />}
       {s.effect?.AllyEffectSetID && <EffectList title="ally effect set" rows={s.effect.AllyEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
       {s.effect?.OpponentEffectSetID && <EffectList title="opponent effect set" rows={s.effect.OpponentEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
     </div>

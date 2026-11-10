@@ -184,7 +184,8 @@ export const JP_EN: Record<string, string> = {
   回復がダメージに変化: "Heals on it deal damage",
   攻撃しない: "Doesn't attack",
   "計略消費気%": "Stratagem Ki cost %",
-  "伏兵(種別1)": "ambush units (token type 1)",
+  // TokenConfig.TokenUnitType 1 = every 伏兵 token (all 390), not only the owner's (that is 自身のトークン)
+  "伏兵(種別1)": "ambush units (伏兵)",
   "舟(種別4)": "boats (token type 4)",
   トークンB: "test token B",
   トークンC: "test token C",

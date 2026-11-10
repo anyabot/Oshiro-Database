@@ -212,3 +212,4 @@
 .chg-singi { color: #f7768e; border-left: 3px solid #f7768e; padding-left: 6px; }
 span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .enemy-table td.enemy-mods { min-width: 240px; max-width: 420px; white-space: normal; overflow-wrap: anywhere; }
+.buff-unit-filters { margin: 0 0 12px; }

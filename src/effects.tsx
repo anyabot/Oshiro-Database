@@ -158,7 +158,8 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       const from = tags ? ` (from ${tags})` : "";
       switch (row.OTDEffectType) {
         case 1: return `when attacked${from}: counter for ${flat ? v : `${v}% of own ATK`}`;
-        case 2: return `when attacked${from}: ${flat ? v : `${v}% of the damage taken`}`;
+        // counter damage: its texts say 「被攻撃時に敵の攻撃の100%をダメージとして反射」 (the attacker's ATK)
+        case 2: return `when attacked${from}: counter damage ${flat ? v : `${v}% of the attacker's ATK`} (反射)`;
         // the game's items call this 障壁 (barrier): Supply 800 '殿障壁+3000'
         case 3: return `barrier${from}: blocks ${flat ? `up to ${v}` : `${v}%`} of the damage`;
         case 5: return `when attacked${from}: damage split into hits of ${v}`;
@@ -336,6 +337,8 @@ export interface RowContext {
   selfOnly?: boolean;
   /** an enemy's ability (EnemyAbility): side-relative targets read from the enemy's side */
   enemyOwner?: boolean;
+  /** a stratagem whose field (FieldEffectType 3) applies its EnchantEffect to every unit in an area */
+  fieldArea?: boolean;
 }
 
 // Side-relative target codes as enemy abilities use them, named by their own texts (strict majority):
@@ -503,7 +506,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // an AttackBonus row is its own damage multiplier, not an OnGiveDamage (与ダメージ) modifier: ranked
     // apart from "damage dealt %" even when its condition always holds
     last = { key: "dmg:bonus", dir: v >= 100 ? "+" : "-", unit: "×", v: v / 100, note: cond || "every hit" };
-    return `damage dealt ×${fmt(v / 100)}${cond ? ` ${cond}` : ""}`;
+    // its own multiplier (AttackBonusStatusEffect), worded apart from OnGiveDamage's "damage dealt +N%"
+    return `damage multiplier ×${fmt(v / 100)} (attack bonus)${cond ? ` ${cond}` : ""}`;
   };
   /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */
   const damageRowFact = (table: string, row: RawRow, v: number) => {
@@ -554,6 +558,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const who = (tg: number, ar: number): string => {
     // target 51: every carrier's description names one specific castle girl (the token's or item's castle)
     if (tg === 51) return "The castle girl named in the text";
+    // code 1 alone is the lord: its abilities say 殿 every time it appears without 城娘 (11) / 伏兵 (33)
+    // (「殿の特技です」, 「殿の攻撃と防御が90上昇」); with them, the texts call the group 「射程内の味方」
+    if (tg === 1 && !ctx.enemyOwner) return cap(`${ar && defs.labels[`area:${ar}`]?.jp === "全て" ? "the " : ""}lord (殿)${ar && defs.labels[`area:${ar}`]?.jp === "射程内" ? " in range" : ""}`);
     const t = ctx.enemyOwner && ENEMY_OWNER_TARGET[tg] ? ENEMY_OWNER_TARGET[tg] : tg ? word(`target:${tg}`, `target ${tg}`) : "";
     const aJp = ar ? defs.labels[`area:${ar}`]?.jp : undefined;
     if (aJp === "自身" || defs.labels[`target:${tg}`]?.jp === "自身") {
@@ -666,7 +673,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const factSide = hitEnemy || (at === 16 && trigger) ? "enemy" : subject === "Self" ? "ally" : sideOfTarget(tgJp);
     /** File the last worded change; the note is the trigger + the sentence's tail. */
     const file = (tl: string, extra = "") => take(factWho, factSide, [trigger && !hitEnemy && !(at === 16) ? cap(trigger) : "", extra, tl.replace(/^, /, "")].filter(Boolean).join(", "));
-    if (at === 21 && link) {
+    if (at === 21 && link && Number(link.field.FieldEffectType) === 3) {
+      // FieldEffectType 3: an area (radius EffectArea) that applies EnchantEffect Param1 to the units in it;
+      // the stratagem's EnchantEffect rows are those effects (e.g. 11080: radius 300 = 「範囲:特大」)
+      text.push(`Area effect #${link.field_id}, radius ${link.field.EffectArea ?? "?"}: the effects below apply to units in the area`);
+    } else if (at === 21 && link) {
       // on-defeat field effect: Param3 = damage as % of ATK (its descriptions print Param3/100 倍
       // in 63 of 64 cases); the missile's modifiers are what the field applies
       const f = link.field, m = link.missile;
@@ -813,7 +824,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const dur = secs ? `, for ${fmt(secs)}s` : "";
     // TargetType 2: the stratagem only targets its user (its texts say 自分のみ)
     const tt = num("TargetType");
-    const ally = defs.labels[`etarget:${tt}`]?.jp === "自分のみ" ? (word(`etarget:${tt}`, ""), "Self") : "Target";
+    const ally = ctx.fieldArea ? "Units in the area"
+      : defs.labels[`etarget:${tt}`]?.jp === "自分のみ" ? (word(`etarget:${tt}`, ""), "Self") : "Target";
     for (const i of [1, 2, 3]) {
       const code = num(`AllyModifierType${i}`), v = num(`AllyEffectValue${i}`);
       if (code) { const m = modifier(code, v); take(ally, "ally", dur); text.push(`${ally}: ${m}${dur}`); }
@@ -863,7 +875,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (area) word(`sarea:${sa}`, "");
     const t = defs.labels[`starget:${st}`] ? word(`starget:${st}`, "") : "";
     let subject = "";
-    if (area === "対象" && (!t || t === "対象")) subject = "Target";
+    if (area === "対象" && (!t || t === "対象")) subject = ctx.fieldArea ? "Units in the area" : "Target";
     else if (area === "対象の射程内") subject = `${t && t !== "対象" ? t : "units"} in ${ctx.selfOnly ? "range" : "the target's range"}`;
     else if (t) subject = t;
     else subject = `target ${st}${sa ? `, area ${sa}` : ""}`;

@@ -4,6 +4,7 @@ import { FallbackImage, FilterChip, FilterRow, GroupCard, LoadState, PageHeader,
 import { listState, searchParamsAdapter } from "@altterisk/game-hub/filters";
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { iconUrl, rarityLabel, useMeta, useUnits, weaponLabel } from "../data";
+import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
 import { unitName } from "../labels";
 
@@ -95,11 +96,7 @@ function reach(r: BuffRow): string {
   return "group";
 }
 
-const RARITY_MIN = [
-  { value: "", label: "Any" },
-  { value: "5", label: "★5+" },
-  { value: "6", label: "★6+" },
-];
+
 
 const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec" };
 function effectLabel(k: string, names: Record<string, string>): string {
@@ -133,7 +130,8 @@ export default function Buffs() {
   const reaches = url.list("to");
   const base = url.text("tier") === "base";
   const byValue = url.text("rank") === "value";
-  const minRarity = Number(url.text("rarity")) || 0;
+  // castle girl filters (same as the castle girl list): only buffs from matching castle girls
+  const unitFilter = useUnitFilters(index ?? undefined, meta ?? undefined, params, setParams);
 
   const units = useMemo(() => new Map((index || []).map((u) => [u.id, u])), [index]);
 
@@ -153,8 +151,8 @@ export default function Buffs() {
   const filtered = useMemo(() => tiered.filter((r) =>
     (!sources.length || sources.includes(r.sl))
     && (!reaches.length || reaches.includes(reach(r)))
-    && (!minRarity || (units.get(r.u)?.rarity ?? 0) >= minRarity)),
-  [tiered, sources.join(), reaches.join(), minRarity, units]);
+    && (!unitFilter.activeCount || unitFilter.matches(units.get(r.u)))),
+  [tiered, sources.join(), reaches.join(), unitFilter.matches, unitFilter.activeCount, units]);
 
   const unitsIn = (list: BuffRow[]) => new Set(list.map((r) => r.u)).size;
   const byCat = useMemo(() => {
@@ -238,9 +236,8 @@ export default function Buffs() {
         <SegmentedButtons label="Rank by" selected={byValue ? "value" : "max"}
           options={[{ value: "max", label: "Max reached" }, { value: "value", label: "Base value" }]}
           onToggle={(v) => url.setText("rank", v === "value" ? "value" : "")} />
-        <SegmentedButtons label="Rarity" selected={url.text("rarity")}
-          options={RARITY_MIN} onToggle={(v) => url.setText("rarity", v)} />
       </div>
+      <div className="buff-unit-filters">{unitFilter.panel}</div>
       <div className="buff-groups">
         {key && groups.map(({ sl, ranked }) => {
           const open = expanded.has(sl);
