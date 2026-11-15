@@ -49,6 +49,7 @@ export default function EquipmentDetail() {
               renderLink={renderLink} href={`/equipment?type=${w.type <= 24 ? w.type : "other"}`} />
             {w.kind === 1 && <MetaChip value={t("kindInitial")} />}
             {w.kind === 2 && <MetaChip value={t("kindMaterial")} />}
+            {w.kind === 3 && <MetaChip value={t("kindPlaceholder")} />}
             {up && <MetaChip label={t("upgradesTo")} value={up.name} renderLink={renderLink} href={`/equipment/${up.id}`} />}
           </MetaChips>
         )}

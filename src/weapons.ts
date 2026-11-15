@@ -28,7 +28,7 @@ export interface Weapon {
   rarity: number;
   /** its pixel-art sprite (public/weapon-dot/<dot>.webp) */
   dot?: number;
-  /** Weapon.Type: 0 equipment, 1 initial / dedicated gear, 2 upgrade material (霊鋼石) */
+  /** Weapon.Type: 0 equipment, 1 initial / dedicated gear, 2 upgrade material (霊鋼石); 3 reward placeholder */
   kind: number;
   stats: Partial<Record<StatKey, number>>;
   text?: string | null;
