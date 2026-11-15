@@ -222,3 +222,4 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 /* filter options with the game's weapon / terrain icons */
 .opt-icon { display: inline-flex; align-items: center; gap: 5px; }
 .opt-icon img { width: 24px; height: 24px; flex: none; margin: -3px 0; }
+.unit-detail .hub-meta-chip__icon img { width: 20px; height: 20px; }

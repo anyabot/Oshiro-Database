@@ -9,6 +9,7 @@ import {
 } from "../data";
 import { DEFAULT_META } from "../meta";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
+import { terrainIcon, weaponIcon } from "../filterIcons";
 import { usePageMeta } from "../usePageMeta";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
@@ -395,9 +396,9 @@ export default function UnitDetail() {
         meta={(
           <MetaChips>
             <MetaChip label={t("rarity")} value={rarityLabel(meta, u.rarity)} renderLink={renderLink} href={`/units?rarity=${u.rarity}`} />
-            <MetaChip label={t("weapon")} value={weaponLabel(meta, u.weapon.type)} renderLink={renderLink} href={u.weapon.type ? `/units?weapon=${u.weapon.type}` : undefined} />
+            <MetaChip label={t("weapon")} value={weaponLabel(meta, u.weapon.type)} icon={weaponIcon(u.weapon.type)} renderLink={renderLink} href={u.weapon.type ? `/units?weapon=${u.weapon.type}` : undefined} />
             {terrainParts(meta, u.terrain).map((x) => (
-              <MetaChip key={x.slug} label={t("terrain")} value={terrainWord(x.jp)} title={terrainTitle(meta, u.terrain)}
+              <MetaChip key={x.slug} label={t("terrain")} value={terrainWord(x.jp)} icon={terrainIcon(x.slug)} title={terrainTitle(meta, u.terrain)}
                 renderLink={renderLink} href={`/units?terrain=${x.slug}`} />
             ))}
             {u.max_renovation === 2 && <MetaChip label={t("renovation")} value={t("kaiNiOpt")} renderLink={renderLink} href="/units?kai=2" />}

@@ -21,6 +21,12 @@ function withIcon(src: string | null, text: string): ReactNode {
 /** A castle type's badge (single or dual terrain), by Card.GrowUpID. */
 export const castleTypeIcon = (type: number) => `${BASE}ui-icon/terrain/${type}.webp`;
 
+/** Small icon elements for chips: a weapon type's icon, a terrain word's badge (null when the game has none). */
+export const weaponIcon = (type: number | null | undefined): ReactNode =>
+  type && isMainWeapon(type) ? <img src={`${BASE}ui-icon/weapon/${type}.webp`} alt="" width={20} height={20} /> : null;
+export const terrainIcon = (slug: string): ReactNode =>
+  TERRAIN_TYPE[slug] ? <img src={castleTypeIcon(TERRAIN_TYPE[slug])} alt="" width={20} height={20} /> : null;
+
 /** "刀" / "Sword" with its weapon-category icon (the 24 standard types). */
 export const weaponOptionLabel = (type: number, text: string) =>
   withIcon(isMainWeapon(type) ? `${BASE}ui-icon/weapon/${type}.webp` : null, text);
