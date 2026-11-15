@@ -15,6 +15,7 @@
     "coverage": "esbuild scripts/coverage.ts --bundle --platform=node --format=esm --outfile=scripts/coverage.mjs --log-level=warning && node scripts/coverage.mjs .",
     "buffs": "esbuild scripts/buffs.ts --bundle --platform=node --format=esm --outfile=scripts/buffs.mjs --log-level=warning && node scripts/buffs.mjs .",
     "ja": "esbuild scripts/humanize.ts --bundle --platform=node --format=esm --outfile=scripts/humanize.mjs --log-level=warning && node scripts/humanize.mjs tools/out/humanize.md && esbuild scripts/ja.ts --bundle --platform=node --format=esm --outfile=scripts/ja.mjs --log-level=warning && node scripts/ja.mjs tools/out/humanize.all.txt tools/out/ja.md",
+    "review": "esbuild scripts/review.ts --bundle --platform=node --format=esm --outfile=tools/out/review.mjs --log-level=warning && node tools/out/review.mjs tools/out/humanize.all.txt tools/out/review.txt",
     "humanize": "esbuild scripts/humanize.ts --bundle --platform=node --format=esm --outfile=scripts/humanize.mjs --log-level=warning && node scripts/humanize.mjs tools/out/humanize.md"
   },
   "dependencies": {

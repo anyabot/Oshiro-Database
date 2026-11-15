@@ -116,6 +116,7 @@ function tidy(s: string): string {
   return s
     .replace(new RegExp(`(${JA}|[)」])\\s+(?=${JA}|[(「])`, "gu"), "$1")
     .replace(/\s*・\s*/g, "・")
+    .replace(/(★\d+) (?=城娘)/g, "$1")
     .replace(/、\s+/g, "、")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -150,13 +151,13 @@ const PLACE: [RegExp, string][] = [
   [/ in Despair$/i, "「絶望」状態の"],
 ];
 const LEADS: [RegExp, string][] = [
-  [/^Great Magic, /, "大魔法: "],
-  [/^Special attack, /, "特殊攻撃: "],
-  [/^Each attack, /, "攻撃毎に "],
-  [/^Each enemy defeated, /, "敵撃破毎に "],
-  [/^Each time (?:it is )?attacked, /, "被攻撃毎に "],
-  [/^Per giantification, /, "巨大化毎に "],
-  [/^Every second, /, "毎秒 "],
+  [/^Great Magic, /, "大魔法、"],
+  [/^Special attack, /, "特殊攻撃時、"],
+  [/^Each attack, /, "攻撃毎に、"],
+  [/^Each enemy defeated, /, "敵撃破毎に、"],
+  [/^Each time (?:it is )?attacked, /, "被攻撃毎に、"],
+  [/^Per giantification, /, "巨大化毎に、"],
+  [/^Every second, /, "毎秒、"],
 ];
 const WHOLE: Record<string, string> = {
   "On hit, the enemy it attacks": "攻撃した敵", "Enemy hit": "攻撃した敵", "Enemies it blocks": "足止め中の敵",
@@ -254,6 +255,7 @@ function perJa(t: string): string {
     [/^own tokens? deployed$/, (n) => `配置中の自身のトークン${n}体につき`],
     [/^special-attack stock$/, (n) => `特殊攻撃ストック${n}につき`],
     [/^unnamed trait set (\d+) units? in range$/i, (n) => `射程内の城娘セット${/\d+/.exec(x)![0]}のユニット${n}体につき`],
+    [/^(.+) enem(?:y|ies) in range$/, (n) => `射程内の${words(x.replace(/ enem(?:y|ies) in range$/, ""), true)}の敵${n}体につき`],
     [/^(.+) units? in range$/, (n) => `射程内の${words(x.replace(/ units? in range$/, ""), true)}ユニット${n}体につき`],
     [/^giantification$/, () => "巨大化毎"],
   ];
@@ -277,6 +279,15 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/^Placement spot effect type (\d+)$/, "配置マス効果 種別$1"],
   [/\bthat "can't be knocked out" time\b/g, "「大破しない」時間"],
   [/^no effect \(class-ability detail (\d+) has no handler; value (\d+)\)$/, "効果なし (クラス特性の詳細$1に処理なし、値$2)"],
+  // a whole English list glossed by the game's own words: "the lord, castle girls or storehouses (殿/城娘/蔵)"
+  [/^(?!immune|no longer)(?![^()]*only at)([a-z][^()\d]*?) \(([^()]*[\u3040-\u30ff\u4e00-\u9fff][^()]*)\)$/, "$2"],
+  [new RegExp(`\\bonce, can't be knocked out: HP can't drop to 0 for (${N})s\\b`), "1度だけ大破しない: $1秒間耐久が0にならない"],
+  [new RegExp(`\\btransforms for (${N})s\\b`), "$1秒間変身"],
+  [new RegExp(`\\bKi ([+−-]${N}) every (${N})s\\b`), "$2秒毎に気$1"],
+  [new RegExp(`\\bHeal \\(% of max HP\\) \\+(${N})%`), "最大耐久の$1%回復"],
+  [/\binflicts ([A-Za-z ]+?)(?: \(([^)]*[\u3040-\u9fff][^)]*)\))? \(the rest of the battle\)/g, (_m, x, jp) => `「${jp || words(x)}」付与(戦闘終了まで)`],
+  [/\bwhen attacked \(from ([^()]+)\): /g, (_m, x) => `被攻撃時 (${fromJa(x)}から): `],
+  [/\bbarrier \(from ([^()]+)\): blocks (\S+) of the damage/g, (_m, x, n) => `バリア (${fromJa(x)}から): ダメージの${n}を防ぐ`],
   // whole phrases that hold words the later rules would take apart
   [/\bbarrier \(バリア\) blocks up to (\d+) damage/g, "バリア: $1ダメージまで防ぐ"],
   [/\bbarrier \(from (.+?)\): blocks (\S+) of the damage/g, (_m, who, n) => `バリア (${receiverJa(who)}から): ダメージの${n}を防ぐ`],
@@ -284,6 +295,9 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bdamage shield: blocks up to (\d+) damage in total/g, "ダメージシールド: 合計$1ダメージまで防ぐ"],
   [/\bcan't be stopped \(immune to move speed being set to 0\)/g, "停止しない (移動速度0化無効)"],
   [/\bimmune to (.+?) being set to 0\b/g, (_m, x) => `${words(x)}の0化無効`],
+  [/\bimmune to ([^,;(]+?) multipliers\b/g, (_m, x) => `${words(x)}の倍率変化無効`],
+  [/\bcan't be made targetable again\b/g, "再び攻撃対象にされない"],
+  [/\bcan't be made blockable again\b/g, "再び足止め可能にされない"],
   [/ \(1 stock = a full gauge\)/g, " (1ストック=ゲージ満タン)"],
   [/\bper special-attack stock\b/g, "特殊攻撃ストック1につき"],
   [/\bstat (\d+) \(the game client never reads it\)/g, "ステータス$1 (クライアント未使用)"],
@@ -348,20 +362,21 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   // amounts based on another stat
   [new RegExp(`([+−-]${N}%?) of the giver's (${STAT})(?=,|$|;|\\))`, "g"), (_m, n, stat) => `${n}（付与者の${words(stat)}基準）`],
   [new RegExp(`([+−-]${N}%?) of own (${STAT})(?=,|$|;|\\))`, "g"), (_m, n, stat) => `${n}（自身の${words(stat)}基準）`],
+  [new RegExp(`([+−-]${N}%?) of (${STAT})(?=,|$|;)`, "g"), (_m, n, stat) => `${n}（${words(stat)}基準）`],
   [/\(\+% of the giver's (.+?)\)/g, (_m, stat) => `（付与者の${words(stat)}の%）`],
   [/\(\+% of own (.+?)\)/g, (_m, stat) => `（自身の${words(stat)}の%）`],
   [new RegExp(`\\bcounter damage (${N}%) of the attacker's (${STAT})(?: \\(反射\\))?(?= \\(|,|$)`, "g"), (_m, n, stat) => `反射ダメージ (攻撃者の${words(stat)}の${n})`],
   [new RegExp(`\\bcounter for (${N}%) of own (${STAT})(?= \\(|,|$)`, "g"), (_m, n, stat) => `反撃 (自身の${words(stat)}の${n})`],
-  [new RegExp(`\\b(independent )?damage (${N})× the target's (max|current) HP`, "g"), (_m, ind, n, which) => `${ind ? "独立" : ""}ダメージ (対象の${which === "max" ? "最大" : "現在"}耐久の${n}倍)`],
-  [new RegExp(`\\b(independent )?damage (${N})× (${STAT})(?= \\(|,|$|;)`, "g"), (_m, ind, n, stat) => `${ind ? "独立" : ""}ダメージ (${words(stat)}の${n}倍)`],
-  [new RegExp(`\\b(independent )?damage ×(${N}) (${STAT})(?= \\(|,|$|;)`, "g"), (_m, ind, n, stat) => `${ind ? "独立" : ""}ダメージ (${words(stat)}の${n}倍)`],
+  [new RegExp(`\\b(independent )?damage (${N})× the target's (max|current) HP`, "g"), (_m, ind, n, which) => `対象の${which === "max" ? "最大" : "現在"}耐久の${n}倍の${ind ? "独立" : ""}ダメージ`],
+  [new RegExp(`\\b(independent )?damage (${N})× (${STAT})(?= \\(|,|$|;)`, "g"), (_m, ind, n, stat) => `${words(stat)}の${n}倍の${ind ? "独立" : ""}ダメージ`],
+  [new RegExp(`\\b(independent )?damage ×(${N}) (${STAT})(?= \\(|,|$|;)`, "g"), (_m, ind, n, stat) => `${words(stat)}の${n}倍の${ind ? "独立" : ""}ダメージ`],
   [new RegExp(`\\bindependent damage (${N})\\b`, "g"), "独立ダメージ $1"],
   [/\(attack bonus\)/g, "(特定攻撃ボーナス)"],
   [new RegExp(`\\bset to (${N}(?:%|s)?)`, "g"), (_m, n) => `${n.replace(/s$/, "秒")}に設定`],
   [/\bimmune to ([^,;(]+?) being set to 0\b/g, (_m, x) => `${words(x)}0化無効`],
   [/\bno longer immune to ([^,;]+)/g, (_m, x) => `${words(x)}無効を解除`],
   [/\bimmune to ([^,;(]+?) (decreases|increases)\b/g, (_m, x, d) => `${words(x)}${d === "decreases" ? "低下" : "上昇"}無効`],
-  [/\bimmune to (.+?)(?=, (?:for|only|up to|doesn't|stacks|per|while|when|activates|on giantification)\b|;|$)/g, (_m, x) => `${splitList(x).map((y) => words(y)).join("・")}無効`],
+  [/\bimmune to (.+?)(?=, (?:[^A-Za-z]|for|only|up to|doesn't|stacks|per|while|when|activates|on giantification)|、|;|$)/g, (_m, x) => `${splitList(x).map((y) => words(y)).join("・")}無効`],
   [new RegExp(`\\binflicts ([A-Za-z ]+?)(?: \\(([^)]*[\\u3040-\\u9fff][^)]*)\\))? \\((${N})s\\)`, "g"), (_m, x, jp, n) => `「${jp || words(x)}」付与(${n}秒)`],
   [/\binflicts ([A-Za-z ]+?) \(([^)]*[぀-鿿][^)]*)\)/g, (_m, _x, jp) => `「${jp}」付与`],
   [/\binflicts ([A-Za-z ]+)/g, (_m, x) => `「${words(x)}」付与`],
@@ -395,9 +410,19 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bno effect \(an empty row in the data\)/g, "効果なし (データ上の空行)"],
   [new RegExp(`\\bKi (${N}) when it appears \\(given back when it is defeated\\)`, "g"), "登場時に気$1 (撃破時に返還)"],
   [new RegExp(` \\(\\+(${N}) Ki per tick; a 2nd/3rd such unit counts (\\S+)\\)`, "g"), " (1回あたり気+$1、2体目/3体目は$2)"],
-  [/\(from ([^()]*(?:\([^()]*\)[^()]*)*)\)/g, (_m, x) => `（${splitList(x).map((y) => words(y, true)).join("・")}から）`],
+  [/\(from ([^()]*(?:\([^()]*\)[^()]*)*)\)/g, (_m, x) => `（${fromJa(x)}から）`],
+  // seconds on an amount: "Stratagem cooldown −5s"
+  [new RegExp(`([+−-]${N})s\\b`, "g"), "$1秒"],
   [/\bthe effects below apply to units in the area\b/g, "範囲内のユニットに下記の効果"],
 ];
+
+// "(from magic, ranged, Bow castle girls)": the lower-case kinds are attack kinds (magic = 術, not the 法術 weapon)
+const FROM_KIND: Record<string, string> = {
+  magic: "術攻撃", physical: "物理攻撃", ranged: "遠隔攻撃", melee: "近接攻撃", "true damage": "固定ダメージ",
+};
+function fromJa(list: string): string {
+  return splitList(list).map((y) => FROM_KIND[y] ?? words(y, true)).join("・");
+}
 
 // an English term (up to 5 words) followed by the game's own word in brackets: the bracket says it already
 const GLOSS = /((?:[A-Za-z][A-Za-z'/-]*\s){0,6}[A-Za-z][A-Za-z'/-]*)\s\(([^()]*[぀-ヿ一-鿿][^()]*)\)/g;

@@ -229,7 +229,12 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
       const val = Number(row.ImmunityValue ?? 0);
       let what = modifierText(Number(row.StatusModifierID ?? 0), val);
       if (!val) what = what.replace(/ ([+−])0%?(, (?:doesn't )?stacks?)?$/, (_m, s: string) => (s === "+" ? " increases" : " decreases"));
+      what = what.replace(/, (?:doesn't )?stacks?$/, "");
+      if (!val) what = what.replace(/ ×1$/, " multipliers");
       what = what.replace(/ set to /, " being set to ");
+      // 「再び攻撃対象になる」 blocked: the unit can't be made targetable / blockable again
+      const again = /^can be (targeted|blocked) again$/.exec(what);
+      if (again) return `can't be made ${again[1] === "targeted" ? "targetable" : "blockable"} again`;
       // move speed set to 0 = being stopped in place
       if (what === "Move speed being set to 0" || what.startsWith("can't move")) return "can't be stopped (immune to move speed being set to 0)";
       // a condition with threshold 0 restricts nothing the texts mention (「移動速度低下を無効」); others kept raw
@@ -300,7 +305,7 @@ const CONDITION: Record<number, (d: number, trait: (id: number) => string) => st
   6: () => "per other castle girl in range",
   7: () => "per ally in range",
   9: (d) => `at giantification stage ${d}`,
-  10: (d, trait) => `per ${trait(d)} unit in range`,
+  10: (d, trait) => { const t = trait(d); return / enemies$/.test(t) ? `per ${t.replace(/ enemies$/, "")} enemy in range` : `per ${t} unit in range`; },
   11: (d) => `while blocking ≥ ${d}`,
   12: (d) => `while blocking ≤ ${d}`,
   14: (d) => (d > 1 ? `per ${d} knockouts (大破) in the formation` : "per knockout (大破) in the formation"),

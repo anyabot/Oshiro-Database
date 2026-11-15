@@ -60,6 +60,10 @@ function joinReceivers(whos: string[]): string {
     lead = `${firsts[0]}, `;
     whos = whos.map((w) => w.slice(lead.length));
   }
+  // the tables write a group's area once, on its first row: "Bow castle girls in range", "Crossbow
+  // castle girls", … (an enemy's 「対象：弓,石弓,鉄砲…」) is one group in range
+  const first = / in (range|the formation)$/.exec(whos[0])?.[0];
+  if (first && whos.length > 1 && whos.slice(1).every((w) => /^[A-Z][\w&' -]* castle girls$/.test(w))) whos = whos.map((w, i) => (i ? w + first : w));
   // the same kind of receiver for different traits: "<trait> castle girls<where>"
   const m = whos.map((w) => /^(?!All )(.+?) (castle girls(?: in range| in the formation)?|enemies(?: in range)?)$/.exec(w));
   if (m.every((x) => x && x[2] === m[0]![2])) {
@@ -76,6 +80,8 @@ function joinReceivers(whos: string[]): string {
     tail = where;
     whos = whos.map((w) => w.slice(0, -where.length));
   }
+  // generic receivers read lower case after the first ("All enemies, allies in the formation and …")
+  whos = whos.map((w, i) => (i && /^(Allies|Enemies|Units|Castle girls|Own|Self)\b/.test(w) ? w.charAt(0).toLowerCase() + w.slice(1) : w));
   const all = whos.map((w) => /^All (.+)$/.exec(w)?.[1]);
   if (all.every(Boolean) && whos.length > 2) return `${lead}All ${listJoin(all as string[])}${tail}`;
   return lead + listJoin(whos) + tail;
