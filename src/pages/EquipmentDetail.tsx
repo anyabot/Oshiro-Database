@@ -53,13 +53,17 @@ export default function EquipmentDetail() {
       />
       <div className="detail-grid">
         <div className="detail-main">
-          {(w.text || statText(w.stats).length > 0) && <Panel title={t("weaponStats")} note={t("weaponStatsNote")}>
+          {(w.text || statText(w.stats).length > 0 || w.ability.length > 0) && <Panel title={t("weaponStats")} note={t("weaponStatsNote")}>
             {statText(w.stats).length > 0 && <p className="weapon-stats">{statText(w.stats).join(" · ")}</p>}
+            {/* the decoded effects sit with the stats: together they are what the weapon does */}
+            {w.ability.length > 0 && defs && (
+              <div className="weapon-effects">
+                <span className="fx-combined__label">{t("weaponAbility")}</span>
+                <AbilityLines rows={w.ability} defs={defs} />
+              </div>
+            )}
             {w.text && <p className="game-text">{w.text}</p>}
           </Panel>}
-          {w.ability.length > 0 && defs && (
-            <Panel title={t("weaponAbility")}><AbilityLines rows={w.ability} defs={defs} /></Panel>
-          )}
           {w.special && (
             <Panel title={t("weaponSpecial")} note={t("weaponSpecialNote")}>
               <div className="skin-list">

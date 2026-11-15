@@ -228,3 +228,5 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .weapon-stats { font-weight: 600; margin: 0 0 8px; }
 .weapon-sources { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
 .weapon-sources .hub-badge { margin-left: 6px; }
+.weapon-effects { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--hub-surface-2, rgba(255,255,255,.04)); }
+.weapon-effects .fx-plain { margin: 4px 0 0; }

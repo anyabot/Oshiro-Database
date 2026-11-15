@@ -24,7 +24,7 @@ const STAT_UI: Record<StatKey, "thHp" | "thAtk" | "thDef" | "regen" | "range" | 
 export function useStatText() {
   const t = useT();
   return (stats: Partial<Record<StatKey, number>>) =>
-    STAT_KEYS.filter((k) => stats[k]).map((k) => `${t(STAT_UI[k]).replace(/ .*$/, "")} ${stats[k]! > 0 ? "+" : "−"}${Math.abs(stats[k]!)}${k === "speed" ? "%" : ""}`);
+    STAT_KEYS.filter((k) => stats[k]).map((k) => `${t(STAT_UI[k]).replace(/ [^\x00-\x7f].*$/, "")} ${stats[k]! > 0 ? "+" : "−"}${Math.abs(stats[k]!)}${k === "speed" ? "%" : ""}`);
 }
 
 /** A weapon's ability rows as decoded lines. */
