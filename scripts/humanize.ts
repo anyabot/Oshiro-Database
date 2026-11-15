@@ -38,7 +38,7 @@ const CHECKS: [string, RegExp | ((s: string) => boolean)][] = [
     return s.split(/ · |; /).some((piece) => {
       const eff = piece.includes(": ") ? piece.slice(piece.indexOf(": ") + 2) : piece;
       if (/\d/.test(eff)) return false;
-      if (/immune|can't|cannot|inflicts|gain|lose|removed|counter|evades|knocked|transforms|activates|plays|move|walk|attack|uses|fires|deploy|motion|visual|stance|stand|ignores|pierces|attribute|disabled|target|weather|falling|split|nullified|instead|no effect|effects below|lasts|empty|immunity|every|until|when|while|only|shield|barrier|taunt|priority|damage taken|damage dealt/i.test(eff)) return false;
+      if (/immune|can't|cannot|inflicts|gain|lose|removed|counter|evades|knocked|transforms|activates|plays|move|walk|attack|uses|fires|deploy|motion|visual|stance|stand|ignores|pierces|attribute|disabled|target|weather|falling|split|nullified|instead|no effect|effects below|lasts|turns|strengthens|empty|immunity|every|until|when|while|only|shield|barrier|taunt|priority|damage taken|damage dealt/i.test(eff)) return false;
       return !STATES.has(eff.trim());
     });
   }],
