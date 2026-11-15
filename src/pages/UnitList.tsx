@@ -4,18 +4,11 @@ import {
   CheckboxGroup, EmptyState, EntityTile, FilterChip, FilterPanel, ListToolbar, LoadState, Pager, SearchBox, routerLinks,
 } from "@altterisk/game-hub";
 import {
-  TERRAINS, categoryLabel, iconUrl, isMainWeapon, rarityLabel, regionLabel, terrainLabel, terrainParts, terrainWord,
-  traitLabel, traitTitle, useMeta, useUnits, weaponLabel,
+  TERRAINS, altName, categoryLabel, iconUrl, isMainWeapon, nameOf, rarityLabel, regionLabel, terrainLabel, terrainOption,
+  terrainParts, traitLabel, traitTitle, useMeta, useUnits, weaponLabel,
 } from "../data";
 import type { UnitIndexEntry } from "../types";
-import { unitName } from "../labels";
-
-/** Card.MaxRenovationCount values as filter options. */
-const RENOVATION_OPTS = [
-  { value: "2", label: "Kai Ni 改弐" },
-  { value: "1", label: "Kai 改壱 (no Kai Ni)" },
-  { value: "0", label: "No renovation" },
-];
+import { useHubLabels, useT } from "../i18n";
 
 const PAGE = 60;
 const renderLink = routerLinks(Link, "to");
@@ -26,6 +19,14 @@ export default function UnitList() {
   // filter/search/page state lives in the URL so back/forward and shared links restore the view
   const [params, setParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(true);
+  const t = useT();
+  const hub = useHubLabels();
+  // Card.MaxRenovationCount values as filter options
+  const renovationOpts = [
+    { value: "2", label: t("kaiNiOpt") },
+    { value: "1", label: t("kaiOpt") },
+    { value: "0", label: t("noRenovation") },
+  ];
 
   const q = params.get("q") || "";
   const showNpc = params.get("npc") === "1";
@@ -73,8 +74,8 @@ export default function UnitList() {
       trait: sorted(tr).map((v) => ({ value: String(v), label: traitLabel(meta, v) })),
       category: sorted(cat).map((v) => ({ value: String(v), label: categoryLabel(meta, v) })),
       // terrain words that some playable castle girl has, in the game's order (平 平山 山 水 地獄 無)
-      terrain: TERRAINS.filter((t) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(t)))
-        .map((t) => ({ value: t.slug, label: `${terrainWord(t.jp)} ${t.jp}` })),
+      terrain: TERRAINS.filter((x) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(x)))
+        .map((x) => ({ value: x.slug, label: terrainOption(x.jp) })),
     };
   }, [units, meta]);
 
@@ -107,7 +108,7 @@ export default function UnitList() {
     return newest ? out.reverse() : out;
   }, [units, meta, q, showNpc, showDup, newest, rarityF, weaponF, regionF, traitF, categoryF, terrainF, kaiF]);
 
-  if (loading || error) return <div className="page"><LoadState loading={loading} error={error} /></div>;
+  if (loading || error) return <div className="page"><LoadState loading={loading} error={error} labels={hub.load} /></div>;
 
   const activeCount = rarityF.length + weaponF.length + regionF.length + traitF.length + categoryF.length + terrainF.length + kaiF.length;
   const activeParams = [...new Set(params.keys())].filter((k) => k !== "page" && params.get(k)).length;
@@ -118,40 +119,41 @@ export default function UnitList() {
   return (
     <div className="page">
       <ListToolbar
-        search={<SearchBox value={q} onChange={(v) => setParam("q", v || null)} placeholder="Search id / name / reading" />}
-        count={`${filtered.length.toLocaleString()} castle girls`}
+        search={<SearchBox value={q} onChange={(v) => setParam("q", v || null)} placeholder={t("searchUnits")} clearLabel={hub.clearSearch} />}
+        count={t("nCastleGirls", { n: filtered.length.toLocaleString() })}
+        labels={hub.toolbar}
         activeFilters={activeParams}
         onClearFilters={() => setParams(new URLSearchParams(), { replace: true })}
         actions={(
           <>
-            <FilterChip active={newest} onClick={() => setParam("sort", newest ? null : "new")}>Newest first</FilterChip>
-            <FilterChip active={showDup} onClick={() => setParam("dup", showDup ? null : "1")}>Transformed / twin entries</FilterChip>
-            <FilterChip active={showNpc} onClick={() => setParam("npc", showNpc ? null : "1")}>Tokens / NPC / fodder</FilterChip>
+            <FilterChip active={newest} onClick={() => setParam("sort", newest ? null : "new")}>{t("newestFirst")}</FilterChip>
+            <FilterChip active={showDup} onClick={() => setParam("dup", showDup ? null : "1")}>{t("twinEntries")}</FilterChip>
+            <FilterChip active={showNpc} onClick={() => setParam("npc", showNpc ? null : "1")}>{t("npcEntries")}</FilterChip>
           </>
         )}
       />
 
-      <FilterPanel open={showFilters} onToggle={() => setShowFilters(!showFilters)} activeCount={activeCount} phoneOnly={false}>
-        <CheckboxGroup title="Rarity" options={opts.rarity} selected={rarityF} onToggle={(v) => toggleCsv("rarity", rarityF, v)} />
+      <FilterPanel open={showFilters} onToggle={() => setShowFilters(!showFilters)} activeCount={activeCount} phoneOnly={false} labels={hub.filters}>
+        <CheckboxGroup title={t("rarity")} options={opts.rarity} selected={rarityF} onToggle={(v) => toggleCsv("rarity", rarityF, v)} />
         <CheckboxGroup
-          title="Weapon"
-          options={opts.weaponOther ? [...opts.weapon, { value: "other", label: "Other (collab)" }] : opts.weapon}
+          title={t("weapon")}
+          options={opts.weaponOther ? [...opts.weapon, { value: "other", label: t("otherCollab") }] : opts.weapon}
           selected={weaponF}
           onToggle={(v) => toggleCsv("weapon", weaponF, v)}
         />
-        <CheckboxGroup title="Terrain" options={opts.terrain} selected={terrainF} onToggle={(v) => toggleCsv("terrain", terrainF, v)} />
-        <CheckboxGroup title="Renovation" options={RENOVATION_OPTS} selected={kaiF} onToggle={(v) => toggleCsv("kai", kaiF, v)} />
-        <CheckboxGroup title="Region" options={opts.region} selected={regionF} onToggle={(v) => toggleCsv("region", regionF, v)} />
-        <CheckboxGroup title="Trait" options={opts.trait} selected={traitF} onToggle={(v) => toggleCsv("trait", traitF, v)} />
-        <CheckboxGroup title="Category" options={opts.category} selected={categoryF} onToggle={(v) => toggleCsv("cat", categoryF, v)} />
+        <CheckboxGroup title={t("terrain")} options={opts.terrain} selected={terrainF} onToggle={(v) => toggleCsv("terrain", terrainF, v)} />
+        <CheckboxGroup title={t("renovation")} options={renovationOpts} selected={kaiF} onToggle={(v) => toggleCsv("kai", kaiF, v)} />
+        <CheckboxGroup title={t("region")} options={opts.region} selected={regionF} onToggle={(v) => toggleCsv("region", regionF, v)} />
+        <CheckboxGroup title={t("trait")} options={opts.trait} selected={traitF} onToggle={(v) => toggleCsv("trait", traitF, v)} />
+        <CheckboxGroup title={t("category")} options={opts.category} selected={categoryF} onToggle={(v) => toggleCsv("cat", categoryF, v)} />
       </FilterPanel>
 
       {traitF.length === 1 && meta?.traits[traitF[0]] && !meta.traits[traitF[0]].label && (
         <p className="muted small">{traitTitle(meta, Number(traitF[0]))}</p>
       )}
 
-      <Pager page={page + 1} pages={pages} onPage={onPage} />
-      {shown.length === 0 && <EmptyState title="No castle girls match these filters." hint="Change the search or clear the filters." />}
+      <Pager page={page + 1} pages={pages} onPage={onPage} labels={hub.pager} />
+      {shown.length === 0 && <EmptyState title={t("noMatchUnits")} hint={t("noMatchHint")} />}
 
       <div className="unit-grid">
         {shown.map((u) => (
@@ -161,22 +163,22 @@ export default function UnitList() {
             renderLink={renderLink}
             className="unit-tile"
             icon={u.face ? <img src={iconUrl(u.face)} alt="" width={60} height={60} loading="lazy" /> : <span className="icon-missing" />}
-            title={unitName(u) || "(unnamed)"}
-            subtitle={`${u.name_en ? `${u.name} · ` : ""}#${u.id} · ${rarityLabel(meta, u.rarity)} · ${weaponLabel(meta, u.weapon)}${u.terrain ? ` · ${terrainLabel(meta, u.terrain)}` : ""}${u.region ? ` · ${regionLabel(meta, u.region)}` : ""}`}
+            title={nameOf(u) || t("unnamed")}
+            subtitle={`${altName(u) ? `${altName(u)} · ` : ""}#${u.id} · ${rarityLabel(meta, u.rarity)} · ${weaponLabel(meta, u.weapon)}${u.terrain ? ` · ${terrainLabel(meta, u.terrain)}` : ""}${u.region ? ` · ${regionLabel(meta, u.region)}` : ""}`}
             badges={(u.traits?.length || u.dup_of || u.transform_of || u.npc || u.renovation === 2) ? (
               <>
-                {u.renovation === 2 && <span className="hub-badge hub-badge--accent" title="Has a 改弐 (Kai Ni) renovation">Kai Ni</span>}
-                {u.traits?.map((t) => <span key={t} className="hub-badge" title={traitTitle(meta, t)}>{traitLabel(meta, t)}</span>)}
-                {u.dup_of && <span className="hub-badge hub-badge--warning">twin of #{u.dup_of}</span>}
-                {u.transform_of && <span className="hub-badge hub-badge--accent">transformed #{u.transform_of}</span>}
-                {u.npc && <span className="hub-badge">type {u.card_type}</span>}
+                {u.renovation === 2 && <span className="hub-badge hub-badge--accent" title={t("kaiNiTitle")}>{t("kaiNiBadge")}</span>}
+                {u.traits?.map((tr) => <span key={tr} className="hub-badge" title={traitTitle(meta, tr)}>{traitLabel(meta, tr)}</span>)}
+                {u.dup_of && <span className="hub-badge hub-badge--warning">{t("twinOf", { id: u.dup_of })}</span>}
+                {u.transform_of && <span className="hub-badge hub-badge--accent">{t("transformedOf", { id: u.transform_of })}</span>}
+                {u.npc && <span className="hub-badge">{t("cardType", { n: u.card_type })}</span>}
               </>
             ) : undefined}
           />
         ))}
       </div>
 
-      <Pager page={page + 1} pages={pages} onPage={onPage} />
+      <Pager page={page + 1} pages={pages} onPage={onPage} labels={hub.pager} />
     </div>
   );
 }

@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FallbackImage, FilterChip, FilterRow, LoadState, PageHeader, SearchBox } from "@altterisk/game-hub";
 import { listState, searchParamsAdapter, textMatch } from "@altterisk/game-hub/filters";
-import { GROUPS, mapImage, useEvents, useStages, type GameEvent, type StageEntry } from "../stages";
+import { GROUPS, groupLabel, mapImage, useEvents, useStages, type GameEvent, type StageEntry } from "../stages";
+import { useHubLabels, useLang, useT } from "../i18n";
 
 const HELL = new Set(["enma", "hel", "osiris"]);
 
@@ -18,6 +19,9 @@ export default function Stages() {
   const group = url.text("group") || "enma";
   const q = url.text("q");
   const pastToo = url.text("past") !== "0";
+  const t = useT();
+  const lang = useLang();
+  const hub = useHubLabels();
 
   const counts = useMemo(() => {
     const m = new Map<string, number>();
@@ -41,7 +45,7 @@ export default function Stages() {
       ss.sort((a, b) => a.tabNo - b.tabNo || a.index - b.index || a.id - b.id);
       return {
         k, ev, stages: ss,
-        title: k.startsWith("b:") ? `武神 ${ss[0].bushin}` : k.startsWith("a:") ? k.slice(2) : ev?.title ?? "Without an event",
+        title: k.startsWith("b:") ? `武神 ${ss[0].bushin}` : k.startsWith("a:") ? k.slice(2) : ev?.title ?? t("withoutEvent"),
         live: ss.some((s) => s.live),
       };
     }).sort((a, b) => Number(b.live) - Number(a.live)
@@ -50,27 +54,26 @@ export default function Stages() {
       || (b.ev?.start ?? "").localeCompare(a.ev?.start ?? "") || a.title.localeCompare(b.title));
   }, [stages, events, group, q, pastToo]);
 
-  if (!stages) return <LoadState loading={loading} error={error} />;
+  if (!stages) return <LoadState loading={loading} error={error} labels={hub.load} />;
   return (
     <div className="page">
-      <PageHeader title="Stages"
-        subtitle="Stages with their enemies, stats and, for Hell, Hades and Bushin, the deliberations (審議) you can toggle. Grouped by event; past events are rebuilt from maps still in the game client's cache, and stages the game removes stay here." />
-      <div className="stage-search"><SearchBox value={q} onChange={(v) => url.setText("q", v)} placeholder="Search stage, event or Bushin" /></div>
+      <PageHeader title={t("stagesTitle")} subtitle={t("stagesSubtitle")} />
+      <div className="stage-search"><SearchBox value={q} onChange={(v) => url.setText("q", v)} placeholder={t("searchStages")} clearLabel={hub.clearSearch} /></div>
       {!q && (
-        <FilterRow label="Series">
+        <FilterRow label={t("series")}>
           {GROUPS.map((g) => (
             <FilterChip key={g.k} active={g.k === group} count={counts.get(g.k) || 0} onClick={() => url.setText("group", g.k)}>
-              {g.label}{g.jp ? ` ${g.jp}` : ""}
+              {groupLabel(g, lang)}
             </FilterChip>
           ))}
         </FilterRow>
       )}
-      <FilterRow label="Show">
-        <FilterChip active={pastToo} onClick={() => url.setText("past", "")}>Current and past</FilterChip>
-        <FilterChip active={!pastToo} onClick={() => url.setText("past", "0")}>Current only</FilterChip>
+      <FilterRow label={t("show")}>
+        <FilterChip active={pastToo} onClick={() => url.setText("past", "")}>{t("currentAndPast")}</FilterChip>
+        <FilterChip active={!pastToo} onClick={() => url.setText("past", "0")}>{t("currentOnly")}</FilterChip>
       </FilterRow>
       {sections.map((sec, i) => <EventSection key={sec.k} {...sec} startOpen={i < OPEN_FIRST || !!q} />)}
-      {!sections.length && <p className="muted">No stage matches.</p>}
+      {!sections.length && <p className="muted">{t("noStage")}</p>}
     </div>
   );
 }
@@ -81,16 +84,17 @@ function EventSection({ title, ev, stages, live, startOpen }: {
   title: string; ev?: GameEvent; stages: StageEntry[]; live: boolean; startOpen: boolean;
 }) {
   const [open, setOpen] = useState(startOpen);
-  const when = ev && !ev.end.startsWith("2099") ? `${day(ev.start)} – ${day(ev.end)}` : ev ? `since ${day(ev.start)}` : "";
+  const t = useT();
+  const when = ev && !ev.end.startsWith("2099") ? `${day(ev.start)} – ${day(ev.end)}` : ev ? t("since", { d: day(ev.start) }) : "";
   return (
     <section className="event-sec">
       <button type="button" className="event-sec__head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <FallbackImage srcs={[mapImage(stages[0].map)]} alt="" width={96} height={54} loading="lazy" className="event-sec__thumb" missingClassName="event-sec__thumb event-sec__thumb--none" />
         <span className="event-sec__title">{title}</span>
         <span className="event-sec__meta">
-          {!live && <span className="hub-badge" title="No stage of this event is in the game's current quest list">past</span>}
+          {!live && <span className="hub-badge" title={t("pastTitle")}>{t("past")}</span>}
           {when && <span className="muted small">{when}</span>}
-          <span className="muted small">{stages.length} stages</span>
+          <span className="muted small">{t("nStages", { n: stages.length })}</span>
         </span>
       </button>
       {open && (
@@ -102,9 +106,9 @@ function EventSection({ title, ev, stages, live, startOpen }: {
               <span className="stage-card__meta">
                 {s.singi && <span className="hub-badge">審議</span>}
                 {s.veryHard && <span className="hub-badge">超難</span>}
-                {s.recovered && <span className="hub-badge" title="Rebuilt from the cached map: no stage multipliers or names in the data">cache</span>}
-                {!s.live && !s.recovered && <span className="hub-badge">removed</span>}
-                <span className="muted small">{s.enemies} enemies · {s.spawns} spawns</span>
+                {s.recovered && <span className="hub-badge" title={t("cacheTitle")}>{t("cache")}</span>}
+                {!s.live && !s.recovered && <span className="hub-badge">{t("removed")}</span>}
+                <span className="muted small">{t("enemiesSpawns", { e: s.enemies, s: s.spawns })}</span>
               </span>
             </Link>
           ))}

@@ -1,29 +1,48 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { SiteShell, homeLink } from "@altterisk/game-hub";
+import { SegmentedButtons, SiteShell, homeLink } from "@altterisk/game-hub";
 import { LIST_META } from "./meta";
 import { usePageMeta } from "./usePageMeta";
+import { LANGS, hubLabels, setLang, useLang, useT, type Lang } from "./i18n";
 
-const FOOTER_LINKS = [
-  { label: "Source on GitHub", href: "https://github.com/Altterisk/Oshiro-Database" },
-  { label: "Portfolio", href: "https://altterisk.github.io/portfolio/" },
-  { label: "Ko-fi", href: "https://ko-fi.com/altterisk" },
-];
+function LanguagePicker() {
+  const t = useT();
+  const lang = useLang();
+  return (
+    <SegmentedButtons className="lang-picker" label={t("language")} options={LANGS} selected={lang}
+      onToggle={(v) => setLang(v as Lang)} />
+  );
+}
 
 export default function App() {
   // list pages here; detail pages and NotFound call usePageMeta themselves
   const { pathname } = useLocation();
   usePageMeta(LIST_META[pathname.replace(/\/$/, "")] ?? null);
+  const lang = useLang();
+  const t = useT();
+  const hub = hubLabels(lang);
   return (
     <SiteShell
       game="oshiro"
       logo={<img src="/logo.png" alt="" />}
       renderHomeLink={homeLink(Link, "to")}
-      nav={<><NavLink to="/units">Units</NavLink><NavLink to="/buffs">Buffs</NavLink><NavLink to="/stages">Stages</NavLink></>}
-      footer={{ links: FOOTER_LINKS }}
+      nav={<><NavLink to="/units">{t("navUnits")}</NavLink><NavLink to="/buffs">{t("navBuffs")}</NavLink><NavLink to="/stages">{t("navStages")}</NavLink></>}
+      actions={<LanguagePicker />}
+      barLabels={hub.bar}
+      errorLabels={hub.error}
+      skipLabel={hub.skip}
+      footer={{
+        links: [
+          { label: t("footerSource"), href: "https://github.com/Altterisk/Oshiro-Database" },
+          { label: t("footerPortfolio"), href: "https://altterisk.github.io/portfolio/" },
+          { label: "Ko-fi", href: "https://ko-fi.com/altterisk" },
+        ],
+        labels: hub.footer,
+      }}
       resetKey={pathname}
       contained={false}
     >
-      <Outlet />
+      {/* keyed by language: pages and their memoised option lists rebuild in the new language */}
+      <Outlet key={lang} />
     </SiteShell>
   );
 }

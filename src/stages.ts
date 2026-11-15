@@ -110,6 +110,12 @@ export const GROUPS: { k: StageGroup; label: string; jp: string }[] = [
   { k: "other", label: "Other", jp: "" },
 ];
 
+/** A series' name for the UI: "Enma 閻魔" in English, "閻魔" in Japanese. */
+export function groupLabel(g: { k: StageGroup; label: string; jp: string }, lang: "en" | "ja"): string {
+  if (lang === "ja") return g.jp || ({ story: "メインストーリー", other: "その他" } as Record<string, string>)[g.k] || g.label;
+  return `${g.label}${g.jp ? ` ${g.jp}` : ""}`;
+}
+
 /** Entry Wait is in frames; the battle runs at 30 per second (DAT_00c6d97c). */
 export const frameSec = (f: number) => Math.round((f / 30) * 10) / 10;
 

@@ -3,10 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { FallbackImage, FilterChip, FilterRow, GroupCard, LoadState, PageHeader, SegmentedButtons } from "@altterisk/game-hub";
 import { listState, searchParamsAdapter } from "@altterisk/game-hub/filters";
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
-import { iconUrl, rarityLabel, useMeta, useUnits, weaponLabel } from "../data";
+import { altName, iconUrl, nameOf, rarityLabel, tierName, useMeta, useUnits, weaponLabel } from "../data";
 import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
-import { unitName } from "../labels";
+import { useHubLabels, useT, type UiKey } from "../i18n";
 
 /** One row of public/data/buffs.json (scripts/buffs.ts). */
 interface BuffRow {
@@ -30,12 +30,12 @@ interface BuffData { keys: Record<string, string>; rows: BuffRow[] }
 
 const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data/${n}.json`] });
 
-const CATEGORIES = [
-  { k: "offense", label: "Offense" },
-  { k: "defense", label: "Defense & healing" },
-  { k: "ki", label: "Ki & cooldowns" },
-  { k: "other", label: "Other" },
-  { k: "debuff", label: "Enemy debuffs" },
+const CATEGORIES: { k: string; label: UiKey }[] = [
+  { k: "offense", label: "catOffense" },
+  { k: "defense", label: "catDefense" },
+  { k: "ki", label: "catKi" },
+  { k: "other", label: "catOther" },
+  { k: "debuff", label: "catDebuff" },
 ];
 const DEBUFF_COLOR = "#f7768e";
 
@@ -58,37 +58,26 @@ function category(r: BuffRow): string {
   return "other";
 }
 
-const SOURCES = [
-  { value: "skill", label: "Specialty 特技" },
-  { value: "formation", label: "Formation 編成特技" },
-  { value: "stratagem", label: "Stratagem 計略" },
-  { value: "special_attack", label: "Special attack" },
-  { value: "class", label: "Class ability" },
-  { value: "special", label: "Special ability" },
-  { value: "possession", label: "Possession 所持" },
-  { value: "defeat", label: "On defeat 撃破時" },
-  { value: "token", label: "Ambush unit 伏兵" },
+const SOURCES: { value: string; label: UiKey; note: UiKey }[] = [
+  { value: "skill", label: "srcSkill", note: "noteSkill" },
+  { value: "formation", label: "srcFormation", note: "noteFormation" },
+  { value: "stratagem", label: "srcStratagem", note: "noteStratagem" },
+  { value: "special_attack", label: "srcSpecialAttack", note: "noteSpecialAttack" },
+  { value: "class", label: "srcClass", note: "noteClass" },
+  { value: "special", label: "srcSpecial", note: "noteSpecial" },
+  { value: "possession", label: "srcPossession", note: "notePossession" },
+  { value: "defeat", label: "srcDefeat", note: "noteDefeat" },
+  { value: "token", label: "srcToken", note: "noteToken" },
 ];
-const SOURCE_LABEL = Object.fromEntries(SOURCES.map((s) => [s.value, s.label]));
-const SOURCE_NOTE: Record<string, string> = {
-  skill: "The castle girl's own specialty: always on while deployed, or on its trigger.",
-  formation: "Applies to the formation from the start of the battle.",
-  stratagem: "Active while the stratagem lasts.",
-  special_attack: "Applied by the special attack.",
-  class: "Every castle girl of the class has it.",
-  special: "Special ability (sub-ability) effects.",
-  possession: "Applies while the castle girl is owned / in the formation.",
-  defeat: "When the castle girl is defeated.",
-  token: "Abilities of the ambush unit (伏兵) her stratagem places.",
-};
+const SOURCE_BY = Object.fromEntries(SOURCES.map((s) => [s.value, s]));
 
 // who receives it, bucketed from the receiver text the effect describer writes
-const REACH = [
-  { value: "self", label: "Self" },
-  { value: "single", label: "Single target" },
-  { value: "range", label: "In range / area" },
-  { value: "wide", label: "All / formation" },
-  { value: "group", label: "Tokens & others" },
+const REACH: { value: string; label: UiKey }[] = [
+  { value: "self", label: "reachSelf" },
+  { value: "single", label: "reachSingle" },
+  { value: "range", label: "reachRange" },
+  { value: "wide", label: "reachWide" },
+  { value: "group", label: "reachGroup" },
 ];
 function reach(r: BuffRow): string {
   const w = r.w;
@@ -127,6 +116,8 @@ export default function Buffs() {
   const [params, setParams] = useSearchParams();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const adapter = searchParamsAdapter(params, setParams);
+  const t = useT();
+  const hub = useHubLabels();
   const url = listState(adapter);
 
   const cat = CATEGORIES.find((c) => c.k === url.text("cat"))?.k ?? "offense";
@@ -191,54 +182,53 @@ export default function Buffs() {
     });
   }, [keys, key, byValue]);
 
-  if (!data) return <LoadState loading={loading} error={error} />;
+  if (!data) return <LoadState loading={loading} error={error} labels={hub.load} />;
   const names = data.keys;
   return (
     <div className="page buffs-page">
-      <PageHeader title="Buff ranking"
-        subtitle="Who gives the biggest effect, by stat, source and receiver. One row per castle girl and receiver (her best for it), ranked within each source." />
+      <PageHeader title={t("buffTitle")} subtitle={t("buffSubtitle")} />
       <details className="stack-help">
-        <summary>How effects stack</summary>
+        <summary>{t("stackHelp")}</summary>
         <ul className="small">
-          <li><strong>Strongest only</strong>: plain % changes of one stat keep only the biggest increase and the biggest decrease (and some flat stats, like DEF ignore and Ki refund, do the same).</li>
-          <li><strong>Stacks</strong>: flat values and the stacking % kind are added together.</li>
-          <li>Growing and per-count effects are ranked by the most they reach (their cap); switch <em>Rank by</em> to compare the base step instead. Effects that grow with no cap are ranked by their step.</li>
-          <li>Values are the stored amounts before giantification scaling.</li>
+          {(["stackStrongest", "stackAdds", "stackGrow", "stackScale"] as const).map((k) => (
+            // fixed strings from the UI table, with <b>/<i> markup only
+            <li key={k} dangerouslySetInnerHTML={{ __html: t(k) }} />
+          ))}
         </ul>
       </details>
-      <FilterRow label="Type">
+      <FilterRow label={t("type")}>
         {CATEGORIES.map((c) => (
           <FilterChip key={c.k} active={c.k === cat} count={unitsIn(byCat.get(c.k) || [])}
             color={c.k === "debuff" ? DEBUFF_COLOR : undefined}
             onClick={() => adapter.set({ cat: c.k, k: null })}>
-            {c.label}
+            {t(c.label)}
           </FilterChip>
         ))}
       </FilterRow>
-      <FilterRow label="Effect">
+      <FilterRow label={t("effect")}>
         {keys.map(([k, list]) => (
           <FilterChip key={k} active={k === key} count={unitsIn(list)} onClick={() => url.setText("k", k)}>{effectLabel(k, names)}</FilterChip>
         ))}
-        {!keys.length && <span className="muted small">Nothing matches these filters.</span>}
+        {!keys.length && <span className="muted small">{t("nothingMatches")}</span>}
       </FilterRow>
-      <FilterRow label="Receiver">
-        <FilterChip active={!reaches.length} onClick={() => url.clear(["to"])}>Any</FilterChip>
+      <FilterRow label={t("receiver")}>
+        <FilterChip active={!reaches.length} onClick={() => url.clear(["to"])}>{t("any")}</FilterChip>
         {REACH.map((o) => (
-          <FilterChip key={o.value} active={reaches.includes(o.value)} onClick={() => url.toggle("to", o.value)}>{o.label}</FilterChip>
+          <FilterChip key={o.value} active={reaches.includes(o.value)} onClick={() => url.toggle("to", o.value)}>{t(o.label)}</FilterChip>
         ))}
       </FilterRow>
-      <FilterRow label="Source">
-        <FilterChip active={!sources.length} onClick={() => url.clear(["source"])}>All</FilterChip>
+      <FilterRow label={t("source")}>
+        <FilterChip active={!sources.length} onClick={() => url.clear(["source"])}>{t("all")}</FilterChip>
         {SOURCES.map((o) => (
-          <FilterChip key={o.value} active={sources.includes(o.value)} onClick={() => url.toggle("source", o.value)}>{o.label}</FilterChip>
+          <FilterChip key={o.value} active={sources.includes(o.value)} onClick={() => url.toggle("source", o.value)}>{t(o.label)}</FilterChip>
         ))}
       </FilterRow>
       <div className="buff-options">
-        <SegmentedButtons label="Renovation" selected={base ? "base" : "best"}
-          options={[{ value: "best", label: "Highest" }, { value: "base", label: "Unrenovated" }]}
+        <SegmentedButtons label={t("renovation")} selected={base ? "base" : "best"}
+          options={[{ value: "best", label: t("highest") }, { value: "base", label: t("unrenovated") }]}
           onToggle={(v) => url.setText("tier", v === "base" ? "base" : "")} />
-        <SegmentedButtons label="Rank by" selected={byValue ? "value" : "max"}
-          options={[{ value: "max", label: "Max reached" }, { value: "value", label: "Base value" }]}
+        <SegmentedButtons label={t("rankBy")} selected={byValue ? "value" : "max"}
+          options={[{ value: "max", label: t("maxReached") }, { value: "value", label: t("baseValue") }]}
           onToggle={(v) => url.setText("rank", v === "value" ? "value" : "")} />
       </div>
       <div className="buff-unit-filters">{unitFilter.panel}</div>
@@ -248,40 +238,40 @@ export default function Buffs() {
           const shown = open ? ranked : ranked.slice(0, PREVIEW);
           return (
             <GroupCard key={sl} className="buff-group"
-              title={`${effectLabel(key, names)} · ${SOURCE_LABEL[sl]}`}
-              count={`${new Set(ranked.map((r) => r.u)).size} castle girls`}
-              note={SOURCE_NOTE[sl]}>
+              title={`${effectLabel(key, names)} · ${t(SOURCE_BY[sl].label)}`}
+              count={t("nCastleGirls", { n: new Set(ranked.map((r) => r.u)).size })}
+              note={t(SOURCE_BY[sl].note)}>
               <table className="hub-table hub-table--stack buff-table">
-                <thead><tr><th>#</th><th>Value</th><th>Castle girl</th><th>Receiver</th><th>Conditions</th></tr></thead>
+                <thead><tr><th>#</th><th>{t("value")}</th><th>{t("castleGirl")}</th><th>{t("receiver")}</th><th>{t("conditions")}</th></tr></thead>
                 <tbody>
                   {shown.map((r, i) => {
                     const u: UnitIndexEntry | undefined = units.get(r.u);
                     return (
                       <tr key={`${r.u}-${i}`}>
                         <td data-label="#" className="muted">{i + 1}</td>
-                        <td data-label="Value" className="buff-val">
+                        <td data-label={t("value")} className="buff-val">
                           <strong>{fmtAmount(r.k, r.v)}</strong>
-                          {r.mx != null && r.mx !== r.v && <div className="small muted">max {fmtAmount(r.k, r.mx)}</div>}
-                          {r.nc && <div className="small muted">no cap</div>}
+                          {r.mx != null && r.mx !== r.v && <div className="small muted">{t("max", { v: fmtAmount(r.k, r.mx) })}</div>}
+                          {r.nc && <div className="small muted">{t("noCap")}</div>}
                           {r.st != null && (
                             <div className={`buff-stack ${r.st === 1 ? "is-stack" : r.st === 0 ? "is-max" : ""}`}>
-                              {r.st === 1 ? "stacks" : r.st === 0 ? "strongest only" : r.st}
+                              {r.st === 1 ? t("stacks") : r.st === 0 ? t("strongestOnly") : r.st}
                             </div>
                           )}
                         </td>
-                        <td data-label="Castle girl">
+                        <td data-label={t("castleGirl")}>
                           <Link className="buff-unit" to={`/units/${r.u}${r.t > 0 ? `?kai=${r.t}` : ""}`}>
                             {u?.face != null
                               ? <FallbackImage srcs={[iconUrl(u.face)]} alt="" width={36} height={36} loading="lazy" missingClassName="buff-noicon" />
                               : <span className="buff-noicon" />}
                             <span>
-                              <span className="buff-unit-name" title={u?.name_en ? u.name : undefined}>{u ? unitName(u) : `#${r.u}`}</span>
-                              {u && <span className="buff-unit-meta">{rarityLabel(meta, u.rarity)} · {weaponLabel(meta, u.weapon)}{r.t > 0 ? ` · ${["", "Kai", "Kai Ni"][r.t]}` : ""}</span>}
+                              <span className="buff-unit-name" title={altName(u) || undefined}>{u ? nameOf(u) : `#${r.u}`}</span>
+                              {u && <span className="buff-unit-meta">{rarityLabel(meta, u.rarity)} · {weaponLabel(meta, u.weapon)}{r.t > 0 ? ` · ${tierName(r.t)}` : ""}</span>}
                             </span>
                           </Link>
                         </td>
-                        <td data-label="Receiver" className="buff-target">{r.w}</td>
-                        <td data-label="Conditions" className="buff-target">
+                        <td data-label={t("receiver")} className="buff-target">{r.w}</td>
+                        <td data-label={t("conditions")} className="buff-target">
                           {r.n ? <span className="small">{r.n}</span> : <span className="muted small">—</span>}
                           {r.nm && <div className="muted small">{r.nm}</div>}
                         </td>
@@ -292,17 +282,14 @@ export default function Buffs() {
               </table>
               {ranked.length > PREVIEW && (
                 <button className="hub-btn buff-more" onClick={() => setExpanded((s) => { const n = new Set(s); if (n.has(sl)) n.delete(sl); else n.add(sl); return n; })}>
-                  {open ? `Show top ${PREVIEW}` : `Show all ${ranked.length}`}
+                  {open ? t("showTop", { n: PREVIEW }) : t("showAll", { n: ranked.length })}
                 </button>
               )}
             </GroupCard>
           );
         })}
       </div>
-      <p className="muted small">
-        Built from the same decoded effect rows the castle girl pages show. Effects still shown as raw fields there
-        (undecoded codes, % of another stat, crowd control, damage over time) are not ranked here.
-      </p>
+      <p className="muted small">{t("buffFooter")}</p>
     </div>
   );
 }

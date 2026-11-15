@@ -1,8 +1,25 @@
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
-import { CASTLE_EN, CATEGORY_EN, REGION_EN, TRAIT_EN, WEAPON_EN } from "./labels";
+import { CASTLE_EN, CATEGORY_EN, REGION_EN, TRAIT_EN, WEAPON_EN, unitName } from "./labels";
+import { getLang } from "./i18n";
 import type { Meta, TraitInfo, UnitDetail, UnitIndexEntry } from "./types";
 
 const BASE = import.meta.env.BASE_URL;
+
+const ja = () => getLang() === "ja";
+
+/** A castle girl's display name: the English name where there is one, the game's own in Japanese mode. */
+export function nameOf(u: { name: string; name_en?: string | null } | undefined | null): string {
+  return u ? (ja() ? u.name : unitName(u)) : "";
+}
+
+/** The other-language name, for subtitles and tooltips ("" when it would repeat the shown one). */
+export function altName(u: { name: string; name_en?: string | null } | undefined | null): string {
+  if (!u?.name_en) return "";
+  return ja() ? u.name_en : u.name;
+}
+
+/** Renovation tier names: 0 Base, 1 Kai, 2 Kai Ni (改壱, 改弐 in Japanese). */
+export const tierName = (t: number) => (ja() ? ["未改築", "改壱", "改弐"] : ["Base", "Kai", "Kai Ni"])[t] ?? `tier ${t}`;
 
 const loader = createJsonLoader({ urls: (name) => [`${BASE}data/${name}.json`] });
 
@@ -19,16 +36,17 @@ export function rarityLabel(meta: Meta | undefined, r: number): string {
 export function weaponLabel(meta: Meta | undefined, w: number | null): string {
   if (!w) return "—";
   const jp = meta?.weapons[w];
-  return jp ? WEAPON_EN[jp] ?? jp : `weapon ${w}`;
+  return jp ? (ja() ? jp : WEAPON_EN[jp] ?? jp) : `weapon ${w}`;
 }
 
 export function regionLabel(meta: Meta | undefined, r: number | null): string {
   if (!r) return "—";
   const jp = meta?.regions[r];
-  return jp ? REGION_EN[jp] ?? jp : `region ${r}`;
+  return jp ? (ja() ? jp : REGION_EN[jp] ?? jp) : `region ${r}`;
 }
 
 export function categoryLabel(meta: Meta | undefined, c: number): string {
+  if (ja() && meta?.categories[c]) return meta.categories[c];
   return CATEGORY_EN[c] ?? meta?.categories[c] ?? `category ${c}`;
 }
 
@@ -40,7 +58,7 @@ export function categoryJp(meta: Meta | undefined, c: number): string | undefine
 /** Trait chip text: the shared name prefix where there is one, else the raw id. */
 export function traitLabel(meta: Meta | undefined, t: number): string {
   const info: TraitInfo | undefined = meta?.traits[t];
-  return info?.label ? TRAIT_EN[info.label] ?? info.label : `特性 ${t}`;
+  return info?.label ? (ja() ? info.label : TRAIT_EN[info.label] ?? info.label) : `特性 ${t}`;
 }
 
 export function traitTitle(meta: Meta | undefined, t: number): string {
@@ -65,7 +83,10 @@ export function terrainParts(meta: Meta | undefined, t: number | null): typeof T
   return TERRAINS.filter((x) => meta.terrain!.parts[x.jp]?.includes(t));
 }
 
-export const terrainWord = (jp: string) => (jp === "無属性" ? "None" : CASTLE_EN[jp] ?? jp);
+export const terrainWord = (jp: string) => (ja() ? jp : jp === "無属性" ? "None" : CASTLE_EN[jp] ?? jp);
+
+/** Filter label of a terrain word: "Plain 平" in English, "平" in Japanese. */
+export const terrainOption = (jp: string) => (ja() ? jp : `${terrainWord(jp)} ${jp}`);
 
 export function terrainLabel(meta: Meta | undefined, t: number | null): string {
   if (!t) return "—";

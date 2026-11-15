@@ -4,22 +4,24 @@ import { useMemo, useState } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
 import { CheckboxGroup, FilterPanel } from "@altterisk/game-hub";
 import {
-  TERRAINS, categoryLabel, isMainWeapon, rarityLabel, regionLabel, terrainParts, terrainWord, traitLabel,
+  TERRAINS, categoryLabel, isMainWeapon, rarityLabel, regionLabel, terrainOption, terrainParts, traitLabel,
   weaponLabel,
 } from "./data";
 import type { Meta, UnitIndexEntry } from "./types";
-
-const RENOVATION_OPTS = [
-  { value: "2", label: "Kai Ni 改弐" },
-  { value: "1", label: "Kai 改壱 (no Kai Ni)" },
-  { value: "0", label: "No renovation" },
-];
+import { useHubLabels, useT } from "./i18n";
 
 const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai"] as const;
 
 export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta | undefined,
   params: URLSearchParams, setParams: SetURLSearchParams, prefix = "f") {
   const [open, setOpen] = useState(false);
+  const t = useT();
+  const hub = useHubLabels();
+  const renovationOpts = [
+    { value: "2", label: t("kaiNiOpt") },
+    { value: "1", label: t("kaiOpt") },
+    { value: "0", label: t("noRenovation") },
+  ];
   const csv = (k: string) => (params.get(prefix + k) || "").split(",").filter(Boolean);
   const sel = Object.fromEntries(KEYS.map((k) => [k, csv(k)])) as Record<(typeof KEYS)[number], string[]>;
   const toggle = (k: (typeof KEYS)[number], v: string) => {
@@ -49,12 +51,12 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
     return {
       rarity: sorted(rar).map((v) => ({ value: String(v), label: rarityLabel(meta, v) })),
       weapon: [...sorted(wep).filter(isMainWeapon).map((v) => ({ value: String(v), label: weaponLabel(meta, v) })),
-        ...(sorted(wep).some((w) => !isMainWeapon(w)) ? [{ value: "other", label: "Other (collab)" }] : [])],
+        ...(sorted(wep).some((w) => !isMainWeapon(w)) ? [{ value: "other", label: t("otherCollab") }] : [])],
       region: sorted(reg).map((v) => ({ value: String(v), label: regionLabel(meta, v) })),
       trait: sorted(tr).map((v) => ({ value: String(v), label: traitLabel(meta, v) })),
       cat: sorted(cat).map((v) => ({ value: String(v), label: categoryLabel(meta, v) })),
-      terrain: TERRAINS.filter((t) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(t)))
-        .map((t) => ({ value: t.slug, label: `${terrainWord(t.jp)} ${t.jp}` })),
+      terrain: TERRAINS.filter((x) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(x)))
+        .map((x) => ({ value: x.slug, label: terrainOption(x.jp) })),
     };
   }, [units, meta]);
 
@@ -81,15 +83,15 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
 
   const activeCount = KEYS.reduce((n, k) => n + sel[k].length, 0);
   const panel = (
-    <FilterPanel open={open || activeCount > 0} onToggle={() => setOpen(!open)} activeCount={activeCount} phoneOnly={false}>
-      <CheckboxGroup title="Rarity" options={opts.rarity} selected={sel.rarity} onToggle={(v) => toggle("rarity", v)} />
-      <CheckboxGroup title="Weapon" options={opts.weapon} selected={sel.weapon} onToggle={(v) => toggle("weapon", v)} />
-      <CheckboxGroup title="Terrain" options={opts.terrain} selected={sel.terrain} onToggle={(v) => toggle("terrain", v)} />
-      <CheckboxGroup title="Region" options={opts.region} selected={sel.region} onToggle={(v) => toggle("region", v)} />
-      <CheckboxGroup title="Category" options={opts.cat} selected={sel.cat} onToggle={(v) => toggle("cat", v)} />
-      <CheckboxGroup title="Renovation" options={RENOVATION_OPTS} selected={sel.kai} onToggle={(v) => toggle("kai", v)} />
-      <CheckboxGroup title="Trait" options={opts.trait} selected={sel.trait} onToggle={(v) => toggle("trait", v)} />
-      {activeCount > 0 && <button className="hub-btn" onClick={clear}>Clear castle girl filters</button>}
+    <FilterPanel open={open || activeCount > 0} onToggle={() => setOpen(!open)} activeCount={activeCount} phoneOnly={false} labels={hub.filters}>
+      <CheckboxGroup title={t("rarity")} options={opts.rarity} selected={sel.rarity} onToggle={(v) => toggle("rarity", v)} />
+      <CheckboxGroup title={t("weapon")} options={opts.weapon} selected={sel.weapon} onToggle={(v) => toggle("weapon", v)} />
+      <CheckboxGroup title={t("terrain")} options={opts.terrain} selected={sel.terrain} onToggle={(v) => toggle("terrain", v)} />
+      <CheckboxGroup title={t("region")} options={opts.region} selected={sel.region} onToggle={(v) => toggle("region", v)} />
+      <CheckboxGroup title={t("category")} options={opts.cat} selected={sel.cat} onToggle={(v) => toggle("cat", v)} />
+      <CheckboxGroup title={t("renovation")} options={renovationOpts} selected={sel.kai} onToggle={(v) => toggle("kai", v)} />
+      <CheckboxGroup title={t("trait")} options={opts.trait} selected={sel.trait} onToggle={(v) => toggle("trait", v)} />
+      {activeCount > 0 && <button className="hub-btn" onClick={clear}>{t("clearUnitFilters")}</button>}
     </FilterPanel>
   );
   return { matches, panel, activeCount };
