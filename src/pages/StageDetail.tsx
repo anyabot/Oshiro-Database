@@ -4,7 +4,7 @@ import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
-import { useHubLabels, useLang, useT } from "../i18n";
+import { useFx, useHubLabels, useLang, useT } from "../i18n";
 import {
   GROUPS, groupLabel, STAT, applyStat, enemyImage, mapImage, preText, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
@@ -165,10 +165,11 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
 function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawRow[]; defs: EffectDefs; kind?: "organized" | "ability"; enemy?: boolean }) {
   const bases = kind === "ability" ? rowBases(rows) : [];
   const t = useT();
+  const fx = useFx();
   return (
     <ul className="fx-plain">
       {groupRows(rows.map((r, i) => describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text))
-        .map((l, i) => <li key={i}>{l.text || t("notDecoded")}</li>)}
+        .map((l, i) => <li key={i}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
     </ul>
   );
 }
@@ -176,6 +177,7 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
 function SingiRow({ o, on, onToggle, defs }: { o: SingiOption; on: boolean; onToggle: () => void; defs: EffectDefs }) {
   const [open, setOpen] = useState(false);
   const t = useT();
+  const fx = useFx();
   const enemySide = useMemo(() => (o.rows ? withTargets(o.rows).some((r) => rowIsEnemySide(r, defs)) : false), [o, defs]);
   return (
     <div className={`singi${on ? " is-on" : ""}`}>
@@ -193,7 +195,7 @@ function SingiRow({ o, on, onToggle, defs }: { o: SingiOption; on: boolean; onTo
           {open && <RowList rows={withTargets(o.rows)} defs={defs} />}
         </>
       ) : o.pre ? (
-        <ul className="fx-plain">{o.pre.map((r, i) => <li key={i}>{preText(r, defs)}</li>)}</ul>
+        <ul className="fx-plain">{o.pre.map((r, i) => <li key={i}>{fx.line(preText(r, defs))}</li>)}</ul>
       ) : <span className="muted small">{t("textOnly")}</span>}
     </div>
   );
@@ -220,6 +222,7 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
   const [open, setOpen] = useState(false);
   const t = useT();
   const lang = useLang();
+  const fx = useFx();
   const { applied, unknown, notes } = useMemo(() => modsFor(e, active, defs, data.targets), [e, active, defs, data]);
   const by = (k: string) => applied.filter((m) => m.key === k);
   const shownKeys: string[] = [STAT.hp, STAT.atk, STAT.def, STAT.mdef, STAT.range, STAT.move];
@@ -259,10 +262,10 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
         <td data-label={t("thRange")}>{statCell(e.range, 1, by(STAT.range))}</td>
         <td data-label={t("thMove")}>{statCell(Math.round(e.move), 1, by(STAT.move))}</td>
         <td data-label={t("thAbilities")} className="enemy-mods">
-          {innate.map((tx, i) => <div key={`i${i}`} className="small chg-innate" title={t("ownAbility")}>{tx}</div>)}
-          {other.map((m, i) => <div key={i} className="small chg-singi" title={m.src}>{m.text.replace(/^[^:]*: /, "")}</div>)}
-          {notes.map((m, i) => <div key={`n${i}`} className={`small chg-singi${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{m.text.replace(/^[^:]*: /, "")}</div>)}
-          {unknown.map((m, i) => <div key={`u${i}`} className="small muted" title={`${m.src}: its target isn't an enemy type the page can test`}>? {m.text}</div>)}
+          {innate.map((tx, i) => <div key={`i${i}`} className="small chg-innate" title={t("ownAbility")}>{fx.line(tx)}</div>)}
+          {other.map((m, i) => <div key={i} className="small chg-singi" title={m.src}>{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
+          {notes.map((m, i) => <div key={`n${i}`} className={`small chg-singi${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
+          {unknown.map((m, i) => <div key={`u${i}`} className="small muted" title={`${m.src}: its target isn't an enemy type the page can test`}>? {fx.line(m.text)}</div>)}
         </td>
       </tr>
       {open && (
@@ -296,6 +299,7 @@ function missileText(m: MissileInfo, defs: EffectDefs): string {
 
 function EnemyDetail({ id, e, defs }: { id: number; e: Enemy; defs: EffectDefs }) {
   const t = useT();
+  const fx = useFx();
   return (
     <div className="enemy-detail__body">
       <div className="stage-facts">
@@ -316,13 +320,13 @@ function EnemyDetail({ id, e, defs }: { id: number; e: Enemy; defs: EffectDefs }
       {e.missiles.length > 0 && (
         <div className="ability">
           <div className="ability__head"><span className="ability__label">{t("attack")}</span></div>
-          <ul className="fx-plain">{e.missiles.map((m) => <li key={m.id}>{missileText(m, defs)}</li>)}</ul>
+          <ul className="fx-plain">{e.missiles.map((m) => <li key={m.id}>{fx.line(missileText(m, defs))}</li>)}</ul>
         </div>
       )}
       {e.deadMissiles.length > 0 && (
         <div className="ability">
           <div className="ability__head"><span className="ability__label">{t("onDeath")}</span></div>
-          <ul className="fx-plain">{e.deadMissiles.map((m) => <li key={m.id}>{missileText(m, defs)}</li>)}</ul>
+          <ul className="fx-plain">{e.deadMissiles.map((m) => <li key={m.id}>{fx.line(missileText(m, defs))}</li>)}</ul>
         </div>
       )}
       {e.transforms.length > 0 && (

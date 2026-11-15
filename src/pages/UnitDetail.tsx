@@ -8,7 +8,7 @@ import {
   traitLabel, traitTitle, useMeta, useUnit, useUnits, weaponLabel,
 } from "../data";
 import { DEFAULT_META } from "../meta";
-import { useHubLabels, useT, type UiKey } from "../i18n";
+import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
 import { usePageMeta } from "../usePageMeta";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
@@ -61,6 +61,7 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
   // alike sentences merged across rows; a row with no sentence keeps its place as "(not decoded)"
   const shown = groupRows(described.map((s) => s.text));
   const t = useT();
+  const fx = useFx();
   return (
     <div className="fx-list">
       {shown.map((l, i) => (
@@ -69,7 +70,7 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
       {combined.length > 0 && (
         <div className="fx-combined">
           <span className="fx-combined__label">{t("combined")}</span>
-          {combined.map((t, i) => <div key={i}>{t}</div>)}
+          {combined.map((c, i) => <div key={i}>{fx.line(c)}</div>)}
         </div>
       )}
     </div>
@@ -80,11 +81,12 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
 function EffectLine({ line, rows }: { line: Line; rows: { r: RawRow; s: Sentence; link?: FieldLink }[] }) {
   const [open, setOpen] = useState(false);
   const t = useT();
+  const fx = useFx();
   const evidence = [...new Set(rows.flatMap((x) => x.s.evidence))];
   return (
     <div className="fx-row">
       <div className="fx-line">
-        <span className="fx-text">{line.text || <span className="muted">{t("notDecoded")}</span>}</span>
+        <span className="fx-text" title={line.text && fx.line(line.text) !== line.text ? line.text : undefined}>{line.text ? fx.line(line.text) : <span className="muted">{t("notDecoded")}</span>}</span>
         {evidence.length > 0 && (
           <span className="fx-q" title={`${t("evidence")}\n${evidence.join("\n")}`}>?</span>
         )}

@@ -8,3 +8,4 @@ scripts/coverage.mjs
 scripts/buffs.mjs
 /tools/
 scripts/humanize.mjs
+scripts/ja.mjs

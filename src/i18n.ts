@@ -1,6 +1,7 @@
 // UI language (EN / 日本語). The game data is Japanese: in Japanese mode labels show the game's own words,
-// in English the hand-made translations (labels.ts). Decoded effect sentences stay English for now.
+// in English the hand-made translations (labels.ts); decoded effect sentences are reworded by effectsJa.ts.
 import { useSyncExternalStore } from "react";
+import { clauseJa, effectJaCached, hasEnglish, receiverJa } from "./effectsJa";
 import { createPersisted } from "@altterisk/game-hub/persist";
 import type { HubBarLabels, HubFooterLabels, ErrorBoundaryLabels, PagerLabels, LoadStateLabels, ListToolbarLabels, FilterPanelLabels } from "@altterisk/game-hub";
 
@@ -369,3 +370,15 @@ export function hubLabels(lang: Lang) {
 }
 
 export const useHubLabels = () => hubLabels(useLang());
+
+const whole = (s: string, ja: string) => (hasEnglish(ja) ? s : ja);
+/** Decoded effect text in the current language: a sentence, a receiver ("Castle girls in range") or a note
+ *  ("for 30s"). Japanese comes from src/effectsJa.ts; a line it can't fully word stays English. */
+export function useFx() {
+  const ja = useLang() === "ja";
+  return {
+    line: (s: string) => (ja && s ? effectJaCached(s) ?? s : s),
+    who: (s: string) => (ja && s ? whole(s, receiverJa(s)) : s),
+    note: (s: string) => (ja && s ? whole(s, clauseJa(s)) : s),
+  };
+}

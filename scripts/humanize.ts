@@ -90,6 +90,11 @@ for (const e of units) {
     ab(at, f.always, "always"); ab(at, f.quest, "quest");
     if (f.special_attack?.ability) ab(at, f.special_attack.ability, "special_attack" as RowKind);
     for (const s of f.stratagems ?? []) {
+      if (s.placement && !doneAb.has(`p${s.id}`)) {
+        doneAb.add(`p${s.id}`);
+        rows(`${at} ${s.name}`, [s.placement.location], "location");
+        rows(`${at} ${s.name}`, s.placement.effects, "placement");
+      }
       if (!s.effect || doneAb.has(`g${s.id}`)) continue;
       doneAb.add(`g${s.id}`);
       const ctx = stratagemContext(defs, s);
@@ -132,6 +137,8 @@ let seed = Number(process.env.SEED ?? 7);
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const sample = Array.from({ length: Math.min(160, all.length) }, () => all[Math.floor(rnd() * all.length)]);
 fs.writeFileSync((process.argv[2] ?? "humanize.md").replace(/\.md$/, ".sample.txt"), [...new Set(sample)].join("\n"));
+// every distinct sentence, the corpus the Japanese wording is checked against (scripts/ja.ts)
+fs.writeFileSync((process.argv[2] ?? "humanize.md").replace(/\.md$/, ".all.txt"), all.join("\n"));
 // every merged line, for reading by eye
 fs.writeFileSync((process.argv[2] ?? "humanize.md").replace(/\.md$/, ".merged.txt"), mergedText.join("\n"));
 console.log(lines[2]);

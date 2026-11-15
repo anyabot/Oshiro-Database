@@ -6,7 +6,8 @@ import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { altName, iconUrl, nameOf, rarityLabel, tierName, useMeta, useUnits, weaponLabel } from "../data";
 import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
-import { useHubLabels, useT, type UiKey } from "../i18n";
+import { getLang, useFx, useHubLabels, useT, type UiKey } from "../i18n";
+import { clauseJa, hasEnglish } from "../effectsJa";
 
 /** One row of public/data/buffs.json (scripts/buffs.ts). */
 interface BuffRow {
@@ -92,9 +93,14 @@ function reach(r: BuffRow): string {
 
 
 const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec", "/s": "per second" };
+const UNIT_TAG_JA: Record<string, string> = { "%": "%", "": "固定値", "×": "×", s: "秒", "/s": "毎秒" };
 function effectLabel(k: string, names: Record<string, string>): string {
   const [key, dir, unit] = k.split("|");
-  return `${names[key] ?? key} ${dir === "+" ? "↑" : "↓"} ${UNIT_TAG[unit] ?? unit}`;
+  const en = names[key] ?? key;
+  const ja = getLang() === "ja" ? clauseJa(en) : "";
+  const name = ja && !hasEnglish(ja) ? ja : en;
+  const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
+  return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
 }
 
 const fmtNum = (n: number) => String(Math.round(n * 1000) / 1000);
@@ -118,6 +124,7 @@ export default function Buffs() {
   const adapter = searchParamsAdapter(params, setParams);
   const t = useT();
   const hub = useHubLabels();
+  const fx = useFx();
   const url = listState(adapter);
 
   const cat = CATEGORIES.find((c) => c.k === url.text("cat"))?.k ?? "offense";
@@ -270,9 +277,9 @@ export default function Buffs() {
                             </span>
                           </Link>
                         </td>
-                        <td data-label={t("receiver")} className="buff-target">{r.w}</td>
+                        <td data-label={t("receiver")} className="buff-target">{fx.who(r.w)}</td>
                         <td data-label={t("conditions")} className="buff-target">
-                          {r.n ? <span className="small">{r.n}</span> : <span className="muted small">—</span>}
+                          {r.n ? <span className="small">{fx.note(r.n)}</span> : <span className="muted small">—</span>}
                           {r.nm && <div className="muted small">{r.nm}</div>}
                         </td>
                       </tr>
