@@ -4,10 +4,11 @@ import { useMemo, useState } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
 import { CheckboxGroup, FilterPanel } from "@altterisk/game-hub";
 import {
-  TERRAINS, categoryLabel, isMainWeapon, rarityLabel, regionLabel, terrainOption, terrainParts, traitLabel,
+  TERRAINS, categoryLabel, isMainWeapon, rarityLabel, regionLabel, terrainParts, traitLabel,
   weaponLabel,
 } from "./data";
 import type { Meta, UnitIndexEntry } from "./types";
+import { terrainOptionLabel, weaponOptionLabel } from "./filterIcons";
 import { useHubLabels, useT } from "./i18n";
 
 const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai"] as const;
@@ -50,13 +51,13 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
     const sorted = (s: Set<number>) => [...s].sort((a, b) => a - b);
     return {
       rarity: sorted(rar).map((v) => ({ value: String(v), label: rarityLabel(meta, v) })),
-      weapon: [...sorted(wep).filter(isMainWeapon).map((v) => ({ value: String(v), label: weaponLabel(meta, v) })),
+      weapon: [...sorted(wep).filter(isMainWeapon).map((v) => ({ value: String(v), label: weaponOptionLabel(v, weaponLabel(meta, v)) })),
         ...(sorted(wep).some((w) => !isMainWeapon(w)) ? [{ value: "other", label: t("otherCollab") }] : [])],
       region: sorted(reg).map((v) => ({ value: String(v), label: regionLabel(meta, v) })),
       trait: sorted(tr).map((v) => ({ value: String(v), label: traitLabel(meta, v) })),
       cat: sorted(cat).map((v) => ({ value: String(v), label: categoryLabel(meta, v) })),
       terrain: TERRAINS.filter((x) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(x)))
-        .map((x) => ({ value: x.slug, label: terrainOption(x.jp) })),
+        .map((x) => ({ value: x.slug, label: terrainOptionLabel(x.slug, x.jp) })),
     };
   }, [units, meta]);
 

@@ -4,10 +4,11 @@ import {
   CheckboxGroup, EmptyState, EntityTile, FilterChip, FilterPanel, ListToolbar, LoadState, Pager, SearchBox, routerLinks,
 } from "@altterisk/game-hub";
 import {
-  TERRAINS, altName, categoryLabel, iconUrl, isMainWeapon, nameOf, rarityLabel, regionLabel, terrainLabel, terrainOption,
+  TERRAINS, altName, categoryLabel, iconUrl, isMainWeapon, nameOf, rarityLabel, regionLabel, terrainLabel,
   terrainParts, traitLabel, traitTitle, useMeta, useUnits, weaponLabel,
 } from "../data";
 import type { UnitIndexEntry } from "../types";
+import { terrainOptionLabel, weaponOptionLabel } from "../filterIcons";
 import { useHubLabels, useT } from "../i18n";
 
 const PAGE = 60;
@@ -68,14 +69,14 @@ export default function UnitList() {
     const sorted = (s: Set<number>) => [...s].sort((a, b) => a - b);
     return {
       rarity: sorted(rar).map((v) => ({ value: String(v), label: rarityLabel(meta, v) })),
-      weapon: sorted(wep).filter(isMainWeapon).map((v) => ({ value: String(v), label: weaponLabel(meta, v) })),
+      weapon: sorted(wep).filter(isMainWeapon).map((v) => ({ value: String(v), label: weaponOptionLabel(v, weaponLabel(meta, v)) })),
       weaponOther: sorted(wep).some((w) => !isMainWeapon(w)),
       region: sorted(reg).map((v) => ({ value: String(v), label: regionLabel(meta, v) })),
       trait: sorted(tr).map((v) => ({ value: String(v), label: traitLabel(meta, v) })),
       category: sorted(cat).map((v) => ({ value: String(v), label: categoryLabel(meta, v) })),
       // terrain words that some playable castle girl has, in the game's order (平 平山 山 水 地獄 無)
       terrain: TERRAINS.filter((x) => (units || []).some((u) => !u.npc && terrainParts(meta, u.terrain).includes(x)))
-        .map((x) => ({ value: x.slug, label: terrainOption(x.jp) })),
+        .map((x) => ({ value: x.slug, label: terrainOptionLabel(x.slug, x.jp) })),
     };
   }, [units, meta]);
 

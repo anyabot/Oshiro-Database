@@ -218,3 +218,7 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 
 /* EN / 日本語 switch in the site bar */
 .lang-picker .hub-seg__btn { padding: 4px 10px; font-size: 12px; }
+
+/* filter options with the game's weapon / terrain icons */
+.opt-icon { display: inline-flex; align-items: center; gap: 5px; }
+.opt-icon img { width: 24px; height: 24px; flex: none; margin: -3px 0; }
