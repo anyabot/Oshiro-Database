@@ -86,6 +86,8 @@ export interface Stratagem {
   token?: { token_id: number; card_id: number; name: string; config: RawRow; ability?: Ability; general_ability?: Ability };
   /** GimmickType 3: the area effect it creates. */
   field?: FieldLink;
+  /** GimmickType 4: the placement spot it changes (LocationEffect) and what its occupant gets (PlacementEffect). */
+  placement?: { location_id: number; location: RawRow; effects: RawRow[] };
   missing?: boolean;
 }
 

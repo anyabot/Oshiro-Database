@@ -148,6 +148,8 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
       {s.guide && <p className="muted small">{s.guide}</p>}
       {s.raw && <RawRows title="Gimmick row" rows={[s.raw]} />}
       {s.field && <EffectList title="FieldEffect" rows={[{ AbilityType: 21 }]} kind="ability" defs={defs} links={{ 0: s.field }} />}
+      {s.placement && <EffectList title={`LocationEffect #${s.placement.location_id}`} rows={[s.placement.location]} kind="location" defs={defs} />}
+      {s.placement && s.placement.effects.length > 0 && <EffectList title={`PlacementEffect #${s.placement.location.Param2}`} rows={s.placement.effects} kind="placement" defs={defs} />}
       {s.token && (
         <div className="nested">
           <p className="switch-line">

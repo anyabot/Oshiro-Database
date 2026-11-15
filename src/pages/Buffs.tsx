@@ -93,7 +93,7 @@ const REACH = [
 function reach(r: BuffRow): string {
   const w = r.w;
   if (w === "Self") return "self";
-  if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks") return "single";
+  if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks" || / placed on the spot$/.test(w)) return "single";
   if (/in range|in the target's range|in the area$/.test(w)) return "range";
   // Ki over time goes to the side's shared pool: "Your side"
   if (/^All |in the formation$|^Allies$|^Castle girls$|^Enemies$|^Your side$/.test(w)) return "wide";

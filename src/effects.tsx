@@ -42,7 +42,7 @@ const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data
 export const useEffectDefs = () => useJson<EffectDefs>(loader, "effects");
 
 /** Which table a row came from; decides which code vocabulary its fields use. */
-export type RowKind = "ability" | "organized" | "always" | "quest" | "potential" | "enchant" | "enchant_set" | "special_attack" | "other";
+export type RowKind = "ability" | "organized" | "always" | "quest" | "potential" | "enchant" | "enchant_set" | "special_attack" | "location" | "placement" | "other";
 
 export interface Sentence {
   /** Plain sentences, one per effect on the row. */
@@ -394,6 +394,14 @@ export function enchantTargetName(defs: EffectDefs, row: RawRow, field: boolean)
   if (tt === 1 || tt === 2 || tt === 3) return undefined;
   return ENCHANT_TEXT_TARGETS[tt] ?? en(tt);
 }
+
+// LocationEffect.TargetType, from its stratagems' texts: 5 「未配置の近接マスまたは遠隔マスが対象」 (240, 8392),
+// 6 「未配置の水上マス以外が対象」 (8434; 8189 doesn't say), 2 「近接配置マス」 (97014)
+const LOCATION_TARGETS: Record<number, string> = {
+  2: "melee placement spots (近接配置マス)",
+  5: "empty melee or ranged spots (未配置の近接マスまたは遠隔マス)",
+  6: "any empty spot except water spots (未配置の水上マス以外)",
+};
 
 /** Context for a stratagem's rows: whether "the target" is its user and whether its field covers an area. */
 export function stratagemContext(defs: EffectDefs, s: { effect?: { row: RawRow }; field?: { field: RawRow } }): RowContext {
@@ -952,12 +960,22 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       file(tl, perGrowUp.slice(2));
       text.push(`${lead}${body}${perGrowUp}${tl}`);
     }
-  } else if (kind === "organized" || kind === "always" || kind === "quest" || kind === "potential") {
+  } else if (kind === "organized" || kind === "always" || kind === "quest" || kind === "potential" || kind === "placement") {
     const et = num("EffectType"), v = num("EffectValue"), key = `effecttype:${et}`;
     let lead = "";
     // potential / always rows have no target columns: they change the card itself
     let factWho = kind === "potential" ? "Self" : "—";
     let factSide: "ally" | "enemy" = "ally";
+    if (kind === "placement") {
+      // PlacementEffect: TargetType = who standing on the spot gets it (ability-target registry: 11 城娘,
+      // 501 平を含む城, …); EffectTextureID / AttributeMatchEffectID are the spot's look
+      const tg = num("TargetType");
+      num("EffectTextureID"); num("AttributeMatchEffectID");
+      const jp = targetJp(defs, tg);
+      const en = jp ? (JP_EN[jp] ?? tagEN(jp) ?? jp) : `target ${tg}`;
+      factWho = `${cap(en)} placed on the spot`;
+      lead = `${factWho}: `;
+    }
     if (kind === "organized") {
       // formation TargetType / AreaType: own vocabulary, named from formation descriptions only
       const tg = num("TargetType"), ar = num("AreaType");
@@ -985,11 +1003,27 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     }
     let resolved = unitEffect(et, v);
     if (resolved == null) { resolved = `${word(key, `effect ${et}`)} ${amountFor(key, v)}`; labelFact(key, v); }
+    // a spot's bonus stacks with the terrain bonus (its texts: 地形属性と重複); one spot, one occupant
+    if (kind === "placement") resolved = resolved.replace(/, doesn't stack$/, "");
     const tl = tail();
     // quest-only rows apply in one quest type only: not ranked
     if (kind === "quest") last = null;
     take(factWho, factSide, tl);
     text.push(`${lead}${resolved}${tl}`);
+  } else if (kind === "location") {
+    // LocationEffect (GimmickType 4): EffectType 1 turns the spot into a melee/ranged spot (240, 8189, 8392,
+    // 8434: 「配置場所を「近接/遠隔マス」に変更」), 2 only strengthens it (8208 「指定した配置場所を強化」,
+    // 97014 「近接配置マスを強化」); Param2 is the PlacementEffectID (rows listed below)
+    const et = num("EffectType");
+    num("Param1"); num("Param2"); num("Param3"); num("StartEffect"); num("ActiveEffect");
+    if (et === 1) text.push("Turns the chosen placement spot into a melee/ranged spot (近接/遠隔マス)");
+    else if (et === 2) text.push("Strengthens the chosen placement spot");
+    else text.push(`Placement spot effect type ${et}`);
+    // TargetType = which spots it can be used on, named by the stratagems' own texts
+    const tt = num("TargetType");
+    const spots = LOCATION_TARGETS[tt];
+    text.push(spots ? `Can be used on: ${spots}` : `Can be used on spot type ${tt}`);
+    if (num("Param2")) text.push("Whoever is placed there gets the effects below");
   } else if (kind === "special_attack") {
     // SpecialAttack.atb row: the special attack fires its MissileID (ミサイル) / SpreadMissileID (拡散ミサイル);
     // their DealDamageEffect / modifiers are the hit's extra effects (e.g. 敵の現在耐久の10%のダメージ)

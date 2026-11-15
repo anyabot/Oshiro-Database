@@ -100,6 +100,8 @@ for (const entry of index) {
     // f.always is the card's own stat profile (ATK/DEF/HP +8%, cost…), not a buff it gives: left out
     if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
     for (const s of f.stratagems ?? []) {
+      // GimmickType 4: the spot it changes buffs whoever is placed there
+      if (s.placement?.effects.length) emit(u.id, f.tier, "stratagem", s.placement.effects, "placement", s.name, "ally");
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
       const ctx = stratagemContext(defs, s);
