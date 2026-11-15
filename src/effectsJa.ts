@@ -90,6 +90,7 @@ const PHRASES: Record<string, string> = {
   "falling doesn't count toward the fallen-unit count": "落下が大破数に数えられない",
   "damage aimed at them is taken by this unit instead": "受けるダメージをこのユニットが肩代わり",
   "can't be used during a special attack": "特殊攻撃中は使用不可",
+  "placement spot change": "配置マス変化", "chosen placement spot": "指定した配置マス",
   "can't be targeted by allies in despair": "「絶望」状態の味方の攻撃対象にならない",
   "special gauge gain when hit and on attack": "被攻撃時・攻撃時の特殊攻撃ゲージ蓄積量",
   "ki (instant, on deploy/activation)": "気(即時、配置/発動時)", "exp from fusion and gain": "城娘合成時の獲得経験値・獲得経験値", thunder: "轟雷", "redeploy time extension": "再配置時間延長",
@@ -271,6 +272,10 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/^effects listed below$/, "効果は下記"],
   [/^No formation effect of its own \(its effects are the quest-only rows\)$/, "編成特技の効果なし (効果はクエスト限定の行)"],
   [/^Ki over time \(per second\)$/, "時間経過の気 (毎秒)"],
+  // the buff list's utility notes (scripts/buffs.ts)
+  [/^placed unit: /, "配置した城娘: "],
+  [/^on [^()]* \(([^()]*)\)$/, "使用対象: $1"],
+  [/^except by flying enemies$/, "飛行敵を除く"],
   [/^Turns the chosen placement spot into a melee\/ranged spot \(近接\/遠隔マス\)$/, "指定した配置マスを近接/遠隔マスに変更"],
   [/^Strengthens the chosen placement spot$/, "指定した配置マスを強化"],
   [/^Can be used on: (.+?) \(([^()]+)\)$/, "使用対象: $2"],

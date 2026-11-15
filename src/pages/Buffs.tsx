@@ -37,6 +37,7 @@ const CATEGORIES: { k: string; label: UiKey }[] = [
   { k: "ki", label: "catKi" },
   { k: "other", label: "catOther" },
   { k: "debuff", label: "catDebuff" },
+  { k: "utility", label: "catUtility" },
 ];
 const DEBUFF_COLOR = "#f7768e";
 
@@ -44,6 +45,7 @@ const DEBUFF_COLOR = "#f7768e";
 const OFFENSE = new Set([202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 217, 219, 220, 223, 225]);
 const DEFENSE = new Set([101, 102, 103, 105, 107, 111, 113, 301, 302, 303, 304, 305, 306, 307, 314, 316, 321]);
 function category(r: BuffRow): string {
+  if (r.k.startsWith("util:")) return "utility";
   if (r.sd === "e") return "debuff";
   const key = r.k.split("|")[0];
   if (key === "dmg:dealt" || key === "dmg:bonus") return "offense";
@@ -83,7 +85,7 @@ const REACH: { value: string; label: UiKey }[] = [
 function reach(r: BuffRow): string {
   const w = r.w;
   if (w === "Self") return "self";
-  if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks" || / placed on the spot$/.test(w)) return "single";
+  if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks" || w === "Chosen placement spot" || / placed on the spot$/.test(w)) return "single";
   if (/in range|in the target's range|in the area$/.test(w)) return "range";
   // Ki over time goes to the side's shared pool: "Your side"
   if (/^All |in the formation$|^Allies$|^Castle girls$|^Enemies$|^Your side$/.test(w)) return "wide";
@@ -100,6 +102,8 @@ function effectLabel(k: string, names: Record<string, string>): string {
   const ja = getLang() === "ja" ? clauseJa(en) : "";
   const name = ja && !hasEnglish(ja) ? ja : en;
   const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
+  // utility effects have no amount: just the name
+  if (key.startsWith("util:")) return name;
   return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
 }
 
@@ -109,6 +113,10 @@ function fmtAmount(k: string, v: number): string {
   if (unit === "×") return `×${fmtNum(v)}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
+/** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */
+const PERMANENT = 1e9;
+const isUtil = (k: string) => k.startsWith("util:");
+
 /** Multipliers below 1 rank the smaller one first; everything else the bigger amount. */
 const lowerFirst = (k: string) => k.endsWith("|-|×");
 
@@ -257,7 +265,7 @@ export default function Buffs() {
                       <tr key={`${r.u}-${i}`}>
                         <td data-label="#" className="muted">{i + 1}</td>
                         <td data-label={t("value")} className="buff-val">
-                          <strong>{fmtAmount(r.k, r.v)}</strong>
+                          <strong>{isUtil(r.k) ? (r.v >= PERMANENT ? t("permanent") : t("seconds", { n: r.v })) : fmtAmount(r.k, r.v)}</strong>
                           {r.mx != null && r.mx !== r.v && <div className="small muted">{t("max", { v: fmtAmount(r.k, r.mx) })}</div>}
                           {r.nc && <div className="small muted">{t("noCap")}</div>}
                           {r.st != null && (
@@ -279,7 +287,7 @@ export default function Buffs() {
                         </td>
                         <td data-label={t("receiver")} className="buff-target">{fx.who(r.w)}</td>
                         <td data-label={t("conditions")} className="buff-target">
-                          {r.n ? <span className="small">{fx.note(r.n)}</span> : <span className="muted small">—</span>}
+                          {r.n ? <span className="small">{isUtil(r.k) ? fx.line(r.n) : fx.note(r.n)}</span> : <span className="muted small">—</span>}
                           {r.nm && <div className="muted small">{r.nm}</div>}
                         </td>
                       </tr>

@@ -38,6 +38,35 @@ export interface BuffRow {
 const rows: BuffRow[] = [];
 const keyNames = new Map<string, string>();
 
+// Utility effects: no amount to rank, so the value is how long they last (PERMANENT = no end).
+// Read from the worded sentences: "Self: Can't be targeted, for 30s", "Target: its skill (特技) activates (特技発動)".
+const PERMANENT = 1e9;
+const UTILITY: Record<string, { name: string; test: RegExp; note?: (line: string) => string | undefined }> = {
+  "util:untargetable": {
+    name: "Can't be targeted",
+    test: /(?<!while it )\bCan't be targeted(?! by allies)/,
+    note: (l) => (/except by flying enemies/.test(l) ? "except by flying enemies" : undefined),
+  },
+  "util:skill": { name: "Skill activation (特技発動)", test: /\bits skill \(特技\) activates/ },
+  "util:spot": { name: "Placement spot change", test: /^(?:Turns|Strengthens) the chosen placement spot/ },
+};
+for (const [k, u] of Object.entries(UTILITY)) keyNames.set(k, u.name);
+
+function utilityRows(u: number, t: number, sl: string, lines: string[], name: string | undefined, extraNote?: string) {
+  for (const line of lines) {
+    for (const [key, util] of Object.entries(UTILITY)) {
+      if (!util.test.test(line)) continue;
+      // the receiver is the sentence's head ("Self", "Castle girls in range"); spot changes name the spot
+      const head = /^([A-Z★][^:]*?): /.exec(line)?.[1];
+      const who = key === "util:spot" ? "Chosen placement spot" : head && !/^(Missile #|Field effect)/.test(head) ? head : "Target";
+      const secs = /\bfor (\d+(?:\.\d+)?)s\b/.exec(line);
+      const v = secs ? Number(secs[1]) : PERMANENT;
+      const note = [util.note?.(line), extraNote].filter(Boolean).join("; ");
+      rows.push({ u, t, sl, k: `${key}|+|`, v, sd: /^(All )?enem/i.test(who) ? "e" : "a", w: who, ...(note ? { n: note } : {}), ...(name ? { nm: name } : {}) });
+    }
+  }
+}
+
 function statName(key: string): string {
   if (key === "dmg:dealt") return "Damage dealt";
   if (key === "dmg:taken") return "Damage taken";
@@ -63,6 +92,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
   rowsIn.forEach((r, i) => {
     const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
     for (const f of s.facts as BuffFact[]) all.push({ ...f, text: s.text[f.line] ?? "" });
+    utilityRows(u, t, sl, s.text, name);
   });
   // a narrower group that also gets the group row (「[夏]は加算値1.5倍」): ranked with its total too
   for (const f of [...all, ...combinedFacts(all)]) {
@@ -101,6 +131,12 @@ for (const entry of index) {
     if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
     for (const s of f.stratagems ?? []) {
       // GimmickType 4: the spot it changes buffs whoever is placed there
+      if (s.placement) {
+        const gives = s.placement.effects.map((r) => describeRow(r, "placement", defs).text.join(" · ").replace(/^[^:]*: /, "")).join(", ");
+        const lines = describeRow(s.placement.location, "location", defs).text;
+        const spots = lines.find((l) => l.startsWith("Can be used on: "))?.slice("Can be used on: ".length);
+        utilityRows(u.id, f.tier, "stratagem", lines, s.name, [gives && `placed unit: ${gives}`, spots && `on ${spots}`].filter(Boolean).join("; ") || undefined);
+      }
       if (s.placement?.effects.length) emit(u.id, f.tier, "stratagem", s.placement.effects, "placement", s.name, "ally");
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
