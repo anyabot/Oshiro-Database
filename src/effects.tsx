@@ -1002,8 +1002,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const dur = secs ? `, for ${fmt(secs)}s` : "";
     // TargetType 2: the stratagem only targets its user (its texts say 自分のみ)
     const tt = num("TargetType");
+    const self = defs.labels[`etarget:${tt}`]?.jp === "自分のみ" && !num("TargetSet");
+    if (self) word(`etarget:${tt}`, "");
+    // AreaOfEffect 1: the ally modifiers land on castle girls inside the target's range, not on the
+    // target itself (its texts say 「対象の射程内(の)城娘」: 64 of 64 that name them, e.g. [裏]松代城)
     const ally = ctx.fieldArea ? ctx.areaWho ?? "Units in the area"
-      : defs.labels[`etarget:${tt}`]?.jp === "自分のみ" && !num("TargetSet") ? (word(`etarget:${tt}`, ""), "Self") : "Target";
+      : num("AreaOfEffect") === 1 ? `Castle girls in ${self ? "range" : "the target's range"}`
+      : self ? "Self" : "Target";
     for (const i of [1, 2, 3]) {
       const code = num(`AllyModifierType${i}`), v = num(`AllyEffectValue${i}`);
       if (code) { const m = modifier(code, v); take(ally, "ally", dur); text.push(`${ally}: ${m}${dur}`); }
