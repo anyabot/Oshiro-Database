@@ -496,7 +496,7 @@ export default function UnitDetail() {
                 <div className="ability">
                   <div className="ability__head">
                     <span className="ability__label">{t("dedicatedWeapon")}</span>
-                    <span className="ability__name">{u.dedicated_weapon.name}</span>
+                    <span className="ability__name"><Link to={`/equipment/${u.dedicated_weapon.id}`}>{u.dedicated_weapon.name}</Link></span>
                     <span className="ability__id">#{u.dedicated_weapon.id}</span>
                   </div>
                   <Text>{u.dedicated_weapon.description}</Text>

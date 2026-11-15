@@ -30,6 +30,11 @@ export const LIST_META: Record<string, PageMeta> = {
     description:
       "Shiro Project:RE stages with their enemies and stats, including Hell (Enma, Hel, Osiris), Abyss and Bushin stages with deliberations (審議) you can toggle to see how they change each enemy.",
   },
+  "/equipment": {
+    title: "Equipment",
+    description:
+      "Every Shiro Project:RE weapon: stats, abilities, castle-girl bonuses and how to get it (dedicated weapon, stage drop, 戦功, exchange, pack, summon bonus, login bonus, upgrade).",
+  },
   "/buffs": {
     title: "Buff Ranking",
     description:

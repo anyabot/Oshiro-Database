@@ -223,3 +223,8 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .opt-icon { display: inline-flex; align-items: center; gap: 5px; }
 .opt-icon img { width: 24px; height: 24px; flex: none; margin: -3px 0; }
 .unit-detail .hub-meta-chip__icon img { width: 20px; height: 20px; }
+
+/* equipment */
+.weapon-stats { font-weight: 600; margin: 0 0 8px; }
+.weapon-sources { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.weapon-sources .hub-badge { margin-left: 6px; }

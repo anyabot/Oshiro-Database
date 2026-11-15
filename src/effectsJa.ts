@@ -342,6 +342,7 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bwith its special attack, /g, "特殊攻撃時\u0005"],
   [/\bevery second, /g, "毎秒\u0005"],
   [/\bwhile blocked \(足止め時\), /g, "足止め時\u0005"],
+  [/\bwhile blocking \(足止め時\), /g, "足止め時\u0005"],
   // notes
   [/(^|, )doesn't stack\b/g, "$1重複不可"],
   [/(^|, )stacks\b/g, "$1重複可"],

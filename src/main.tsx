@@ -7,6 +7,8 @@ import UnitDetail from "./pages/UnitDetail";
 import Buffs from "./pages/Buffs";
 import Stages from "./pages/Stages";
 import StageDetail from "./pages/StageDetail";
+import Equipment from "./pages/Equipment";
+import EquipmentDetail from "./pages/EquipmentDetail";
 import NotFoundPage from "./pages/NotFound";
 import "@altterisk/game-hub/hub.css";
 import "@altterisk/game-hub/base.css";
@@ -24,6 +26,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="buffs" element={<Buffs />} />
           <Route path="stages" element={<Stages />} />
           <Route path="stages/:id" element={<StageDetail />} />
+          <Route path="equipment" element={<Equipment />} />
+          <Route path="equipment/:id" element={<EquipmentDetail />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

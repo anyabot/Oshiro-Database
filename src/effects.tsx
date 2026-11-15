@@ -277,7 +277,7 @@ function stateCondition(stat: string, own: boolean): string {
 // (「足止めした敵の攻撃が40%低下」, 10 stratagems), 14 = 特殊攻撃 (AbilityType 14's own name)
 const UNIT_EFFECT_TRIGGER: Record<number, string> = {
   2: "on hit", 11: "each attack it makes", 12: "each time it is attacked", 13: "each enemy it defeats",
-  14: "with its special attack", 16: "on the enemies it blocks", 17: "while blocked (足止め時)", 19: "every second",
+  14: "with its special attack", 15: "while blocking (足止め時)", 16: "on the enemies it blocks", 17: "while blocked (足止め時)", 19: "every second",
 };
 
 // UnitEffect.UnitEffectType -> the table its ActualEffectID is always found in
