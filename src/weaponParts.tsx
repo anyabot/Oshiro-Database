@@ -41,6 +41,18 @@ export function AbilityLines({ rows, defs }: { rows: RawRow[]; defs: EffectDefs 
   );
 }
 
+/** The first decoded effect lines of a weapon, in the current language (for list tiles). */
+export function useEffectSummary(defs: EffectDefs | undefined) {
+  const fx = useFx();
+  return (rows: RawRow[], max = 2): string[] => {
+    if (!defs || !rows.length) return [];
+    const conv = weaponAbilityRows(rows, defs);
+    const bases = rowBases(conv);
+    return groupRows(conv.map((r, i) => describeRow(r, "ability", defs, undefined, bases[i]).text))
+      .map((l) => l.text).filter(Boolean).slice(0, max).map((x) => fx.line(x).replace(/^(Self|自身): /, ""));
+  };
+}
+
 /** One source, worded in the current language, with links to the castle girl / stage / weapon it names. */
 export function SourceLine({ s, units, stages, weapons }: {
   s: WeaponSource; units: Map<number, UnitIndexEntry>; stages: Map<number, StageEntry>; weapons: Map<number, Weapon>;

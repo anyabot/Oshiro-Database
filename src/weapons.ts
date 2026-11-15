@@ -26,6 +26,8 @@ export interface Weapon {
   name: string;
   type: number;
   rarity: number;
+  /** its pixel-art sprite (public/weapon-dot/<dot>.webp) */
+  dot?: number;
   /** Weapon.Type: 0 equipment, 1 initial / dedicated gear, 2 upgrade material (霊鋼石) */
   kind: number;
   stats: Partial<Record<StatKey, number>>;
@@ -82,4 +84,5 @@ export function weaponAbilityRows(rows: RawRow[], defs: EffectDefs): RawRow[] {
   });
 }
 
+export const weaponDotUrl = (dot: number) => `${import.meta.env.BASE_URL}weapon-dot/${dot}.webp`;
 export const weaponIconUrl = (type: number) => `${import.meta.env.BASE_URL}ui-icon/weapon/${type}.webp`;

@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckboxGroup, EmptyState, EntityTile, FilterChip, FilterPanel, ListToolbar, LoadState, Pager, SearchBox, routerLinks } from "@altterisk/game-hub";
 import { useHubLabels, useT, type UiKey } from "../i18n";
-import { SOURCE_GROUPS, sourceGroups, useWeapons, weaponIconUrl } from "../weapons";
-import { useStatText, weaponTypeName } from "../weaponParts";
+import { SOURCE_GROUPS, sourceGroups, useWeapons, weaponDotUrl, weaponIconUrl } from "../weapons";
+import { useEffectDefs } from "../effects";
+import { useEffectSummary, useStatText, weaponTypeName } from "../weaponParts";
 
 const PAGE = 60;
 const renderLink = routerLinks(Link, "to");
@@ -20,6 +21,8 @@ export default function Equipment() {
   const t = useT();
   const hub = useHubLabels();
   const statText = useStatText();
+  const { data: defs } = useEffectDefs();
+  const effects = useEffectSummary(defs);
 
   const q = params.get("q") || "";
   const gear = params.get("gear") === "1";
@@ -98,10 +101,21 @@ export default function Equipment() {
             key={w.id}
             href={`/equipment/${w.id}`}
             renderLink={renderLink}
-            className="unit-tile"
-            icon={<img src={weaponIconUrl(w.type)} alt="" width={52} height={52} loading="lazy" />}
+            className="unit-tile weapon-tile"
+            icon={(
+              <span className="weapon-tile__art">
+                {w.dot ? <img className="weapon-dot" src={weaponDotUrl(w.dot)} alt="" loading="lazy" /> : <img src={weaponIconUrl(w.type)} alt="" loading="lazy" />}
+                <img className="weapon-tile__type" src={weaponIconUrl(w.type)} alt="" width={20} height={20} loading="lazy" />
+              </span>
+            )}
             title={w.name || `#${w.id}`}
-            subtitle={[`#${w.id}`, `★${w.rarity}`, weaponTypeName(data, w.type), ...statText(w.stats).slice(0, 3)].join(" · ")}
+            subtitle={(
+              <>
+                <span className="weapon-tile__line">{[`#${w.id}`, `★${w.rarity}`, weaponTypeName(data, w.type)].join(" · ")}</span>
+                {statText(w.stats).length > 0 && <span className="weapon-tile__line weapon-tile__stats">{statText(w.stats).join(" · ")}</span>}
+                {effects(w.ability).map((e, i) => <span key={i} className="weapon-tile__line weapon-tile__fx">{e}</span>)}
+              </>
+            )}
             badges={(
               <>
                 {sourceGroups(w).map((g) => <span key={g} className={`hub-badge${g === "none" ? "" : " hub-badge--accent"}`}>{t(GROUP_LABEL[g])}</span>)}

@@ -6,7 +6,7 @@ import { useEffectDefs } from "../effects";
 import { iconUrl, nameOf, useUnits } from "../data";
 import { useStages } from "../stages";
 import { usePageMeta } from "../usePageMeta";
-import { useWeapons, weaponIconUrl, type Weapon } from "../weapons";
+import { useWeapons, weaponDotUrl, weaponIconUrl, type Weapon } from "../weapons";
 import { AbilityLines, SourceLine, useStatText, weaponTypeName } from "../weaponParts";
 
 const renderLink = routerLinks(Link, "to");
@@ -37,7 +37,9 @@ export default function EquipmentDetail() {
     <div className="page unit-detail">
       <Breadcrumbs renderLink={renderLink} items={[{ label: t("equipTitle"), href: "/equipment" }, { label: w.name }]} />
       <PageHeader
-        art={<img className="unit-face" src={weaponIconUrl(w.type)} alt="" width={96} height={96} />}
+        art={w.dot
+          ? <span className="weapon-art"><img className="weapon-dot" src={weaponDotUrl(w.dot)} alt="" /></span>
+          : <img className="unit-face" src={weaponIconUrl(w.type)} alt="" width={96} height={96} />}
         title={w.name || `#${w.id}`}
         id={`#${w.id}`}
         meta={(

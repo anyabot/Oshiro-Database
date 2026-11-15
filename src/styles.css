@@ -230,3 +230,17 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .weapon-sources .hub-badge { margin-left: 6px; }
 .weapon-effects { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--hub-surface-2, rgba(255,255,255,.04)); }
 .weapon-effects .fx-plain { margin: 4px 0 0; }
+/* weapon pixel art: keep the pixels sharp, fit the box */
+.weapon-dot { image-rendering: pixelated; object-fit: contain; }
+.weapon-tile { align-items: flex-start; }
+.weapon-tile .hub-tile__icon img.weapon-dot { width: 64px; height: 64px; border-radius: 0; object-fit: contain; }
+.weapon-tile__art { position: relative; display: inline-flex; width: 64px; height: 64px; align-items: center; justify-content: center;
+  background: var(--hub-surface-raised, rgba(255,255,255,.04)); border-radius: var(--hub-radius-md, 8px); }
+.weapon-tile .hub-tile__icon img.weapon-tile__type { position: absolute; right: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 0; }
+.weapon-tile .hub-tile__subtitle { white-space: normal; display: flex; flex-direction: column; gap: 1px; }
+.weapon-tile__line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.weapon-tile__stats { color: var(--hub-text); font-weight: 600; }
+.weapon-tile__fx { color: var(--hub-text-muted); }
+.weapon-art { display: inline-flex; width: 120px; height: 120px; align-items: center; justify-content: center;
+  background: var(--hub-surface-raised, rgba(255,255,255,.04)); border-radius: 12px; }
+.weapon-art .weapon-dot { width: 112px; height: 112px; }
