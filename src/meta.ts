@@ -20,6 +20,11 @@ export const NOT_FOUND_META: PageMeta = { title: "Page not found", description: 
 
 /** Index pages, keyed by path. */
 export const LIST_META: Record<string, PageMeta> = {
+  "": {
+    title: "",
+    description:
+      "Fan-made Shiro Project:RE (城プロRE) database: current events and banners, the newest castle girls and equipment, and every castle girl, weapon and stage.",
+  },
   "/units": {
     title: "Castle Girls",
     description:

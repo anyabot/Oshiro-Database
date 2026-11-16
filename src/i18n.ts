@@ -442,6 +442,51 @@ export const UI = {
   route: { en: "Route", ja: "経路" },
   hidden: { en: " (hidden)", ja: " (隠れ)" },
   strength: { en: " · strength {n}", ja: " · 強さ {n}" },
+
+  // home
+  navHome: { en: "Home", ja: "ホーム" },
+  homeTitle: { en: "Shiro Project:RE Database", ja: "城プロRE データベース" },
+  homeSubtitle: {
+    en: "Fan-made database of castle girls, equipment, stages and buffs, read from the game's own data.",
+    ja: "ゲームデータから作った非公式データベース: 城娘・武器・ステージ・バフ。",
+  },
+  homeBanners: { en: "Banners", ja: "バナー" },
+  homeBannersHint: {
+    en: "The home-screen banners of the current game data, in the game's order.",
+    ja: "現在のゲームデータのホーム画面バナー (ゲーム内の順)。",
+  },
+  bannerSummon: { en: "Summon", ja: "招城" },
+  bannerEvent: { en: "Event", ja: "イベント" },
+  bannerShop: { en: "Shop", ja: "売店" },
+  bannerFixed: { en: "Permanent", ja: "常設" },
+  bannerEtc: { en: "Other", ja: "その他" },
+  bannerArena: { en: "Hell", ja: "地獄" },
+  untilMaint: { en: "until the {d} maintenance", ja: "{d} メンテナンスまで" },
+  untilTime: { en: "until {d}", ja: "{d}まで" },
+  homeEvents: { en: "Current events", ja: "開催中のイベント" },
+  noEvents: { en: "No limited-time event is running right now.", ja: "現在開催中の期間限定イベントはありません。" },
+  endsIn: { en: "ends in {t}", ja: "残り {t}" },
+  daysHours: { en: "{d}d {h}h", ja: "{d}日{h}時間" },
+  hoursMins: { en: "{h}h {m}m", ja: "{h}時間{m}分" },
+  allStages: { en: "All stages ›", ja: "すべてのステージ ›" },
+  homeNewUnits: { en: "New castle girls", ja: "新しい城娘" },
+  homeNewUnitsHint: {
+    en: "Dated by when each girl's files reached the game's CDN, usually about a week before her release.",
+    ja: "城娘のファイルがゲームのCDNに追加された日付 (実装の約1週間前)。",
+  },
+  homeNewEquip: { en: "New equipment", ja: "新しい武器" },
+  homeNewEquipHint: {
+    en: "Dated by the earliest source in the data: pack or exchange date, the event of the stage that drops it, or the weapon it upgrades from. Equipment with no dated source isn't listed.",
+    ja: "データ内の最も早い入手元の日付: パック・交換所の日付、ドロップするステージのイベント、改築元の武器。日付の分からない武器は表示しません。",
+  },
+  addedOn: { en: "added {d}", ja: "{d} 追加" },
+  addedAfter: { en: "added {d} or later", ja: "{d} 以降に追加" },
+  allUnits: { en: "All castle girls ›", ja: "すべての城娘 ›" },
+  allEquipment: { en: "All equipment ›", ja: "すべての武器 ›" },
+  homeLinkUnits: { en: "Stats, abilities, stratagems and renovation tiers of every castle girl", ja: "全城娘のステータス・特技・計略・改築" },
+  homeLinkBuffs: { en: "Castle girls ranked by the buffs and debuffs they give", ja: "バフ・デバフで城娘をランキング" },
+  homeLinkEquipment: { en: "Every weapon: stats, abilities and where it comes from", ja: "全武器の性能・特技・入手方法" },
+  homeLinkStages: { en: "Enemies, deliberations and maps of every stage", ja: "全ステージの敵・審議・マップ" },
 } satisfies Record<string, { en: string; ja: string }>;
 
 export type UiKey = keyof typeof UI;

@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import App from "./App";
+import Home from "./pages/Home";
 import UnitList from "./pages/UnitList";
 import UnitDetail from "./pages/UnitDetail";
 import Buffs from "./pages/Buffs";
@@ -20,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          <Route index element={<Navigate to="/units" replace />} />
+          <Route index element={<Home />} />
           <Route path="units" element={<UnitList />} />
           <Route path="units/:id" element={<UnitDetail />} />
           <Route path="buffs" element={<Buffs />} />

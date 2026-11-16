@@ -33,6 +33,25 @@ Trait (`Tokusei`) values have no name table in the game data. Where most of a
 trait's carriers share a name prefix (`[夏]`, `[正月]`…), that prefix is used as
 its label; the others show as `特性 <id>`.
 
+## Home page
+
+`/` shows the running limited-time events (`events.json`, with each event's featured girls from
+`Event.atb` FocusCardID1-3), the game's home-screen banners, and the newest castle girls and
+equipment. `tools/export_home.py` writes it (run after the unit, weapon and stage exporters; it
+needs the network):
+
+- `public/data/home.json` — `Banner.atb` rows in carousel order. The exe (`FUN_00775b20`) maps each
+  `Banner.Type` to one fixed sprite of the `EstateMenu{Arena,Battle,Etc,Fixed,Shop,Summon}Texture`
+  sheets, which every update re-ships with new art; the sprites go to `public/banner/<hash>.webp`.
+  The page hides a banner once its `DateText` ("11/17 メンテナンスまで") has passed.
+- `public/data/added.json` — a ledger (earlier dates are kept). Castle girls: the CDN
+  `Last-Modified` of their `Card%04d.aar`, about a week before release; girls already in the
+  2026-07-02 data whose file is newer were re-uploaded and stay undated. Equipment: weapons absent
+  from the 2026-07-02 data, dated by their earliest dated source (pack/exchange date, the event of
+  a drop stage, the dedicated girl, the base weapon), else by a lower ID in the same ID block
+  (`after`), else by the first export that sees them (`seen`). Weapons that were already undated
+  on the first run are `between` and are not shown as new.
+
 ## Buff ranking
 
 `/buffs` ranks who gives the biggest effect per stat (ATK %, range, damage taken, enemy DEF…),

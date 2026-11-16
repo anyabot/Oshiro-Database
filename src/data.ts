@@ -99,3 +99,23 @@ export function terrainTitle(meta: Meta | undefined, t: number | null): string |
   const jp = meta?.terrain?.types[t] ?? terrainParts(meta, t).map((x) => x.jp).join("/");
   return `${jp} · Card.GrowUpID ${t}`;
 }
+
+/** public/data/home.json (tools/export_home.py): the game's home banners and each event's featured girls. */
+export interface HomeBanner {
+  type: number;
+  ext: number;
+  /** which EstateMenu*Texture sheet: summon · event · shop · fixed · etc · arena */
+  kind: string;
+  /** public/banner/<image>.webp */
+  image: string;
+  /** the game's own text, e.g. "11/17 メンテナンスまで" */
+  until: string;
+  fixed: boolean;
+}
+export interface HomeData { generated: string; banners: HomeBanner[]; focus: Record<string, number[]> }
+/** public/data/added.json: unit -> date its card file was uploaded; weapon -> [date, how] (see export_home.py). */
+export interface AddedData { units: Record<string, string>; weapons: Record<string, [string, "source" | "after" | "seen" | "between"]> }
+
+export const useHome = () => useJson<HomeData>(loader, "home");
+export const useAdded = () => useJson<AddedData>(loader, "added");
+export const bannerUrl = (image: string) => `${BASE}banner/${image}.webp`;
