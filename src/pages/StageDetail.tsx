@@ -12,7 +12,8 @@ import {
 import { usePageMeta } from "../usePageMeta";
 import { StageMap, removedNames } from "../stageMap";
 import { useUnits } from "../data";
-import { useStory, useStoryIndex } from "../stages";
+import { useStoryIndex } from "../story";
+import { QUEST_SCENE, StoryReader } from "../storyReader";
 import type { RawRow } from "../types";
 
 // CrowdControlType: 3 火傷 (% of current HP), 4 猛毒 (% of max HP) are the damage-over-time states
@@ -94,8 +95,8 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   const seriesUrl = `/stages?group=${place.cat.k}${place.sub ? `&sub=${place.sub.k}` : ""}`;
   const { data: events } = useEvents();
   const ev = stage.event != null ? events?.find((e) => e.id === stage.event) : undefined;
-  const { data: storyIds } = useStoryIndex();
-  const hasStory = !!storyIds?.includes(stage.id);
+  const { data: storyIndex } = useStoryIndex();
+  const hasStory = !!storyIndex?.quests.includes(stage.id);
   // sections as tabs (?tab=); Enemies is the default and keeps the URL clean
   const tabs = [
     { id: "enemies", label: t("enemies") },
@@ -208,7 +209,9 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
 
       {tab === "story" && hasStory && (
         <TabPanel tab="story" idBase="stage">
-          <Panel title={t("story")} note={t("storyNote")}><StoryBody questId={stage.id} /></Panel>
+          <Panel title={t("story")} note={<>{t("storyNote")} · <Link to={`/story/q/${stage.id}`}>{t("storyReadOn")}</Link></>}>
+            <StoryReader parts={[{ key: String(stage.id), title: "", file: `q/${stage.id}`, sceneLabel: (n) => t(QUEST_SCENE[n] ?? "storyScene3") }]} />
+          </Panel>
         </TabPanel>
       )}
     </div>
@@ -225,28 +228,6 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
       {groupRows(rows.map((r, i) => describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text))
         .map((l, i) => <li key={i}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
     </ul>
-  );
-}
-
-function StoryBody({ questId }: { questId: number }) {
-  const { data, loading, error } = useStory(questId);
-  const t = useT();
-  const hub = useHubLabels();
-  if (!data) return <LoadState loading={loading} error={error} labels={hub.load} />;
-  return (
-    <div className="story">
-      {data.scenes.map((s) => (
-        <section key={s.n} className="story__scene">
-          <h3 className="story__title">{t(s.n === 1 ? "storyScene1" : s.n === 2 ? "storyScene2" : "storyScene3")}</h3>
-          {s.lines.map((l, i) => (l === "" ? <hr key={i} className="story__break" /> : (
-            <div key={i} className={`story__line${l[0] ? "" : " story__line--narr"}`}>
-              {l[0] && <span className="story__who">{l[0]}</span>}
-              <p className="story__text game-text">{l[1]}</p>
-            </div>
-          )))}
-        </section>
-      ))}
-    </div>
   );
 }
 

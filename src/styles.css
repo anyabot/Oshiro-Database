@@ -404,3 +404,72 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .stage-tabs { margin-top: 12px; }
 .stage-page { min-width: 0; max-width: 100%; }
 .stage-page > * { min-width: 0; max-width: 100%; }
+
+/* --- scene player (storyPlayer.tsx): a 16:9 stage, sizes in container units like a game screen --- */
+.sp-overlay { position: fixed; inset: 0; z-index: 1400; background: rgba(0, 0, 0, 0.88); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sp-wrap { width: min(100%, calc((100dvh - 90px) * 16 / 9)); display: flex; flex-direction: column; gap: 8px; }
+.sp-wrap:fullscreen { width: 100%; height: 100%; justify-content: center; background: #000; padding: 8px; }
+.sp-wrap:fullscreen .sp { width: min(100%, calc((100dvh - 60px) * 16 / 9)); margin: 0 auto; }
+.sp { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000; container-type: size; cursor: pointer; user-select: none; border-radius: 6px; }
+.sp-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sp-chara { position: absolute; bottom: 0; left: 50%; height: 100%; }
+.sp-chara > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sp-chara > .sp-face { inset: auto; }
+.sp-window { position: absolute; left: 4cqw; right: 4cqw; bottom: 3cqh; min-height: 24cqh; padding: 3.2cqh 2.6cqw 2.4cqh;
+  background: linear-gradient(rgba(10, 14, 28, 0.86), rgba(10, 14, 28, 0.94)); border: 0.25cqh solid rgba(232, 200, 120, 0.75);
+  border-radius: 1.4cqh; color: #fff; box-shadow: 0 0.6cqh 2cqh rgba(0, 0, 0, 0.5); }
+.sp-name { position: absolute; top: -3.4cqh; left: 2cqw; padding: 0.6cqh 1.6cqw; font-size: 3cqh; font-weight: 700; color: #fff;
+  background: linear-gradient(90deg, #7a2d35, #a8434d); border: 0.2cqh solid rgba(232, 200, 120, 0.9); border-radius: 0.8cqh; }
+.sp-text { margin: 0; font-size: 3.6cqh; line-height: 1.55; white-space: pre-line; text-shadow: 0 0.2cqh 0.4cqh #000; }
+.sp-more { position: absolute; right: 2cqw; bottom: 1.4cqh; font-size: 2.4cqh; color: rgba(232, 200, 120, 0.9); animation: sp-blink 1s infinite; }
+.sp-title { position: absolute; top: 1.6cqh; left: 1.6cqw; padding: 0.4cqh 1cqw; font-size: 2.2cqh; color: #fff; background: rgba(0, 0, 0, 0.45); border-radius: 0.6cqh; }
+@keyframes sp-blink { 50% { opacity: 0.2; } }
+.sp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sp-bar .is-on { border-color: var(--hub-accent); color: var(--hub-accent); }
+.sp-count { margin-left: auto; color: #ccc; }
+.art-zoom { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* --- story reader / page --- */
+.story__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.story__part { display: flex; flex-direction: column; gap: 10px; }
+.story__chapter { margin: 18px 0 0; font-size: 18px; border-bottom: 1px solid var(--hub-border); padding-bottom: 4px; }
+.story__scene { display: flex; flex-direction: column; gap: 2px; }
+.story__scene-head { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.story__label { font-weight: 700; }
+.hub-btn--small { padding: 2px 8px; font-size: 12px; }
+.story-chapter { margin-bottom: 12px; }
+.story-chapter__title { margin: 6px 0; font-size: 14px; color: var(--hub-text-muted); }
+.story-links { margin: 0; padding-left: 18px; columns: 2 280px; column-gap: 24px; }
+.story-links li { break-inside: avoid; padding: 2px 0; }
+.story-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.story-card { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--hub-border); border-radius: 8px; color: inherit; }
+.story-card:hover { border-color: var(--hub-accent); text-decoration: none; }
+.story-card .hub-badge { align-self: flex-start; }
+.story-bonds { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 12px; }
+.story-nav { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.story-skits td:first-child { white-space: nowrap; }
+
+/* --- unit images tab --- */
+.unit-view-tabs { margin-top: 12px; }
+.art-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.art-card { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.art-card__img { all: unset; position: relative; display: block; width: 100%; cursor: zoom-in; border-radius: 8px;
+  background: repeating-conic-gradient(var(--hub-border) 0 25%, transparent 0 50%) 0 0 / 20px 20px; }
+.art-card__img > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art-card__img > .art-card__face { inset: auto; }
+.art-card figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
+.art-faces { display: flex; flex-wrap: wrap; gap: 4px; }
+.art-faces .is-on { border-color: var(--hub-accent); color: var(--hub-accent); }
+.art-tier { margin-bottom: 18px; }
+.art-tier__title { margin: 8px 0; font-size: 16px; }
+.story-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.story-items--loose { margin-bottom: 12px; }
+.story-scene-card { justify-content: center; min-height: 92px; padding: 12px; gap: 4px; }
+.story-scene-card__mark { color: var(--hub-accent); font-size: 18px; }
+/* preloaded lines (storyPlayer.tsx): all in the page, transparent but the current one (opacity, not
+   display/visibility, so page translators still reach the hidden ones) */
+.sp-say { position: absolute; left: 0; right: 0; top: 0; padding: inherit; opacity: 0; pointer-events: none; }
+.sp-say--on { position: static; padding: 0; opacity: 1; pointer-events: auto; }
+.sp-range { flex: 1 1 160px; min-width: 120px; }
+.sp-help { margin: 0; color: #bbb; }
+.sp > .sp-more { right: 6cqw; bottom: 5cqh; z-index: 1; }

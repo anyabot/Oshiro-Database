@@ -77,39 +77,56 @@ the ones that buff her; gold/EXP (lord, all castle girls) and enemy-debuff posse
 Full card art is too big for this repo, so it lives in separate public GitHub repos served by
 jsDelivr, the same model as the Aigis site's `aigis-img-*` buckets:
 
-| Repo | Cards | Size |
+| Repo | Contents | Size |
 |---|---|---|
-| [oshiro-img-0](https://github.com/Altterisk/oshiro-img-0) | CardID 1-729 | 350 MB |
-| [oshiro-img-1](https://github.com/Altterisk/oshiro-img-1) | 730-9055 | 350 MB |
-| [oshiro-img-2](https://github.com/Altterisk/oshiro-img-2) | 9056+ and **every new card** | 28 MB |
+| [oshiro-img-0](https://github.com/Altterisk/oshiro-img-0) | cards 1-729 | 366 MB |
+| [oshiro-img-1](https://github.com/Altterisk/oshiro-img-1) | cards 730-9055 | 362 MB |
+| [oshiro-img-2](https://github.com/Altterisk/oshiro-img-2) | cards 9056+, part of the renovation art, and `scene/` (story pictures, 110 MB) | 450 MB + scene |
+| [oshiro-img-3](https://github.com/Altterisk/oshiro-img-3) | the rest of the renovation art and **every new card** | 311 MB |
 
-URL: `https://cdn.jsdelivr.net/gh/Altterisk/oshiro-img-<bucket>@main/art/<CardID>_<n>.webp`;
-`public/data/art.json` gives each card's bucket and its images `[n, width, height]`.
+URL: `https://cdn.jsdelivr.net/gh/Altterisk/oshiro-img-<bucket>@main/art/<CardID>_<n>.webp`, faces
+`<CardID>_<n>f<k>.webp`. `public/data/art.json` gives each card's bucket, images `[n, width, height]`,
+face rectangles, and `reno` (renovation card -> [base card, tier]).
 
-1. `python tools/sync_cdn.py --only "^Card\d+\.aar$"` downloads the card archives (Card%04d.aar,
-   about 3 GB; not part of the normal data sync).
-2. `python tools/export_card_art.py --all` writes `../oshiro-art/art/<CardID>_<n>.webp` (WebP q85): each
-   `Card<id>_<n>.atx` cropped to its largest sprite region, so the 100x100 expression faces packed beside
-   the art are left out. Up to 4 images per card (main art, two action/cut-in images, a full-body
-   outfit). Cards whose regions are under 128 px are placeholders and get no art. Incremental: unchanged
-   archives (md5) are skipped.
-3. `python tools/make_art_buckets.py --cap-mb 350 --push` assigns cards to buckets by ascending CardID
-   (persisted in `../oshiro-art/art_buckets.json`, so a card never moves; new cards go to the last bucket,
-   and a full one opens `oshiro-img-3`, which must be created on GitHub first), hardlinks the files into
-   `../oshiro-art/repos/oshiro-img-<k>/art/`, writes `public/data/art.json`, and commits + pushes changed
-   repos. jsDelivr caches `@main` for up to 12 h.
+- Images per card (`Card<id>_<n>.atx`, cropped to the largest sprite region): 0 main art, 1 and 2 the
+  cut-ins, 3 the full-body outfit. The other regions are 3 expression faces, drawn at -origin on the art
+  (the story scripts' `face ID=<card> type=1-3`).
+- Renovations: `Card<id+1000>` is 改壱 and `Card<id+2000>` 改弐 of card `<id>` (all 1,243 such archives
+  belong to a card with that tier). Only images that differ from the base card's same slot are kept;
+  1,230 pixel-identical ones (mostly the full-body image) are skipped and the site falls back to the base.
+
+1. `python tools/sync_cdn.py --only "^Card\d+\.aar$"` downloads the card archives (about 3 GB; not
+   part of the normal data sync).
+2. `python tools/export_card_art.py --all` writes `../oshiro-art/art/` (WebP q85). Placeholders (regions
+   under 128 px) get no art. Incremental: unchanged archives (md5) are skipped.
+3. `python tools/export_scene_art.py` writes the story backgrounds, named characters and face overlays
+   to `../oshiro-art/scene/` and `public/data/scene.json`.
+4. `python tools/make_art_buckets.py --cap-mb 450 --push` assigns cards to buckets (persisted in
+   `../oshiro-art/art_buckets.json`, so a card never moves; new cards go to the last bucket, and a full one
+   opens the next repo, which must be created on GitHub first), hardlinks the files into
+   `../oshiro-art/repos/`, mirrors `scene/` into oshiro-img-2, writes `public/data/art.json`, and commits +
+   pushes changed repos. jsDelivr caches `@main` for up to 12 h.
 
 Voices (`Voice*.aar`, 3.45 GB) are not exported.
 
 ## Story
 
-A stage page has a folded **Story** section with the quest's scenes (before / after the battle),
-loaded only when opened. `tools/export_story.py` reads `StoryEventText.aar`: one folder of scenes
-(Event1/Event2/Event3.atb, the same names in every folder) per story quest, in QuestID order of the
-`Quest.atb` rows with `EventTiming` set (431 folders = 431 quests; 385 of the 390 folders with a
-`map ID=` command name that quest's MapNo, the other 5 its neighbouring map). Speaker (`name`) and
-`text` lines are kept, a `bg` change starts a new section; art, voice and music commands are left out.
-Only live quests are in `Quest.atb`, so stories of removed events are not exported.
+`/story` lists every story scene the game ships, and every scene plays in a scene player that redraws the
+game's own script: background (or a stage map), the standing character (a named sprite or the card's
+art) with its scripted expression face, and the talk window. `tools/export_story.py` reads four archives
+whose members share names (Event1/2/3.atb), so they are read in archive order and told apart by TOC index:
+
+- `StoryEventText.aar`: one folder per quest with `Quest.EventTiming` set, in QuestID order (431 = 431;
+  385 of the 390 folders with a `map ID=` command name that quest's map). 1 before the battle, 2 after.
+- `AnyEventText.aar`: folder = scene ID, named by the event tables (Arena, ReprintArenaFestival,
+  WorldEvent 夢幻航海, AnotherLegends 天魔大乱, GrandBattleEvent, TowerEvent, VoteEvent, SurgeBattle):
+  prologue / tutorial / epilogues, and `Epilogue<N>Parameter` "k:id" = chapter N's cutscene after k maps.
+  Event books put these in game order between the chapter's quests.
+- `SkitEventText.aar`: seasonal skits, folder = `CampaignReward.SkitID`.
+- `BondsEventText.aar`: folder = CardID, the three bond stories.
+
+Output: `public/data/story/index.json` plus `q/`, `e/`, `s/`, `b/` scene files (commands bg, map, chara,
+face, name, text; music and voice are left out). Stage pages show their quest's scenes in a Story tab.
 
 ## Stages and deliberations
 

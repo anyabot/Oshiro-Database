@@ -11,6 +11,7 @@ import { DEFAULT_META } from "../meta";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
 import { terrainIcon, weaponIcon } from "../filterIcons";
 import { usePageMeta } from "../usePageMeta";
+import { artUrl, useArt, useStoryIndex, type ArtData } from "../story";
 import { StatSimPanel } from "../statSimPanel";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
@@ -407,6 +408,7 @@ export default function UnitDetail() {
   const { data: index } = useUnits();
   const { data: defs } = useEffectDefs();
   const [params, setParams] = useSearchParams();
+  const viewTab = params.get("view") === "images" ? "images" : "details";
   const t = useT();
   const hub = useHubLabels();
 
@@ -475,7 +477,11 @@ export default function UnitDetail() {
         <p className="notice">{withLink(t("transformNotice"), <Link to={`/units/${u.transform_of}`}>#{u.transform_of}</Link>)}</p>
       )}
 
-      <div className="detail-grid">
+      <UrlTabs label={t("unitView")} idBase="view" className="unit-view-tabs" active={viewTab}
+        tabs={[{ id: "details", label: t("unitDetails") }, { id: "images", label: t("unitImages") }]}
+        onChange={(v) => { const n = new URLSearchParams(params); if (v === "details") n.delete("view"); else n.set("view", v); setParams(n, { replace: true }); }} />
+      {viewTab === "images" && <TabPanel tab="images" idBase="view"><UnitImages u={u} /></TabPanel>}
+      {viewTab === "details" && <div className="detail-grid">
         <div className="detail-main">
           {u.forms.length === 0 && <Panel title={t("abilities")}><p className="muted">{t("noAbilities")}</p></Panel>}
           {views.length > 1 && (
@@ -586,7 +592,86 @@ export default function UnitDetail() {
             <RawRows title="Card.atb row" rows={[u.raw]} />
           </Panel>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
+
+/** The card's art from the image repos (tools/make_art_buckets.py), each with its expression faces;
+ *  renovations (改壱/改弐) list only the images that differ from the base card's. */
+function UnitImages({ u }: { u: Unit }) {
+  const t = useT();
+  const hub = useHubLabels();
+  const { data: art, loading, error } = useArt();
+  const { data: story } = useStoryIndex();
+  const [zoom, setZoom] = useState<string | null>(null);
+  const bonds = story?.bonds.find(([cid]) => cid === u.id)?.[1];
+  if (!art) return <LoadState loading={loading} error={error} labels={hub.load} />;
+  const base = art.cards[String(u.id)];
+  const tiers = [
+    { tier: 0, card: u.id },
+    ...Object.entries(art.reno ?? {}).filter(([, [b]]) => b === u.id).map(([cid, [, tier]]) => ({ tier, card: Number(cid) }))
+      .sort((a, b) => a.tier - b.tier),
+  ].filter((x) => art.cards[String(x.card)]);
+  return (
+    <>
+      {bonds ? (
+        <p className="notice"><Link to={`/story/b/${u.id}`}>{t("unitBondStories", { n: bonds })}</Link></p>
+      ) : null}
+      {!base && <EmptyState title={t("unitNoImages")} />}
+      {tiers.map(({ tier, card }) => {
+        const entry = art.cards[String(card)];
+        const own = new Set(entry[1].map(([n]) => n));
+        const same = tier ? (base?.[1] ?? []).filter(([n]) => !own.has(n)).map(([n]) => t(IMAGE_KIND[n] ?? "unitImage", { n })) : [];
+        return (
+          <section key={card} className="art-tier">
+            {tiers.length > 1 && <h3 className="art-tier__title">{tierName(tier)}{tier ? <span className="muted small"> · Card #{card}</span> : null}</h3>}
+            {same.length > 0 && <p className="muted small">{t("unitImagesSame", { list: same.join(", ") })}</p>}
+            <div className="art-grid">
+              {entry[1].map(([n, w, h]) => (
+                <ArtFigure key={n} art={art} card={card} n={n} w={w} h={h} faces={entry[2]?.[String(n)] ?? []} alt={`${nameOf(u)} ${n}`} onZoom={setZoom} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+      {zoom && (
+        <div className="sp-overlay" role="dialog" aria-modal="true" onClick={() => setZoom(null)}>
+          <img className="art-zoom" src={zoom} alt="" />
+        </div>
+      )}
+    </>
+  );
+}
+
+function ArtFigure({ art, card, n, w, h, faces, alt, onZoom }: {
+  art: ArtData; card: number; n: number; w: number; h: number; faces: [number, number, number, number][]; alt: string; onZoom: (src: string) => void;
+}) {
+  const t = useT();
+  const [k, setK] = useState(0);
+  const src = artUrl(art, card, `${card}_${n}`)!;
+  const f = k ? faces[k - 1] : null;
+  return (
+    <figure className="art-card">
+      <button type="button" className="art-card__img" style={{ aspectRatio: `${w} / ${h}` }} onClick={() => onZoom(src)} title={t("unitImageOpen")}>
+        <img src={src} alt={alt} loading="lazy" />
+        {f && <img className="art-card__face" alt="" src={artUrl(art, card, `${card}_${n}f${k}`)!} style={{
+          left: `${(f[0] / w) * 100}%`, top: `${(f[1] / h) * 100}%`, width: `${(f[2] / w) * 100}%`, height: `${(f[3] / h) * 100}%`,
+        }} />}
+      </button>
+      <figcaption>
+        <span className="muted small">{t(IMAGE_KIND[n] ?? "unitImage", { n })} · {w}×{h}</span>
+        {faces.length > 0 && (
+          <span className="art-faces">
+            {[0, ...faces.map((_, i) => i + 1)].map((x) => (
+              <button key={x} type="button" className={`hub-btn hub-btn--small${x === k ? " is-on" : ""}`} aria-pressed={x === k}
+                onClick={() => setK(x)}>{x ? t("unitFace", { n: x }) : t("unitFaceBase")}</button>
+            ))}
+          </span>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
+const IMAGE_KIND: Record<number, UiKey> = { 0: "unitImageMain", 1: "unitImageCut1", 2: "unitImageCut2", 3: "unitImageBody" };
