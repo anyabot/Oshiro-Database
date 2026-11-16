@@ -22,7 +22,15 @@ export interface UnitIndexEntry {
   terrain: number | null;
   /** Card.MaxRenovationCount: 0 none, 1 改壱, 2 改弐. */
   renovation: number;
+  /** Class.AttackType: placeable on melee (近接) spots, ranged (遠隔) spots, or both. */
+  placement?: Placement | null;
+  /** Class.ShipLocationPlaceable: can also be placed on water (水上) spots. */
+  water?: boolean | null;
+  /** general ability class-ability row 6/13: can be placed on boat (舟) spots, a stage gimmick. */
+  boat?: boolean | null;
 }
+
+export type Placement = "melee" | "ranged" | "both";
 
 export interface TraitInfo {
   /** Shared [prefix] of the carriers' names; null when they share none. */
@@ -164,6 +172,9 @@ export interface UnitDetail {
   region: number | null;
   /** Card.GrowUpID: castle (terrain) type. */
   terrain: number | null;
+  placement: Placement | null;
+  water: boolean;
+  boat: boolean;
   traits: number[];
   face: number | null;
   skins: number[];
@@ -188,4 +199,32 @@ export interface UnitDetail {
   introduction: string | null;
   welcome: string | null;
   raw: RawRow;
+}
+
+/** Who a group possession ability (所持) buffs: any listed value matches (public/data/possessions.json). */
+export interface PossessionRule {
+  weapon?: number[];
+  region?: number[];
+  trait?: number[];
+  /** Card.GrowUpID values (InstallationCastleTypeLimit numbering) */
+  terrain?: number[];
+  /** the target's Japanese name (石弓城娘, 地獄を含む城) */
+  jp?: string;
+}
+
+/** One castle girl's possession ability at one renovation tier, aimed at a group of castle girls. */
+export interface PossessionSource {
+  u: number;
+  t: number;
+  id: number;
+  name?: string;
+  desc?: string;
+  /** AbilityTargetType codes, keys of PossessionData.rules */
+  targets: number[];
+  effects: RawRow[];
+}
+
+export interface PossessionData {
+  rules: Record<string, PossessionRule>;
+  sources: PossessionSource[];
 }

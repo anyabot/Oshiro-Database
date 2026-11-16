@@ -53,6 +53,12 @@ function joinStats(stats: string[]): string {
 /** Receivers as one phrase: "Shield, Sword and Spear castle girls in range", "Great Magic, all castle
  *  girls and the lord (殿)". */
 function joinReceivers(whos: string[]): string {
+  // the same receiver in several quest types: "In quest types 6, 7 and 8 (賽の河原 一層, …), self"
+  const quest = whos.map((w) => /^In quest type (\d+) \(([^()]*)\), (.+)$/.exec(w));
+  if (quest.every(Boolean) && quest.every((q) => q![3] === quest[0]![3])) {
+    const first = quest[0]![2].replace(/…$/, "").split(", ")[0];
+    return `In quest types ${listJoin(quest.map((q) => q![1]))} (${first}, …), ${quest[0]![3]}`;
+  }
   // a shared leading clause ("Great Magic, ") is said once
   let lead = "";
   const firsts = whos.map((w) => (/^([^,]+), (.+)$/.exec(w) ?? [])[1]);

@@ -45,7 +45,7 @@ const PHRASES: Record<string, string> = {
   "special gauge per stock": "ストック当たりの特殊攻撃ゲージ", "special attack stock": "特殊攻撃ストック",
   "redeploy time": "再配置時間", "time until stratagem": "計略使用までの時間", "time until first stratagem": "初回計略使用までの時間",
   "auto-giantify time": "自動巨大化時間", "auto-giantify time (flat)": "自動巨大化時間(固定値)", "stratagem cooldown": "計略再使用時間",
-  "stratagem cooldown progress": "計略再使用の経過", "stratagem stock": "計略ストック", "deploy ki": "配置気",
+  "stratagem cooldown progress": "計略再使用の経過", "stratagem stock": "計略ストック", "deploy ki": "配置気", "deploy or move ki": "配置・移動気",
   "giantify ki": "巨大化気", "stratagem ki cost": "計略消費気", "ki cost": "消費気", "ki gain": "獲得気",
   "ki gain interval": "気回収時間", "ki per kill": "撃破獲得気", "ki refund on retreat/defeat": "撤退大破時の回復気",
   "ki refund on retreat (% of deploy ki)": "撤退時の気返還(配置気の%)", "natural ki gain": "気の自然増加量",
@@ -162,7 +162,7 @@ const LEADS: [RegExp, string][] = [
 ];
 const WHOLE: Record<string, string> = {
   "On hit, the enemy it attacks": "攻撃した敵", "Enemy hit": "攻撃した敵", "Enemies it blocks": "足止め中の敵",
-  "The castle girl named in the text": "テキストで指定された城娘", "Your side": "殿側",
+  "The castle girl named in the text": "テキストで指定された城娘", "the castle girl named in the text": "テキストで指定された城娘", "Your side": "殿側",
   "Can be used on (発動対象)": "発動対象", "Area effect": "範囲効果",
 };
 
@@ -175,7 +175,7 @@ function atom(a: string): string {
   if (/ in Despair$/i.test(s)) { state = "「絶望」状態の"; s = s.replace(/ in Despair$/i, ""); }
   let except = "";
   if (/ except self$/i.test(s)) { except = "(自身を除く)"; s = s.replace(/ except self$/i, ""); }
-  const quest = /^\u0002(\d+)\u0003(.*)\u0004(.*)$/.exec(s);
+  const quest = /^\u0002([\d、]+)\u0003(.*)\u0004(.*)$/.exec(s);
   if (quest) return `クエスト種別${quest[1]} (${tidy(quest[2])})の${atom(quest[3])}`;
   const set = /^unnamed trait set (\d+) castle girls$/i.exec(s);
   if (set) return `${all}${state}城娘セット${set[1]}${except}`;
@@ -204,8 +204,10 @@ export function receiverJa(subject: string): string {
   if (area) return `範囲効果 (半径${area[1]})`;
   let lead = "";
   for (const [re, ja] of LEADS) if (re.test(s)) { lead = ja; s = s.replace(re, ""); break; }
+  // a whole receiver after its lead: "Great Magic, the castle girl named in the text"
+  if (WHOLE[s]) return tidy(lead + WHOLE[s]);
   // "In quest type 6 (賽の河原 一層, …), self" is one receiver: the stage list stays with it
-  s = s.replace(/In quest type (\d+) \(([^()]*)\), /g, (_m, n, list) => `\u0002${n}\u0003${list.replace(/, /g, "、")}\u0004`);
+  s = s.replace(/In quest types? (\d+(?:(?:, | and )\d+)*) \(([^()]*)\), /g, (_m, n, list) => `\u0002${n.replace(/, | and /g, "、")}\u0003${list.replace(/, /g, "、")}\u0004`);
   // the bracketed originals repeat the English words before them, which the table translates
   s = s.replace(/ \([^()]*[぀-ヿ一-鿿][^()]*\)/g, "")
     .replace(/^castle girls that can be placed on melee and ranged tiles/i, "Dual-tile castle girls");
@@ -294,6 +296,18 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bwhen attacked \(from ([^()]+)\): /g, (_m, x) => `被攻撃時 (${fromJa(x)}から): `],
   [/\bbarrier \(from ([^()]+)\): blocks (\S+) of the damage/g, (_m, x, n) => `バリア (${fromJa(x)}から): ダメージの${n}を防ぐ`],
   // whole phrases that hold words the later rules would take apart
+  [/\battack motion #(\d+): (.+?) per attack/g, (_m: string, id: string, runs: string) => `攻撃モーション#${id}: 1回の攻撃で${runs
+    .replace(/(\d+) hits?/g, "$1回").replace(/ at ×([\d.]+)/g, "(×$1)").replace(/ \+ splash (\d+) around the target/g, "・標的と周囲(範囲$1)")
+    .replace(/, then /g, "、その後")}`],
+  [/\bmissile #(\d+), ([\d.]+)s apart\b/g, "ミサイル#$1、$2秒間隔"],
+  // buff notes on a placement-spot stratagem: "…; on any empty spot except water spots (未配置の水上マス以外)"
+  [/(^|; )on ([^;()]+\([^()]*[぀-ヿ一-鿿][^()]*\))/g, (_m, a, spot) => `${a}配置マス: ${spot}`],
+  [/\bthe castle girl named in the text\b/g, "テキストで指定された城娘"],
+  [/\bcan't use stratagems \(計略使用不可\)/g, "計略使用不可"],
+  [/\bturns into its alternate form \(its twin card\)/g, "別形態に変化"],
+  [/\bturns into its alternate form \(card #(\d+)\)/g, "別形態 (カード#$1) に変化"],
+  [/\bcan also be placed on melee tiles \(近接マス配置可能\)/g, "近接マスにも配置可能"],
+  [/ \(always set by movement abilities; its effect isn't traced\)/g, " (移動能力と共に設定; 効果は未解明)"],
   [/\bbarrier \(バリア\) blocks up to (\d+) damage/g, "バリア: $1ダメージまで防ぐ"],
   [/\bbarrier \(from (.+?)\): blocks (\S+) of the damage/g, (_m, who, n) => `バリア (${receiverJa(who)}から): ダメージの${n}を防ぐ`],
   [/\bbarrier: blocks (\S+) of the damage/g, "バリア: ダメージの$1を防ぐ"],
@@ -315,8 +329,10 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   // growth and per-count notes, before the trigger leads they contain
   [/\bgrows by that amount ((?:each|every) [a-z0-9. ]+?)(?= \(|,|$|\))/g, (_m, t) => `${stepJa(t)}に同量上昇`],
   [/ \(shrinks instead while Reversal \(反転化\) is on\)/g, " (反転化中は減少)"],
-  [new RegExp(`, \\+(${N}%?) more ((?:each|every) [a-z ]+?)(?=,|$)`, "g"), (_m, n, t) => `、${stepJa(t)}に+${n}ずつ上昇`],
-  [/(?<=^|, |\d%? )per ((?:\d+ )?[A-Za-z][a-zA-Z' -]*?(?: \([^)]*\))?(?: it has taken| in the formation| deployed| in range)?)(?=,|$)/g, (_m, t) => perJa(t)],
+  // N is signed: "+5% more each hit" grows, "−10% more each trigger" keeps lowering (its stat's −10% above)
+  [new RegExp(`, ([+−-])(\\d+(?:\\.\\d+)?%?) more ((?:each|every) [a-z0-9. ]+?)(?=,|$)`, "g"),
+    (_m, sign, n, t) => `、${stepJa(t)}に${sign === "+" ? "+" : "−"}${n}ずつ${sign === "+" ? "上昇" : "低下"}`],
+  [/(?<=^|, |\d%? )per ((?:\d+ )?[A-Za-z](?:[a-zA-Z' -]|(?<=set )\d+)*?(?: \([^)]*\))?(?: it has taken| in the formation| deployed| in range)?)(?=,|$)/g, (_m, t) => perJa(t)],
   // leads
   [/^Each enemy defeated$/, "敵撃破毎"],
   [/^Each time attacked$/, "被攻撃毎"],
@@ -406,11 +422,7 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bwalks with its second walk motion \(歩き2\)/g, "歩き2モーションで歩行"],
   [/\bwalks\b/g, "歩行"],
   [/\bbattle motion set → #(\d+) \(its attack animation sets the hit count\)/g, "戦闘モーション → #$1 (攻撃アニメーションでヒット数が決まる)"],
-  [/\battack motion #(\d+): (.+?) per attack/g, (_m: string, id: string, runs: string) => `攻撃モーション#${id}: 1回の攻撃で${runs
-    .replace(/(\d+) hits?/g, "$1回").replace(/ at ×([\d.]+)/g, "(×$1)").replace(/ \+ splash (\d+) around the target/g, "・標的と周囲(範囲$1)")
-    .replace(/, then /g, "、その後")}`],
   [/\bHits per attack\b/g, "1回の攻撃のヒット数"],
-  [/\bmissile #(\d+), ([\d.]+)s apart\b/g, "ミサイル#$1、$2秒間隔"],
   [/\bvisual effect #(\d+)/g, "エフェクト#$1"],
   [/\bactivates ability #(\d+) \(mode (\d+)\)/g, "特技#$1を発動 (モード$2)"],
   [/\buses special attack #(\d+) \(特殊攻撃ID\)/g, "特殊攻撃#$1を使用"],

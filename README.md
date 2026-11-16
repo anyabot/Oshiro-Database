@@ -12,6 +12,8 @@ as raw table fields, never guessed.
 
 List pages keep their search, filters and page in the URL, so back/forward and
 shared links restore the same view (`?page=` counts from 0).
+The castle girl list shows the newest first, by the `added.json` date (see [Home page](#home-page));
+the same date falls back to the higher ID and undated entries come last. `?sort=id` keeps game ID order.
 
 ## Data
 
@@ -23,6 +25,10 @@ All data lives under `public/`:
 - `public/unit-icon/<id>.webp` — 120×120 face icons (~11 MB, published)
 
 Card art is not exported (several GB).
+
+Placement is the main class's `Class.AttackType` (1 近接 melee spots, 100 遠隔 ranged, 1001 both: the
+投剣/鞭/陣貝/軍船 classes whose texts say 近接・遠隔双方); `Class.ShipLocationPlaceable` adds water (水上) spots.
+A switch weapon (sub class) can differ (織田信長 / 徳川家康 switch melee → ranged): the unit page shows it there.
 
 Terrain (平 Plain / 平山 Hill / 山 Mountain / 水 Water / 地獄 Hell) is `Card.GrowUpID` (巨大化種別):
 the exe's castle-type target matcher reads that field, and `InstallationCastleTypeLimit.atb`
@@ -59,8 +65,51 @@ split by source (特技, 編成特技, 計略, class ability…), with receiver,
 filters. Its data, `public/data/buffs.json`, is built by `npm run buffs` (`scripts/buffs.ts`) from
 the same effect describer the castle girl pages use: `describeRow` returns, next to each sentence,
 the stat changes it worded (stat, direction, value, cap, stacking, receiver, ally/enemy side).
-Rebuild it after re-exporting effects or units. Left out: the card's own stat profile
+Rebuild it after re-exporting effects or units.
+The same run writes `public/data/possessions.json`: every possession ability (所持) aimed at a group
+of castle girls, with a match rule read from the exe-decoded target label (weapon type, region
+`Card.AreaType`, trait `Tokusei`, or terrain via the castle-type lists). Each castle girl's page lists
+the ones that buff her; gold/EXP (lord, all castle girls) and enemy-debuff possessions are left out. Left out: the card's own stat profile
 (`always` rows), potentials, quest-only rows, and anything still shown as raw codes.
+
+## Card art (image repos)
+
+Full card art is too big for this repo, so it lives in separate public GitHub repos served by
+jsDelivr, the same model as the Aigis site's `aigis-img-*` buckets:
+
+| Repo | Cards | Size |
+|---|---|---|
+| [oshiro-img-0](https://github.com/Altterisk/oshiro-img-0) | CardID 1-729 | 350 MB |
+| [oshiro-img-1](https://github.com/Altterisk/oshiro-img-1) | 730-9055 | 350 MB |
+| [oshiro-img-2](https://github.com/Altterisk/oshiro-img-2) | 9056+ and **every new card** | 28 MB |
+
+URL: `https://cdn.jsdelivr.net/gh/Altterisk/oshiro-img-<bucket>@main/art/<CardID>_<n>.webp`;
+`public/data/art.json` gives each card's bucket and its images `[n, width, height]`.
+
+1. `python tools/sync_cdn.py --only "^Card\d+\.aar$"` downloads the card archives (Card%04d.aar,
+   about 3 GB; not part of the normal data sync).
+2. `python tools/export_card_art.py --all` writes `../oshiro-art/art/<CardID>_<n>.webp` (WebP q85): each
+   `Card<id>_<n>.atx` cropped to its largest sprite region, so the 100x100 expression faces packed beside
+   the art are left out. Up to 4 images per card (main art, two action/cut-in images, a full-body
+   outfit). Cards whose regions are under 128 px are placeholders and get no art. Incremental: unchanged
+   archives (md5) are skipped.
+3. `python tools/make_art_buckets.py --cap-mb 350 --push` assigns cards to buckets by ascending CardID
+   (persisted in `../oshiro-art/art_buckets.json`, so a card never moves; new cards go to the last bucket,
+   and a full one opens `oshiro-img-3`, which must be created on GitHub first), hardlinks the files into
+   `../oshiro-art/repos/oshiro-img-<k>/art/`, writes `public/data/art.json`, and commits + pushes changed
+   repos. jsDelivr caches `@main` for up to 12 h.
+
+Voices (`Voice*.aar`, 3.45 GB) are not exported.
+
+## Story
+
+A stage page has a folded **Story** section with the quest's scenes (before / after the battle),
+loaded only when opened. `tools/export_story.py` reads `StoryEventText.aar`: one folder of scenes
+(Event1/Event2/Event3.atb, the same names in every folder) per story quest, in QuestID order of the
+`Quest.atb` rows with `EventTiming` set (431 folders = 431 quests; 385 of the 390 folders with a
+`map ID=` command name that quest's MapNo, the other 5 its neighbouring map). Speaker (`name`) and
+`text` lines are kept, a `bg` change starts a new section; art, voice and music commands are left out.
+Only live quests are in `Quest.atb`, so stories of removed events are not exported.
 
 ## Stages and deliberations
 

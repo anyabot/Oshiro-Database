@@ -1,7 +1,7 @@
 import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { CASTLE_EN, CATEGORY_EN, REGION_EN, TRAIT_EN, WEAPON_EN, unitName } from "./labels";
 import { getLang } from "./i18n";
-import type { Meta, TraitInfo, UnitDetail, UnitIndexEntry } from "./types";
+import type { Meta, PossessionData, PossessionRule, TraitInfo, UnitDetail, UnitIndexEntry } from "./types";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -26,6 +26,22 @@ const loader = createJsonLoader({ urls: (name) => [`${BASE}data/${name}.json`] }
 export const useUnits = () => useJson<UnitIndexEntry[]>(loader, "units");
 export const useMeta = () => useJson<Meta>(loader, "meta");
 export const useUnit = (id: number | null) => useJson<UnitDetail>(loader, id == null ? null : `unit/${id}`);
+/** Placement filter values a castle girl has: her spot kind (melee / ranged / both) and "water". */
+export function placementTags(u: { placement?: string | null; water?: boolean | null; boat?: boolean | null }): string[] {
+  return [...(u.placement ? [u.placement] : []), ...(u.water ? ["water"] : []), ...(u.boat ? ["boat"] : [])];
+}
+export const PLACEMENTS = ["melee", "ranged", "both", "water", "boat"] as const;
+
+export const usePossessions = () => useJson<PossessionData>(loader, "possessions");
+
+/** Whether a group possession ability's target (weapon, region, trait or terrain) includes this castle girl. */
+export function possessionMatches(rule: PossessionRule, u: Pick<UnitDetail, "region" | "traits" | "terrain"> & { weapon: number | null }): boolean {
+  if (rule.weapon) return u.weapon != null && rule.weapon.includes(u.weapon);
+  if (rule.region) return u.region != null && rule.region.includes(u.region);
+  if (rule.trait) return u.traits.some((x) => rule.trait!.includes(x));
+  if (rule.terrain) return u.terrain != null && rule.terrain.includes(u.terrain);
+  return false;
+}
 
 export const iconUrl = (face: number) => `${BASE}unit-icon/${face}.webp`;
 

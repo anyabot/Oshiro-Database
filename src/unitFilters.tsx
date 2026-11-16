@@ -4,14 +4,14 @@ import { useMemo, useState } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
 import { CheckboxGroup, FilterPanel } from "@altterisk/game-hub";
 import {
-  TERRAINS, categoryLabel, isMainWeapon, rarityLabel, regionLabel, terrainParts, traitLabel,
+  PLACEMENTS, TERRAINS, categoryLabel, placementTags, isMainWeapon, rarityLabel, regionLabel, terrainParts, traitLabel,
   weaponLabel,
 } from "./data";
 import type { Meta, UnitIndexEntry } from "./types";
 import { terrainOptionLabel, weaponOptionLabel } from "./filterIcons";
 import { useHubLabels, useT } from "./i18n";
 
-const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai"] as const;
+const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai", "place"] as const;
 
 export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta | undefined,
   params: URLSearchParams, setParams: SetURLSearchParams, prefix = "f") {
@@ -77,6 +77,7 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
       // a dual-terrain castle (平/水城) matches each of its terrains, like the game's "平を含む城"
       if (sel.terrain.length && !terrainParts(meta, u.terrain).some((t) => sel.terrain.includes(t.slug))) return false;
       if (sel.kai.length && !has(sel.kai, u.renovation)) return false;
+      if (sel.place.length && !placementTags(u).some((x) => sel.place.includes(x))) return false;
       return true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,6 +91,7 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
       <CheckboxGroup title={t("terrain")} options={opts.terrain} selected={sel.terrain} onToggle={(v) => toggle("terrain", v)} />
       <CheckboxGroup title={t("region")} options={opts.region} selected={sel.region} onToggle={(v) => toggle("region", v)} />
       <CheckboxGroup title={t("category")} options={opts.cat} selected={sel.cat} onToggle={(v) => toggle("cat", v)} />
+      <CheckboxGroup title={t("placement")} options={PLACEMENTS.map((p) => ({ value: p, label: t(`place_${p}`) }))} selected={sel.place} onToggle={(v) => toggle("place", v)} />
       <CheckboxGroup title={t("renovation")} options={renovationOpts} selected={sel.kai} onToggle={(v) => toggle("kai", v)} />
       <CheckboxGroup title={t("trait")} options={opts.trait} selected={sel.trait} onToggle={(v) => toggle("trait", v)} />
       {activeCount > 0 && <button className="hub-btn" onClick={clear}>{t("clearUnitFilters")}</button>}

@@ -39,7 +39,9 @@ export const JP_EN: Record<string, string> = {
   SpecialGaugeChargeByDamage: "Special gauge gain when hit",
   "SpecialGaugeChargeByDamage (flat cut)": "Special gauge gain when hit (flat cut)",
   SpecialStock: "Special attack stock",
-  "DeployCost%": "Deploy Ki",
+  // moving re-deploys onto the new cell and pays this cost again (FUN_004af9f0); every movement ability cuts it
+  // (99145 「ヘカティエ移動消費気削減」 is a lone status-10501 row)
+  "DeployCost%": "Deploy or move Ki",
   "DeployCost (flat cut)": "Deploy Ki reduction",
   DeployCostReduction: "Deploy Ki reduction",
   CostReduction: "Cost reduction",

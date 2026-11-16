@@ -25,7 +25,7 @@ const STATES = new Set(Object.keys(defs.labels).filter((k) => k.startsWith("stat
 const CHECKS: [string, RegExp | ((s: string) => boolean)][] = [
   ["raw code", /\b(stat|target( type)?|set(?= #)|effect|modifier|unit effect( type)?|ability type|value type|flag|bit|area|trigger|crowd control|motion|expr)\s#?\d/i],
   ["condition op", /\bop\d/],
-  ["undefined / NaN", /undefined|NaN|null|\[object/],
+  ["undefined / NaN", /undefined|NaN|\bnull\b|\[object/],
   ["broken punctuation", /, ,|: :|,\s*$|:\s*$|\(\s*\)|\s{2,}|,\)|\(,/],
   ["ASCII minus on a number", /(^|[\s(×])-\d/],
   ["zero amount", /[+−]0(%|s)?(?![\d.])|×0(?![\d.])/],

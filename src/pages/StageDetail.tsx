@@ -1,6 +1,6 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@altterisk/game-hub";
+import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons, TabPanel, UrlTabs } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
@@ -12,6 +12,7 @@ import {
 import { usePageMeta } from "../usePageMeta";
 import { StageMap, removedNames } from "../stageMap";
 import { useUnits } from "../data";
+import { useStory, useStoryIndex } from "../stages";
 import type { RawRow } from "../types";
 
 // CrowdControlType: 3 火傷 (% of current HP), 4 猛毒 (% of max HP) are the damage-over-time states
@@ -93,21 +94,23 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   const seriesUrl = `/stages?group=${place.cat.k}${place.sub ? `&sub=${place.sub.k}` : ""}`;
   const { data: events } = useEvents();
   const ev = stage.event != null ? events?.find((e) => e.id === stage.event) : undefined;
+  const { data: storyIds } = useStoryIndex();
+  const hasStory = !!storyIds?.includes(stage.id);
+  // sections as tabs (?tab=); Enemies is the default and keeps the URL clean
+  const tabs = [
+    { id: "enemies", label: t("enemies") },
+    { id: "map", label: t("mapTitle") },
+    ...(stage.singi ? [{ id: "singi", label: active.length ? t("deliberationsTab", { n: points }) : t("deliberationsTabNone") }] : []),
+    { id: "spawns", label: t("spawnTab", { n: stage.spawns.length }) },
+    ...(hasStory ? [{ id: "story", label: t("story") }] : []),
+  ];
+  const asked = params.get("tab") ?? "enemies";
+  const tab = tabs.some((x) => x.id === asked) ? asked : "enemies";
   return (
     <div className="page stage-page">
       <p className="muted small"><Link to="/stages">{t("stagesTitle")}</Link> / <Link to={seriesUrl}>{catLabel(place.sub ?? place.cat, lang)}</Link>{ev ? ` / ${ev.title}` : ""}</p>
       <PageHeader title={stage.name}
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", t("quest", { id: stage.id }), t("mapN", { n: stage.map })].filter(Boolean).join(" · ")} />
-      {stage.spots ? (
-        <Fold title={t("mapTitle")}>
-          <StageMap info={stage.spots} mapNo={stage.map} questId={stage.id} name={stage.name} hard={hard}
-            removers={active.filter((o) => o.mask).map((o) => ({ name: o.name, mask: o.mask! }))}
-            rowList={(rows, kind) => kind === "ability" ? <RowList rows={rows} defs={defs} kind="ability" />
-              : <RowList rows={withTargets(rows.map(({ EffectTextureID, AttributeMatchEffectID, ...r }) => r))} defs={defs} />} />
-        </Fold>
-      ) : (
-        <FallbackImage srcs={[mapImage(stage.map)]} alt={t("mapAlt", { name: stage.name })} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
-      )}
       {stage.recovered && (
         <p className="muted small">{t("recovered")}{t(stage.estimate?.normal ? "recoveredEst" : "recoveredBase")}</p>
       )}
@@ -137,38 +140,77 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
         </span>
       </div>
 
-      {stage.mapEffect.length > 0 && (
-        <Fold title={t("mapEffects")} note={t("mapEffectsNote")}>
-          <RowList rows={withTargets(stage.mapEffect)} defs={defs} />
-        </Fold>
+      <UrlTabs label={t("stageSections")} idBase="stage" className="stage-tabs" tabs={tabs} active={tab}
+        onChange={(id) => setParam("tab", id === "enemies" ? null : id)} />
+
+      {tab === "enemies" && (
+        <TabPanel tab="enemies" idBase="stage">
+          {stage.singi && (
+            <p className="muted small">
+              {active.length
+                ? t("delibActive", { n: active.length, pts: points })
+                : t("delibNone")}{" "}
+              <button type="button" className="link-btn" onClick={() => setParam("tab", "singi")}>{t("delibOpen")}</button>
+            </p>
+          )}
+          <Panel title={t("enemies")} note={<>{t("enemiesNote", { then: active.length ? t("thenDelib") : "" })}{" "}
+            <span className="chg-innate">{t("ownAbility")}</span> <span className="chg-singi">{t("fromDelib")}</span></>}>
+            <table className="hub-table hub-table--stack enemy-table">
+              <thead><tr><th>{t("enemy")}</th><th>#</th><th>{t("thHp")}</th><th>{t("thAtk")}</th><th>{t("thDef")}</th><th>{t("thMdef")}</th><th>{t("thRange")}</th><th>{t("thMove")}</th><th>{t("thAbilities")}</th></tr></thead>
+              <tbody>
+                {order.map(({ id: eid, form, depth }) => {
+                  const e = data.enemies[eid];
+                  return e ? <EnemyRow key={eid} id={eid} e={e} n={stage.counts[eid] ?? 0} r={r} active={active} data={data} defs={defs}
+                    form={form} depth={depth} unit={girlLink(e)} /> : null;
+                })}
+              </tbody>
+            </table>
+          </Panel>
+        </TabPanel>
       )}
 
-      {stage.singi && (
-        <Fold title={t("deliberations", { n: points })}
-          note={stage.singi.gold ? t("goldSilver", { g: stage.singi.gold, s: stage.singi.silver ?? "" }) : t("sameGroup")}>
-          <div className="singi-list">
-            {options.map((o) => <SingiRow key={o.id} o={o} on={chosen.has(o.id)} onToggle={() => toggle(o)} defs={defs}
-              removes={o.mask && stage.spots ? removedNames(stage.spots, o.mask, lang, hard).join(", ") : ""} />)}
-          </div>
-          {chosen.size > 0 && <button className="hub-btn" onClick={() => setParam("d", null)}>{t("clearDelib")}</button>}
-        </Fold>
+      {tab === "map" && (
+        <TabPanel tab="map" idBase="stage">
+          {stage.spots ? (
+            <Panel title={t("mapTitle")}>
+              <StageMap info={stage.spots} mapNo={stage.map} questId={stage.id} name={stage.name} hard={hard}
+                removers={active.filter((o) => o.mask).map((o) => ({ name: o.name, mask: o.mask! }))}
+                rowList={(rows, kind) => kind === "ability" ? <RowList rows={rows} defs={defs} kind="ability" />
+                  : <RowList rows={withTargets(rows.map(({ EffectTextureID, AttributeMatchEffectID, ...r }) => r))} defs={defs} />} />
+            </Panel>
+          ) : (
+            <FallbackImage srcs={[mapImage(stage.map)]} alt={t("mapAlt", { name: stage.name })} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
+          )}
+          {stage.mapEffect.length > 0 && (
+            <Panel title={t("mapEffects")} note={t("mapEffectsNote")}>
+              <RowList rows={withTargets(stage.mapEffect)} defs={defs} />
+            </Panel>
+          )}
+        </TabPanel>
       )}
 
-      <Panel title={t("enemies")} note={<>{t("enemiesNote", { then: active.length ? t("thenDelib") : "" })}{" "}
-        <span className="chg-innate">{t("ownAbility")}</span> <span className="chg-singi">{t("fromDelib")}</span></>}>
-        <table className="hub-table hub-table--stack enemy-table">
-          <thead><tr><th>{t("enemy")}</th><th>#</th><th>{t("thHp")}</th><th>{t("thAtk")}</th><th>{t("thDef")}</th><th>{t("thMdef")}</th><th>{t("thRange")}</th><th>{t("thMove")}</th><th>{t("thAbilities")}</th></tr></thead>
-          <tbody>
-            {order.map(({ id: eid, form, depth }) => {
-              const e = data.enemies[eid];
-              return e ? <EnemyRow key={eid} id={eid} e={e} n={stage.counts[eid] ?? 0} r={r} active={active} data={data} defs={defs}
-                form={form} depth={depth} unit={girlLink(e)} /> : null;
-            })}
-          </tbody>
-        </table>
-      </Panel>
+      {tab === "singi" && stage.singi && (
+        <TabPanel tab="singi" idBase="stage">
+          <Panel title={t("deliberations", { n: points })}
+            note={stage.singi.gold ? t("goldSilver", { g: stage.singi.gold, s: stage.singi.silver ?? "" }) : t("sameGroup")}>
+            <div className="singi-list">
+              {options.map((o) => <SingiRow key={o.id} o={o} on={chosen.has(o.id)} onToggle={() => toggle(o)} defs={defs}
+                removes={o.mask && stage.spots ? removedNames(stage.spots, o.mask, lang, hard).join(", ") : ""} />)}
+            </div>
+            {chosen.size > 0 && <button className="hub-btn" onClick={() => setParam("d", null)}>{t("clearDelib")}</button>}
+          </Panel>
+        </TabPanel>
+      )}
 
-      <Timeline stage={stage} data={data} />
+      {tab === "spawns" && (
+        <TabPanel tab="spawns" idBase="stage"><Timeline stage={stage} data={data} /></TabPanel>
+      )}
+
+      {tab === "story" && hasStory && (
+        <TabPanel tab="story" idBase="stage">
+          <Panel title={t("story")} note={t("storyNote")}><StoryBody questId={stage.id} /></Panel>
+        </TabPanel>
+      )}
     </div>
   );
 }
@@ -186,15 +228,25 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
   );
 }
 
-/** A panel whose title folds it open and shut (chevron). */
-function Fold({ title, note, children, open: initial = true }: { title: ReactNode; note?: ReactNode; children: ReactNode; open?: boolean }) {
-  const [open, setOpen] = useState(initial);
+function StoryBody({ questId }: { questId: number }) {
+  const { data, loading, error } = useStory(questId);
+  const t = useT();
+  const hub = useHubLabels();
+  if (!data) return <LoadState loading={loading} error={error} labels={hub.load} />;
   return (
-    <Panel className={`fold${open ? "" : " fold--shut"}`} note={open ? note : undefined}
-      title={<button type="button" className="fold__btn" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <span className="fold__chev" aria-hidden="true">{open ? "▾" : "▸"}</span>{title}</button>}>
-      {open ? children : null}
-    </Panel>
+    <div className="story">
+      {data.scenes.map((s) => (
+        <section key={s.n} className="story__scene">
+          <h3 className="story__title">{t(s.n === 1 ? "storyScene1" : s.n === 2 ? "storyScene2" : "storyScene3")}</h3>
+          {s.lines.map((l, i) => (l === "" ? <hr key={i} className="story__break" /> : (
+            <div key={i} className={`story__line${l[0] ? "" : " story__line--narr"}`}>
+              {l[0] && <span className="story__who">{l[0]}</span>}
+              <p className="story__text game-text">{l[1]}</p>
+            </div>
+          )))}
+        </section>
+      ))}
+    </div>
   );
 }
 

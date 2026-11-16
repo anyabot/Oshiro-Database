@@ -4,8 +4,8 @@ import {
   Breadcrumbs, EmptyState, LoadState, MetaChip, MetaChips, PageHeader, Panel, StatRows, TabPanel, UrlTabs, routerLinks,
 } from "@altterisk/game-hub";
 import {
-  altName, categoryJp, categoryLabel, iconUrl, nameOf, rarityLabel, regionLabel, terrainParts, terrainTitle, terrainWord, tierName,
-  traitLabel, traitTitle, useMeta, useUnit, useUnits, weaponLabel,
+  altName, categoryJp, categoryLabel, iconUrl, nameOf, possessionMatches, rarityLabel, regionLabel, terrainParts, terrainTitle, terrainWord, tierName,
+  traitLabel, traitTitle, useMeta, usePossessions, useUnit, useUnits, weaponLabel,
 } from "../data";
 import { DEFAULT_META } from "../meta";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
@@ -15,7 +15,9 @@ import { StatSimPanel } from "../statSimPanel";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
 import { groupRows, type Line } from "../group";
-import type { Ability, ClassBlock, FieldLink, Form, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit } from "../types";
+import type {
+  Ability, ClassBlock, FieldLink, Form, PossessionSource, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit, UnitIndexEntry,
+} from "../types";
 
 const renderLink = routerLinks(Link, "to");
 
@@ -292,6 +294,9 @@ function ClassSection({ label, block, defs }: { label: string; block: ClassBlock
         <span>{t("thDef")} {num(c, "InitialDefense")} → {num(c, "MaxDefense")}</span>
         <span>{t("range")} {num(c, "AttackRange")}</span>
         {num(c, "MaxTarget") > 0 && <span>{t("targets")} {num(c, "MaxTarget")}</span>}
+        {PLACE_OF[num(c, "AttackType")] && (
+          <span>{t("placement")} {t(`place_${PLACE_OF[num(c, "AttackType")]}`)}{num(c, "ShipLocationPlaceable") ? ` + ${t("place_water")}` : ""}</span>
+        )}
       </div>
       {block.class_ability && (
         <div className="nested"><AbilityBlock label={t("classAbility")} a={block.class_ability} defs={defs} /></div>
@@ -299,6 +304,9 @@ function ClassSection({ label, block, defs }: { label: string; block: ClassBlock
     </div>
   );
 }
+
+/** Class.AttackType -> placement (as tools/export_units.py PLACEMENT). */
+const PLACE_OF: Record<number, "melee" | "ranged" | "both"> = { 1: "melee", 100: "ranged", 1001: "both" };
 
 function num(row: RawRow | null, k: string): number {
   const v = row?.[k];
@@ -341,6 +349,47 @@ function StatsPanel({ u }: { u: Unit }) {
 function tierTitle(v: TierView): string {
   const name = tierName(v.tier);
   return name === v.label ? v.label : `${name} ${v.label}`;
+}
+
+/** Every castle girl's possession ability (所持) whose group target (weapon, region, trait, terrain) includes
+ *  this one, grouped by the girl who owns it; a renovation that keeps the same ability merges into one entry. */
+function PossessionBuffsPanel({ u, defs, byId }: { u: Unit; defs?: EffectDefs; byId: Map<number, UnitIndexEntry> }) {
+  const { data } = usePossessions();
+  const t = useT();
+  if (!data || u.npc) return null;
+  const me = { weapon: u.weapon.type, region: u.region, traits: u.traits, terrain: u.terrain };
+  const hits = data.sources.filter((p) => p.targets.some((c) => { const r = data.rules[c]; return r && possessionMatches(r, me); }));
+  // one entry per owner + ability (same name, text and rows across tiers)
+  const groups = new Map<string, { p: PossessionSource; tiers: number[] }>();
+  for (const p of hits) {
+    const k = `${p.u}|${p.name}|${p.desc}|${JSON.stringify(p.effects)}`;
+    const g = groups.get(k);
+    if (g) g.tiers.push(p.t); else groups.set(k, { p, tiers: [p.t] });
+  }
+  const list = [...groups.values()];
+  return (
+    <Panel title={t("possessionBuffs")} note={t("possessionBuffsNote")}>
+      {list.length === 0 && <p className="muted">{t("possessionBuffsNone")}</p>}
+      {list.map(({ p, tiers }) => {
+        const owner = byId.get(p.u);
+        return (
+          <div className="ability" key={`${p.u}-${p.id}-${tiers.join()}`}>
+            <div className="ability__head">
+              <Link to={`/units/${p.u}${tiers[0] ? `?kai=${tiers[0]}` : ""}`} className="possession-owner" title={owner?.name}>
+                {owner?.face ? <img src={iconUrl(owner.face)} alt="" width={32} height={32} loading="lazy" /> : null}
+                <span>{owner ? nameOf(owner) : `#${p.u}`}</span>
+              </Link>
+              {tiers.map((x) => <span key={x} className="hub-badge">{tierName(x)}</span>)}
+              <span className="ability__name">{p.name}</span>
+              <span className="ability__id">#{p.id}</span>
+            </div>
+            <Text>{p.desc}</Text>
+            <EffectList title="effect rows" rows={p.effects} kind="ability" defs={defs} />
+          </div>
+        );
+      })}
+    </Panel>
+  );
 }
 
 /** A translated sentence with a {link} placeholder, rendered with the link element in its place. */
@@ -402,6 +451,10 @@ export default function UnitDetail() {
               <MetaChip key={x.slug} label={t("terrain")} value={terrainWord(x.jp)} icon={terrainIcon(x.slug)} title={terrainTitle(meta, u.terrain)}
                 renderLink={renderLink} href={`/units?terrain=${x.slug}`} />
             ))}
+            {u.placement && <MetaChip label={t("placement")} value={t(`place_${u.placement}`)} title={t(`placeTitle_${u.placement}`)}
+              renderLink={renderLink} href={`/units?place=${u.placement}`} />}
+            {u.water && <MetaChip label={t("placement")} value={t("place_water")} title={t("placeTitle_water")} renderLink={renderLink} href="/units?place=water" />}
+            {u.boat && <MetaChip label={t("placement")} value={t("place_boat")} title={t("placeTitle_boat")} renderLink={renderLink} href="/units?place=boat" />}
             {u.max_renovation === 2 && <MetaChip label={t("renovation")} value={t("kaiNiOpt")} renderLink={renderLink} href="/units?kai=2" />}
             {u.region && <MetaChip label={t("region")} value={regionLabel(meta, u.region)} renderLink={renderLink} href={`/units?region=${u.region}`} />}
             <MetaChip label={t("category")} value={categoryLabel(meta, u.category)} title={categoryJp(meta, u.category)}
@@ -485,6 +538,7 @@ export default function UnitDetail() {
               )}
             </Panel>
           )}
+          <PossessionBuffsPanel u={u} defs={defs} byId={byId} />
         </div>
 
         <div className="detail-side">

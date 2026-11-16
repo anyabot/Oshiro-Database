@@ -5,7 +5,7 @@ import {
 } from "@altterisk/game-hub";
 import {
   TERRAINS, altName, categoryLabel, iconUrl, isMainWeapon, nameOf, rarityLabel, regionLabel, terrainLabel,
-  terrainParts, traitLabel, traitTitle, useMeta, useUnits, weaponLabel,
+  terrainParts, traitLabel, traitTitle, PLACEMENTS, placementTags, useAdded, useMeta, useUnits, weaponLabel,
 } from "../data";
 import type { UnitIndexEntry } from "../types";
 import { terrainOptionLabel, weaponOptionLabel } from "../filterIcons";
@@ -16,6 +16,7 @@ const renderLink = routerLinks(Link, "to");
 
 export default function UnitList() {
   const { data: units, loading, error } = useUnits();
+  const { data: added } = useAdded();
   const { data: meta } = useMeta();
   // filter/search/page state lives in the URL so back/forward and shared links restore the view
   const [params, setParams] = useSearchParams();
@@ -32,7 +33,8 @@ export default function UnitList() {
   const q = params.get("q") || "";
   const showNpc = params.get("npc") === "1";
   const showDup = params.get("dup") === "1";
-  const newest = params.get("sort") === "new";
+  // default: newest first by added.json date (CDN upload of the card file); ?sort=id keeps game ID order
+  const byId = params.get("sort") === "id";
   const page = Number(params.get("page") || "0");
   const csv = (key: string): string[] => (params.get(key) || "").split(",").filter(Boolean);
   const rarityF = csv("rarity");
@@ -42,6 +44,7 @@ export default function UnitList() {
   const categoryF = csv("cat");
   const terrainF = csv("terrain");
   const kaiF = csv("kai");
+  const placeF = csv("place");
 
   // any filter/search change resets pagination; ?page= is 0-based
   const setParam = (key: string, value: string | null) => {
@@ -100,18 +103,22 @@ export default function UnitList() {
       // a dual-terrain castle (平/水城) matches each of its terrains, like the game's "平を含む城"
       if (terrainF.length && !terrainParts(meta, u.terrain).some((t) => terrainF.includes(t.slug))) return false;
       if (kaiF.length && !has(kaiF, u.renovation)) return false;
+      if (placeF.length && !placementTags(u).some((x) => placeF.includes(x))) return false;
       if (term) {
         const hay = `${u.id} ${u.name} ${u.name_en || ""} ${u.ruby || ""}`.toLowerCase();
         if (!hay.includes(term)) return false;
       }
       return true;
     });
-    return newest ? out.reverse() : out;
-  }, [units, meta, q, showNpc, showDup, newest, rarityF, weaponF, regionF, traitF, categoryF, terrainF, kaiF]);
+    if (byId) return out;
+    // newest date first, same date by higher ID; undated entries last, by higher ID
+    const date = (u: UnitIndexEntry) => added?.units[String(u.id)] ?? "";
+    return out.sort((a, b) => date(b).localeCompare(date(a)) || b.id - a.id);
+  }, [units, added, meta, q, showNpc, showDup, byId, rarityF, weaponF, regionF, traitF, categoryF, terrainF, kaiF, placeF]);
 
   if (loading || error) return <div className="page"><LoadState loading={loading} error={error} labels={hub.load} /></div>;
 
-  const activeCount = rarityF.length + weaponF.length + regionF.length + traitF.length + categoryF.length + terrainF.length + kaiF.length;
+  const activeCount = rarityF.length + weaponF.length + regionF.length + traitF.length + categoryF.length + terrainF.length + kaiF.length + placeF.length;
   const activeParams = [...new Set(params.keys())].filter((k) => k !== "page" && params.get(k)).length;
   const pages = Math.ceil(filtered.length / PAGE);
   const shown = filtered.slice(page * PAGE, page * PAGE + PAGE);
@@ -127,7 +134,7 @@ export default function UnitList() {
         onClearFilters={() => setParams(new URLSearchParams(), { replace: true })}
         actions={(
           <>
-            <FilterChip active={newest} onClick={() => setParam("sort", newest ? null : "new")}>{t("newestFirst")}</FilterChip>
+            <FilterChip active={byId} onClick={() => setParam("sort", byId ? null : "id")} title={t("byIdTitle")}>{t("byId")}</FilterChip>
             <FilterChip active={showDup} onClick={() => setParam("dup", showDup ? null : "1")}>{t("twinEntries")}</FilterChip>
             <FilterChip active={showNpc} onClick={() => setParam("npc", showNpc ? null : "1")}>{t("npcEntries")}</FilterChip>
           </>
@@ -143,6 +150,7 @@ export default function UnitList() {
           onToggle={(v) => toggleCsv("weapon", weaponF, v)}
         />
         <CheckboxGroup title={t("terrain")} options={opts.terrain} selected={terrainF} onToggle={(v) => toggleCsv("terrain", terrainF, v)} />
+        <CheckboxGroup title={t("placement")} options={PLACEMENTS.map((p) => ({ value: p, label: t(`place_${p}`) }))} selected={placeF} onToggle={(v) => toggleCsv("place", placeF, v)} />
         <CheckboxGroup title={t("renovation")} options={renovationOpts} selected={kaiF} onToggle={(v) => toggleCsv("kai", kaiF, v)} />
         <CheckboxGroup title={t("region")} options={opts.region} selected={regionF} onToggle={(v) => toggleCsv("region", regionF, v)} />
         <CheckboxGroup title={t("trait")} options={opts.trait} selected={traitF} onToggle={(v) => toggleCsv("trait", traitF, v)} />

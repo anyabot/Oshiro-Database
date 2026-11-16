@@ -118,6 +118,12 @@ export const useStage = (id: number | null) => useJson<StageDetail>(loader, id =
 export const useEnemies = () => useJson<EnemyData>(loader, "enemies");
 export const useEvents = () => useJson<GameEvent[]>(loader, "events");
 
+/** A quest's story scenes (tools/export_story.py): n 1 = before the battle, 2 = after, 3 = continued;
+ *  each line is [speaker ("" = narration), text], "" = the background changes. */
+export interface StoryScene { n: number; lines: ([string, string] | "")[] }
+export const useStoryIndex = () => useJson<number[]>(loader, "story/index");
+export const useStory = (id: number | null) => useJson<{ id: number; scenes: StoryScene[] }>(loader, id == null ? null : `story/${id}`);
+
 /** Enemy battle sprite, one standing frame (tools/export_enemy_images.py). */
 export const enemyImage = (dot: number) => `${import.meta.env.BASE_URL}enemy-icon/${dot}.webp`;
 

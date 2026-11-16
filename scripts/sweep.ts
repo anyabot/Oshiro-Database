@@ -27,6 +27,10 @@ const note = (key: string, abilityKey: string, example: string) => {
   h.abilities.add(abilityKey);
 };
 
+// "set to" rows checked by hand: the text's matching number belongs to another clause
+// (3067: attack speed set to 100% vs 移動速度100%低下; 99071: attack speed vs 被ダメージを100%軽減)
+const SET_REVIEWED = new Set(["ability:#7232(card 3067)", "ability:#7233(card 3067)", "enchant:gimmick#99071"]);
+
 let rowsTotal = 0, rowsClean = 0;
 const seen = new Set<string>();
 
@@ -43,11 +47,25 @@ function sweepRows(rows: RawRow[] | undefined, kind: RowKind, who: string, ctx: 
     const desc = (ctx.description ?? "").replace(/\n/g, " ").slice(0, 90);
     const example = `${who} ${ctx.name ?? ""} — "${sentence}" — ${desc}`;
     let clean = true;
-    for (const m of sentence.matchAll(RAW)) { note(`${kind} · ${m[0].replace(/\d+$/, (n) => n)}`, abilityKey, example); clean = false; }
+    // a status the exe proves is never read (stat 222) is decoded: it does nothing
+    for (const m of sentence.replace(/\bstat \d+ \(the game client never reads it\)/g, "").matchAll(RAW)) { note(`${kind} · ${m[0].replace(/\d+$/, (n) => n)}`, abilityKey, example); clean = false; }
     for (const k of Object.keys(rest)) {
       if (COSMETIC.test(k)) continue;
       note(`${kind} · unused field ${k}`, abilityKey, `${example} [${k}=${rest[k]}]`);
       clean = false;
+    }
+    // "set to N" where the game's own text changes the stat BY N (「大魔法消費気が10%軽減」): a status that
+    // holds an amount of change, set with ExpressionType 3, must read as a cut / amount (effects.tsx
+    // CUT_STATUS / AMOUNT_STATUS), never "set to". "set to 0" is always a real set (防御を0にし, 隙が0).
+    for (const m of sentence.matchAll(/\bset to (?:×)?([\d.]+)/g)) {
+      if (Number(m[1]) === 0 || SET_REVIEWED.has(abilityKey)) continue;
+      const n = m[1].replace(/\.0+$/, "").replace(".", "\\.");
+      const full = (ctx.description ?? "").replace(/\s+/g, "");
+      const change = new RegExp(`(?<![\\d.])${n}(?:%|％|秒|倍)?(?:ずつ)?(軽減|短縮|低下|減少|上昇|増加|延長|アップ|ダウン)`).exec(full);
+      if (change && !new RegExp(`(?<![\\d.])${n}(?:%|％|秒)?(?:に(?:設定|固定|なる|変化)|になり)`).test(full)) {
+        note(`${kind} · "set to" where the text says ${change[1]}`, abilityKey, example);
+        clean = false;
+      }
     }
     if (clean) rowsClean++;
   });

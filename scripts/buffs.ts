@@ -7,7 +7,7 @@ import path from "node:path";
 import { describeRow, motionHits, rowBases, stratagemContext, type RowContext, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
 import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
-import type { Ability, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
+import type { Ability, PossessionRule, PossessionSource, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
 
 const root = path.resolve(process.argv[2] ?? ".");
 const data = (p: string) => JSON.parse(fs.readFileSync(path.join(root, "public/data", p), "utf8"));
@@ -144,6 +144,29 @@ const ability = (u: number, t: number, sl: string, a: Ability | null | undefined
   if (a && !a.missing) emit(u, t, sl, a.effects, kind, a.name, undefined, a.field_links);
 };
 
+// Possession abilities (所持) aimed at a group of castle girls: who they buff, as a match rule read from
+// the exe-decoded target label (src "exe" ex: "weapon type == 5", "Card.AreaType == 7",
+// "Card.Tokusei1/2/3 == 2", "castle type in [8, 9, …]", "… = InstallationCastleTypeLimit ID 17 '無属性を含む' {16, 13}").
+// Lord / enemy / all-castle-girl rows (gold, EXP, enemy debuffs) are left out: they name no group.
+const possessions: PossessionSource[] = [];
+const possessionRules: Record<string, PossessionRule> = {};
+const unruled = new Set<number>();
+function possessionRule(code: number): PossessionRule | null {
+  if (code in possessionRules) return possessionRules[code];
+  const l = defs.labels[`target:${code}`];
+  const ex = l?.src === "exe" ? l.ex?.[0] ?? "" : "";
+  let m: RegExpExecArray | null;
+  let rule: PossessionRule | null = null;
+  if ((m = /^weapon type == (\d+)/.exec(ex))) rule = { weapon: [Number(m[1])] };
+  else if ((m = /^Card\.AreaType == (\d+)/.exec(ex))) rule = { region: [Number(m[1])] };
+  else if ((m = /^Card\.Tokusei1\/2\/3 == (\d+)/.exec(ex))) rule = { trait: [Number(m[1])] };
+  else if ((m = /^castle type in \[([\d, ]+)\]/.exec(ex)) || (m = /castle type .*\{([\d, ]+)\}\s*$/.exec(ex))) {
+    rule = { terrain: m[1].split(",").map(Number) };
+  }
+  if (rule) possessionRules[code] = { ...rule, jp: l!.jp };
+  return rule;
+}
+
 let units = 0;
 for (const entry of index) {
   // playable cards only: no NPC / duplicate entries, and transformed states belong to their stratagem
@@ -197,6 +220,17 @@ for (const entry of index) {
   ability(u.id, -1, "class", u.sub_class?.class_ability);
   ability(u.id, -1, "special", u.special_ability?.sub_ability);
   if (rows.length > before) units++;
+  for (const f of u.forms) {
+    const p = f.possessed;
+    if (!p || p.missing || !p.effects?.length) continue;
+    const codes = new Set<number>();
+    for (const r of p.effects) {
+      const code = Number(r.AbilityTargetType) || 0;
+      if (!code || [1, 4, 11].includes(code)) continue; // lord, enemies, every castle girl
+      if (possessionRule(code)) codes.add(code); else unruled.add(code);
+    }
+    if (codes.size) possessions.push({ u: u.id, t: f.tier, id: p.id, name: p.name, desc: p.description, targets: [...codes], effects: p.effects });
+  }
 }
 
 // the same change listed twice (e.g. a skill repeated in a later form) counts once
@@ -207,4 +241,7 @@ rows.push(...unique);
 const keys = Object.fromEntries([...keyNames.entries()].sort());
 const out = path.join(root, "public/data/buffs.json");
 fs.writeFileSync(out, JSON.stringify({ keys, rows }));
+const pout = path.join(root, "public/data/possessions.json");
+fs.writeFileSync(pout, JSON.stringify({ rules: possessionRules, sources: possessions }));
+console.log(`${possessions.length} group possession abilities -> ${path.relative(root, pout)}${unruled.size ? `; no match rule for target ${[...unruled].join(", ")}` : ""}`);
 console.log(`${rows.length} buff rows from ${units} castle girls, ${keyNames.size} stats -> ${path.relative(root, out)} (${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);

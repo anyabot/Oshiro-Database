@@ -123,6 +123,13 @@ const COUNT_STATUS: Record<number, string> = {
   505: "special-attack stock (1 stock = a full gauge)",
 };
 
+/** % cuts of a cost or a time (their only set-type modifiers 10402 / 10401): "Great Magic Ki cost −10%". */
+const CUT_STATUS: Record<number, string> = { 10452: "Great Magic Ki cost", 10454: "Great Magic cooldown" };
+/** Reduction / ignore percentages (set-type modifiers 901, 902, 17): "Physical damage reduction 50%". */
+const AMOUNT_STATUS = new Set([302, 305, 203]);
+/** Multipliers held in % (100 = ×1): AntiAirBonus, DirectHitBonus (override), DamageVsFlying. */
+const MULT_STATUS = new Set([213, 223, 219]);
+
 const FLAT_MAX_STATUS = new Set([105, 106, 108, 111, 113, 203, 210, 211, 212, 213, 214, 215, 216, 219, 220, 223,
   10107, 10201, 10206, 10405, 10452, 10454]);
 
@@ -262,6 +269,11 @@ const CC_TEXT: Record<number, string> = { 7: "constant HP loss (耐久減少)", 
 // Statuses no exe evidence names, named by their rows' texts: 108 = redeploy time extension
 // (真・佐竹義重[爆焔] 「再配置時間延長効果を与える」; deliberations 1542/1561/1600 「再配置時間を(大幅)延長」)
 const STATUS_TEXT: Record<number, string> = { 108: "Redeploy time extension (再配置時間延長)" };
+/** Undecoded statuses: what the data does show, after the raw code. */
+const STATUS_NOTE: Record<number, string> = {
+  // all 22 rows sit in movement abilities, next to their move rows and move Ki cut; no reader found in the exe
+  402: " (always set by movement abilities; its effect isn't traced)",
+};
 
 /** "for 20s", or "for the rest of the battle" for the 999999.999 s the data uses as forever. */
 // 999999.999 s and 999.999 s are both the data's "forever" (the 999.999 s ones are 撤退大破まで永続 effects)
@@ -373,6 +385,10 @@ const CLASS_ABILITY: Record<number, (v: number, d: number) => string> = {
   11: (v) => `attack motion → variant ${v}${v === 8 ? " (攻撃2 / attack2)" : ""}`,
   // bit 12 (FUN_00511480), tested with bit 3 by the placement checks FUN_00559d80 / FUN_00579d50
   13: () => "can be deployed on boat tiles (舟マス配置可能)",
+  // FUN_00512fa0 -> FUN_00517960 runs a one-off command. Every owner has a twin card (Card.DependenceCardId,
+  // CardType 15); value 6935 is [お月見]松本城's twin, 1 = the card's own twin; 腐川冬子 (twin 9054
+  // ジェノサイダー翔) says 「ジェノサイダー翔」になり
+  5: (v) => (v > 1 ? `turns into its alternate form (card #${v})` : "turns into its alternate form (its twin card)"),
   // FUN_0050fbd0 / FUN_0050fd20: attaches effect id v to the unit's sprite
   14: (v) => `visual effect #${v}`,
   15: (v) => `visual effect #${v}`,
@@ -386,6 +402,8 @@ const CLASS_ABILITY: Record<number, (v: number, d: number) => string> = {
   19: (v) => `walking motion (移動中モーション) → #${v}`,
   20: (v) => `walk-start motion (移動前モーション) → #${v}`,
   21: (v) => `walk-end motion (移動後モーション) → #${v}`,
+  // its only owners (3047 [月狼]月山富田城, 3151 ゲヘナ, both ranged classes) say 近接マス配置可能
+  22: () => "can also be placed on melee tiles (近接マス配置可能)",
 };
 
 // EnchantTargetSet (発動対象) codes -> the ability target registry code with the same meaning. Fitted to
@@ -644,6 +662,22 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (status === 401 && expr === 3 && v === 0) return "can't move (move speed 0)";
     // 104 is a time in ms (regen interval, FUN_0050e710)
     if (status === 104 && expr === 3) return `Regen interval set to ${fmt(v / 1000)}s`;
+    // statuses that hold an amount of change, not a level: ExpressionType 3 sets that amount, so the
+    // texts say 軽減 / 短縮 (「大魔法消費気が10%軽減」, 「受けるダメージが50%軽減」), never "set to"
+    if (expr === 3 && CUT_STATUS[status]) {
+      last = { key: `status:${status}`, dir: "-", unit: "%", v };
+      return `${CUT_STATUS[status]} −${v}%`;
+    }
+    // multipliers held in % (100 = ×1): 「飛行敵に対して攻撃が2.3倍」 = AntiAirBonus set to 230,
+    // 「攻撃が飛行敵に半減されず」 = DamageVsFlying set to 100
+    if (expr === 3 && MULT_STATUS.has(status)) return `${statName} ×${fmt(v / 100)}`;
+    // 10104 set (EffectType 1107, MissileEffect of 沈黙): 0 = 計略使用不可 (all 77 deliberation rows and the
+    // Silence missiles), 600 = 「計略の使用可能までの時間が40％短縮」 (deliberation 1257) = ×v/1000
+    if (expr === 3 && status === 10104) return v === 0 ? "can't use stratagems (計略使用不可)" : `${statName} ×${fmt(v / 1000)}`;
+    if (expr === 3 && AMOUNT_STATUS.has(status)) {
+      last = { key: `status:${status}`, dir: "+", unit: "%", v };
+      return `${statName} ${v}%`;
+    }
     let amount: string;
     if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
@@ -671,7 +705,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         : w?.unit === "倍" ? (w.form === "mul" ? v / 100 : dir === "-" ? 1 - v / 100 : 1 + v / 100) : v;
       last = { key: `status:${status}`, dir: dir as "+" | "-", unit, v: val, ...(stack ? { stack } : {}) };
     }
-    return `${statName} ${amount}${stack ? `, ${stack}` : ""}`;
+    return `${statName} ${amount}${stack ? `, ${stack}` : ""}${STATUS_NOTE[status] ?? ""}`;
   };
 
   /** 状態異常 name of a CrowdControlType (Gimmick guide links), else its number. */
@@ -966,7 +1000,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         // Ki is the side's shared pool, whoever the row names
         take("Your side", "ally");
       }
-      text.push(`${lead}Ki +${v} every ${fmt(ms / 1000)}s`);
+      // DurationInMillis is the interval here, so not tail(): only its location (【水上】10秒毎に気が追加で2増加)
+      // and its LimitValue cap (as on every other row)
+      const loc = num("AbilityLocationType"), lim = num("LimitValue");
+      const where = loc && defs.labels[`location:${loc}`] ? `, when on ${word(`location:${loc}`, "")} tiles` : "";
+      text.push(`${lead}Ki +${v} every ${fmt(ms / 1000)}s${where}${lim > 0 ? `, up to ${lim}` : ""}`);
     } else if (at === 22 && atd && defs.attack_bonus[atd]) {
       // AbilityTypeDetail = AttackBonusStatusEffectID (operators as the descriptions word them: 以下 ≤, 以上 ≥)
       const body = attackBonus(defs.attack_bonus[atd], v), tl = tail();
@@ -1124,7 +1162,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const recv = st !== 2 && st !== 1 ? targetJp(defs, st) : undefined;
     const recvEn = st === 1 ? "the lord (殿)" : recv ? (JP_EN[recv] ?? tagEN(recv) ?? recv) : undefined;
     // generic group words read lower-case after "all"; proper names (Hokkaido, New Year, weapons) keep theirs
-    const lower = (x: string) => (/^(Castle|Melee|Ranged|Ambush|Allies|Enemies|Enemy|Units|Flying)/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x);
+    const lower = (x: string) => (/^(Castle|Melee|Ranged|Ambush|Allies|Enemies|Enemy|Units|Flying)\b/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x);
     // EffectAreaType 3 reaches every such unit on the map: its texts say 全ての / 全城娘 / 全敵, or name
     // the owner's ambush units wherever they stand (sarea:3's mined 「対象」 only echoes 「対象の…」)
     if (sa === 3 && recvEn) subject = /^(Own |the lord)/.test(recvEn) ? cap(recvEn) : `all ${lower(recvEn)}`;
@@ -1177,7 +1215,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     for (const [k, v] of Object.entries(r0)) if (!used.has(k)) rest[k] = v;
     // a set value that grows on each re-apply starts at the value and climbs by it:
     // "Physical damage reduction 10%, +10% more each time it is attacked, up to 50%"
-    const grown = text.map((t) => t.replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `));
+    // (reduction amounts have no "set to": "Physical damage reduction 10%, grows by that amount …")
+    const grown = text.map((t) => t
+      .replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `)
+      .replace(/ (−?)([\d.]+%)(.*?), grows by that amount /g, (_, s, n, mid) => ` ${s}${n}${mid}, ${s || "+"}${n} more `));
     return { text: grown, evidence, rest, facts };
   }
 }
