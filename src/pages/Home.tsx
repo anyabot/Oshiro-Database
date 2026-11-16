@@ -188,8 +188,8 @@ export default function Home() {
                       <img className="weapon-tile__type" src={weaponIconUrl(w.type)} alt="" width={20} height={20} loading="lazy" />
                     </span>
                   )}
-                  title={w.name || `#${w.id}`}
-                  subtitle={`★${w.rarity} · ${weaponTypeName(weapons, w.type)}`}
+                  title={nameOf(w) || `#${w.id}`}
+                  subtitle={`${altName(w) ? `${altName(w)} · ` : ""}★${w.rarity} · ${weaponTypeName(weapons, w.type)}`}
                 />
               ))}
             </div>

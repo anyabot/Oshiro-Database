@@ -256,3 +256,97 @@ export function applyStat(base: number, mods: EnemyMod[]): number {
 
 /** Stage rate (攻撃/耐久/防御補正 %), 0 = unchanged. */
 export const rate = (r: number | undefined) => (r ? r / 100 : 1);
+
+/** The game's sortie-menu art (tools/export_sortie.py), by the exe's sprite key. */
+export const sortieImage = (key: number) => `${import.meta.env.BASE_URL}sortie/${key}.webp`;
+
+export interface StageCategory {
+  k: string; en: string; jp: string;
+  /** SortieMenu.aar button (a tall sub-menu card for subs) */
+  img?: number;
+  /** SortieMenuBgTexture.aar page background */
+  bg?: number;
+  match: (s: StagePlace) => boolean;
+  subs?: StageCategory[];
+}
+
+/** What decides a stage's series: enough of a StageEntry or a StageDetail. */
+export type StagePlace = Pick<StageEntry, "group" | "tab" | "name" | "live">;
+
+const corridor = (k: string, jp: string, en: string, img: number): StageCategory =>
+  ({ k, jp: `${jp}の回廊`, en: `${en} corridor`, img, match: (s) => s.name.startsWith(`${jp}の回廊`) });
+
+/** The quest menu's series, in the game's order, each with the game's own button. A stage belongs to
+ *  the first series that matches (Quest.TabType for the ones Event.atb doesn't name); "events" takes the rest. */
+export const CATEGORIES: StageCategory[] = [
+  { k: "story", en: "Main story", jp: "天下統一", img: 4208, bg: 4361, match: (s) => s.group === "story" },
+  { k: "voyage", en: "Voyage", jp: "夢幻航海", img: 4206, bg: 4357, match: (s) => s.group === "voyage" || s.tab === 16 },
+  { k: "tenma", en: "Tenma", jp: "天魔大乱", img: 4246, match: (s) => s.group === "tenma" || s.tab === 18 },
+  { k: "osaka", en: "Gun'yū Kakkyo", jp: "群雄割拠", img: 4316, match: (s) => s.group === "osaka" },
+  {
+    k: "hell", en: "Hell", jp: "地獄", img: 4165, match: (s) => ["enma", "hel", "osiris", "hades"].includes(s.group),
+    subs: [
+      { k: "enma", en: "Enma's Arena", jp: "閻魔の闘技場", img: 4309, bg: 4352, match: (s) => s.group === "enma" },
+      { k: "hel", en: "Hel's Playground", jp: "ヘルの遊戯場", img: 4310, bg: 4353, match: (s) => s.group === "hel" },
+      { k: "osiris", en: "Osiris' Tribunal", jp: "オシリスの審判場", img: 4311, bg: 4354, match: (s) => s.group === "osiris" },
+      { k: "hades", en: "Hades' Death Arena (Abyss)", jp: "ハデスの死闘場", img: 4312, bg: 4359, match: (s) => s.group === "hades" },
+    ],
+  },
+  {
+    k: "palace", en: "Kenran Palace", jp: "絢爛御殿", img: 4281, bg: 4358, match: (s) => s.group === "palace" && s.tab !== 25,
+    subs: [corridor("hira", "平", "Plain", 4296), corridor("hirayama", "平山", "Hill", 4297), corridor("yama", "山", "Mountain", 4298),
+      corridor("mizu", "水", "Water", 4299), corridor("mu", "無", "Void", 4304)],
+  },
+  {
+    k: "seasons", en: "Four Seasons Palace", jp: "四季御殿", img: 4300, bg: 4360, match: (s) => s.group === "palace" && s.tab === 25,
+    subs: [corridor("haru", "春", "Spring", 4305), corridor("natsu", "夏", "Summer", 4306), corridor("aki", "秋", "Autumn", 4307),
+      corridor("fuyu", "冬", "Winter", 4308)],
+  },
+  { k: "bushin", en: "Bushin", jp: "武神降臨", img: 4221, match: (s) => s.group === "bushin" },
+  { k: "kabuto", en: "Great Helm", jp: "討伐武将大兜", img: 4249, match: (s) => s.tab === 19 },
+  { k: "kenranshou", en: "Kenran Crystals", jp: "絢爛晶と導かれし城娘", img: 4294, match: (s) => s.tab === 24 },
+  { k: "daily", en: "Daily reprint", jp: "日次復刻", img: 4122, match: (s) => s.tab === 15 },
+  { k: "reprint", en: "Reprints", jp: "復刻討伐", img: 4251, match: (s) => s.live && [4, 6, 7].includes(s.tab) },
+  { k: "kura", en: "Storehouse defense", jp: "蔵防衛戦", img: 4121, match: (s) => s.tab === 2 },
+  { k: "tutorial", en: "Tactics school", jp: "戦術指南所", img: 4203, match: (s) => s.tab === 3 },
+  { k: "events", en: "Events", jp: "イベント", bg: 4361, match: () => true },
+];
+
+/** The series (and sub-menu entry) a stage is listed under. */
+export function categoryOf(s: StagePlace): { cat: StageCategory; sub?: StageCategory } {
+  const cat = CATEGORIES.find((c) => c.match(s))!;
+  return { cat, sub: cat.subs?.find((x) => x.match(s)) };
+}
+
+/** Find a series by its key or by a sub-menu key (old links used ?group=enma). */
+export function findCategory(k: string): { cat?: StageCategory; sub?: StageCategory } {
+  for (const cat of CATEGORIES) {
+    if (cat.k === k) return { cat };
+    const sub = cat.subs?.find((x) => x.k === k);
+    if (sub) return { cat, sub };
+  }
+  return {};
+}
+
+export const catLabel = (c: StageCategory, lang: "en" | "ja") => (lang === "ja" ? c.jp : `${c.en} ${c.jp}`);
+
+/** data/sortie.json (tools/export_sortie.py): QuestID -> the card the game shows beside its quest list. */
+export const useSortie = () => useJson<{ quest: Record<string, number> }>(loader, "sortie");
+
+const KANJI = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+
+/** Series whose quest page has tabs (Quest.TabNumber), with the game's tab names. */
+export function tabLabel(tab: number, n: number, lang: "en" | "ja"): string | null {
+  const ja = lang === "ja";
+  switch (tab) {
+    case 1: return ["始動編", "征伐編", "魔王編", "覚醒編", "戦闘編", "継承編", "天下編"][n - 1] ?? `${n}`;
+    case 16: return n === 7 ? "EX" : ja ? `第${n}章` : `Ch. ${n}`;
+    // TabNumber 6 is 異伝 (the game's tab art 6149 reads 「異伝 6章」)
+    case 18: return n === 7 ? "EX" : n === 6 ? (ja ? "異伝 第六章" : "Side story ch. 6") : ja ? `第${KANJI[n]}章` : `Ch. ${n}`;
+    case 11: case 12: case 13: return ja ? `${KANJI[n]}層` : `Floor ${n}`;
+    case 23: case 24: return ja ? `${KANJI[n]}` : `${n}`;
+    case 2: return ["要石の巻", "贈物の巻", "金策の巻", "武器の巻", "神娘の巻"][n - 1] ?? `${n}`;
+    case 3: return ["初級", "中級", "上級"][n - 1] ?? `${n}`;
+    default: return null;
+  }
+}

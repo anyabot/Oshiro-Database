@@ -24,6 +24,8 @@ export interface WeaponSource {
 export interface Weapon {
   id: number;
   name: string;
+  /** English name (tools/translate_weapons.py), null where none */
+  name_en?: string | null;
   type: number;
   rarity: number;
   /** its pixel-art sprite (public/weapon-dot/<dot>.webp) */

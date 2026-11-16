@@ -4,6 +4,7 @@ import { CheckboxGroup, EmptyState, EntityTile, FilterChip, FilterPanel, ListToo
 import { useHubLabels, useT, type UiKey } from "../i18n";
 import { SOURCE_GROUPS, sourceGroups, useWeapons, weaponDotUrl, weaponIconUrl } from "../weapons";
 import { useEffectDefs } from "../effects";
+import { altName, nameOf } from "../data";
 import { useEffectSummary, useStatText, weaponTypeName } from "../weaponParts";
 
 const PAGE = 60;
@@ -61,7 +62,7 @@ export default function Equipment() {
       if (typeF.length && !typeF.includes(String(w.type)) && !(typeF.includes("other") && w.type > 24)) return false;
       if (rarityF.length && !rarityF.includes(String(w.rarity))) return false;
       if (srcF.length && !sourceGroups(w).some((g) => srcF.includes(g))) return false;
-      if (term && !`${w.id} ${w.name}`.toLowerCase().includes(term)) return false;
+      if (term && !`${w.id} ${w.name} ${w.name_en || ""}`.toLowerCase().includes(term)) return false;
       return true;
     });
     return newest ? [...out].sort((a, b) => b.id - a.id) : out;
@@ -108,9 +109,10 @@ export default function Equipment() {
                 <img className="weapon-tile__type" src={weaponIconUrl(w.type)} alt="" width={20} height={20} loading="lazy" />
               </span>
             )}
-            title={w.name || `#${w.id}`}
+            title={nameOf(w) || `#${w.id}`}
             subtitle={(
               <>
+                {altName(w) && <span className="weapon-tile__line">{altName(w)}</span>}
                 <span className="weapon-tile__line">{[`#${w.id}`, `★${w.rarity}`, weaponTypeName(data, w.type)].join(" · ")}</span>
                 {statText(w.stats).length > 0 && <span className="weapon-tile__line weapon-tile__stats">{statText(w.stats).join(" · ")}</span>}
                 {effects(w.ability).map((e, i) => <span key={i} className="weapon-tile__line weapon-tile__fx">{e}</span>)}

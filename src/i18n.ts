@@ -304,11 +304,12 @@ export const UI = {
   // stages
   stagesTitle: { en: "Stages", ja: "ステージ" },
   stagesSubtitle: {
-    en: "Stages with their enemies, stats and, for Hell, Hades and Bushin, the deliberations (審議) you can toggle. Grouped by event; past events are rebuilt from maps still in the game client's cache, and stages the game removes stay here.",
-    ja: "ステージの敵とステータス。地獄・ハデス・武神は審議を切り替えられます。イベントごとにまとめ、過去のイベントはクライアントのキャッシュに残るマップから復元しています。ゲームから削除されたステージも残ります。",
+    en: "Stages with their enemies, stats and, for Hell, Hades and Bushin, the deliberations (審議) you can toggle. Laid out like the game's sortie menu, then grouped by event; past events are rebuilt from maps still in the game client's cache, and stages the game removes stay here.",
+    ja: "ステージの敵とステータス。地獄・ハデス・武神は審議を切り替えられます。ゲームの出陣画面と同じ並びで、イベントごとにまとめ、過去のイベントはクライアントのキャッシュに残るマップから復元しています。ゲームから削除されたステージも残ります。",
   },
   searchStages: { en: "Search stage, event or Bushin", ja: "ステージ・イベント・武神で検索" },
   series: { en: "Series", ja: "シリーズ" },
+  allSeries: { en: "All series", ja: "出陣一覧" },
   show: { en: "Show", ja: "表示" },
   currentAndPast: { en: "Current and past", ja: "開催中と過去" },
   currentOnly: { en: "Current only", ja: "開催中のみ" },

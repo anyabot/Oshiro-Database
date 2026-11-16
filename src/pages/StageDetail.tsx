@@ -6,7 +6,7 @@ import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
 import { useFx, useHubLabels, useLang, useT } from "../i18n";
 import {
-  GROUPS, groupLabel, STAT, applyStat, enemyImage, mapImage, preText, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
+  catLabel, categoryOf, STAT, applyStat, enemyImage, mapImage, preText, useEvents, enemyAbilityRows, frameSec, modsFor, plainText, rate, rowIsEnemySide, useEnemies, useStage, withTargets,
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
@@ -89,12 +89,13 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
     return rows;
   }, [stage, data]);
 
-  const group = GROUPS.find((g) => g.k === stage.group);
+  const place = categoryOf({ ...stage, live: stage.live ?? false });
+  const seriesUrl = `/stages?group=${place.cat.k}${place.sub ? `&sub=${place.sub.k}` : ""}`;
   const { data: events } = useEvents();
   const ev = stage.event != null ? events?.find((e) => e.id === stage.event) : undefined;
   return (
     <div className="page stage-page">
-      <p className="muted small"><Link to={`/stages?group=${stage.group}`}>{t("stagesTitle")}</Link> / {group ? groupLabel(group, lang) : ""}{ev ? ` / ${ev.title}` : ""}</p>
+      <p className="muted small"><Link to="/stages">{t("stagesTitle")}</Link> / <Link to={seriesUrl}>{catLabel(place.sub ?? place.cat, lang)}</Link>{ev ? ` / ${ev.title}` : ""}</p>
       <PageHeader title={stage.name}
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", t("quest", { id: stage.id }), t("mapN", { n: stage.map })].filter(Boolean).join(" · ")} />
       {stage.spots ? (

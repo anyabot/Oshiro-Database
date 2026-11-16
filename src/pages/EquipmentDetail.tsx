@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Breadcrumbs, EmptyState, LoadState, MetaChip, MetaChips, PageHeader, Panel, routerLinks } from "@altterisk/game-hub";
 import { useHubLabels, useT } from "../i18n";
 import { useEffectDefs } from "../effects";
-import { iconUrl, nameOf, useUnits } from "../data";
+import { altName, iconUrl, nameOf, useUnits } from "../data";
 import { useStages } from "../stages";
 import { usePageMeta } from "../usePageMeta";
 import { useWeapons, weaponDotUrl, weaponIconUrl, type Weapon } from "../weapons";
@@ -27,7 +27,7 @@ export default function EquipmentDetail() {
     stages: new Map((stageList ?? []).map((s) => [s.id, s])),
   }), [data, index, stageList]);
   const w = maps.weapons.get(id);
-  usePageMeta(w ? { title: w.name, description: `${w.name} (★${w.rarity} ${data?.types[String(w.type)] ?? ""}) in Shiro Project:RE: stats, ability and how to get it.` } : null);
+  usePageMeta(w ? { title: nameOf(w), description: `${nameOf(w)}${w.name_en ? ` (${w.name})` : ""} (★${w.rarity} ${data?.types[String(w.type)] ?? ""}) in Shiro Project:RE: stats, ability and how to get it.` } : null);
 
   if (!data) return <div className="page"><LoadState loading={loading} error={error} labels={hub.load} /></div>;
   if (!w) return <div className="page"><EmptyState title={t("noWeapon", { id })} action={<Link to="/equipment">{t("backShort")}</Link>} /></div>;
@@ -35,12 +35,13 @@ export default function EquipmentDetail() {
 
   return (
     <div className="page unit-detail">
-      <Breadcrumbs renderLink={renderLink} items={[{ label: t("equipTitle"), href: "/equipment" }, { label: w.name }]} />
+      <Breadcrumbs renderLink={renderLink} items={[{ label: t("equipTitle"), href: "/equipment" }, { label: nameOf(w) }]} />
       <PageHeader
         art={w.dot
           ? <span className="weapon-art"><img className="weapon-dot" src={weaponDotUrl(w.dot)} alt="" /></span>
           : <img className="unit-face" src={weaponIconUrl(w.type)} alt="" width={96} height={96} />}
-        title={w.name || `#${w.id}`}
+        title={nameOf(w) || `#${w.id}`}
+        subtitle={altName(w) || undefined}
         id={`#${w.id}`}
         meta={(
           <MetaChips>
@@ -50,7 +51,7 @@ export default function EquipmentDetail() {
             {w.kind === 1 && <MetaChip value={t("kindInitial")} />}
             {w.kind === 2 && <MetaChip value={t("kindMaterial")} />}
             {w.kind === 3 && <MetaChip value={t("kindPlaceholder")} />}
-            {up && <MetaChip label={t("upgradesTo")} value={up.name} renderLink={renderLink} href={`/equipment/${up.id}`} />}
+            {up && <MetaChip label={t("upgradesTo")} value={nameOf(up)} renderLink={renderLink} href={`/equipment/${up.id}`} />}
           </MetaChips>
         )}
       />

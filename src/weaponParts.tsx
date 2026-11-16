@@ -81,7 +81,7 @@ export function SourceLine({ s, units, stages, weapons }: {
     case "achievement": body = linked("srcAchievement", "quest", quest(s.quest)); break;
     case "evolution": {
       const w = s.weapon ? weapons.get(s.weapon) : undefined;
-      body = linked("srcEvolution", "weapon", w ? <Link to={`/equipment/${w.id}`}>{w.name}</Link> : `#${s.weapon}`);
+      body = linked("srcEvolution", "weapon", w ? <Link to={`/equipment/${w.id}`}>{nameOf(w)}</Link> : `#${s.weapon}`);
       break;
     }
     case "login": body = t("srcLogin", { date: d }); break;
