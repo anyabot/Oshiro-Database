@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
@@ -10,7 +10,7 @@ import {
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
-import { StageMap } from "../stageMap";
+import { StageMap, removedNames } from "../stageMap";
 import { useUnits } from "../data";
 import type { RawRow } from "../types";
 
@@ -98,12 +98,12 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
       <PageHeader title={stage.name}
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", t("quest", { id: stage.id }), t("mapN", { n: stage.map })].filter(Boolean).join(" · ")} />
       {stage.spots ? (
-        <Panel title={t("mapTitle")}>
+        <Fold title={t("mapTitle")}>
           <StageMap info={stage.spots} mapNo={stage.map} questId={stage.id} name={stage.name} hard={hard}
-            mask={active.reduce((m, o) => m | (o.mask ?? 0), 0)}
+            removers={active.filter((o) => o.mask).map((o) => ({ name: o.name, mask: o.mask! }))}
             rowList={(rows, kind) => kind === "ability" ? <RowList rows={rows} defs={defs} kind="ability" />
               : <RowList rows={withTargets(rows.map(({ EffectTextureID, AttributeMatchEffectID, ...r }) => r))} defs={defs} />} />
-        </Panel>
+        </Fold>
       ) : (
         <FallbackImage srcs={[mapImage(stage.map)]} alt={t("mapAlt", { name: stage.name })} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
       )}
@@ -137,19 +137,20 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
       </div>
 
       {stage.mapEffect.length > 0 && (
-        <Panel title={t("mapEffects")} note={t("mapEffectsNote")}>
+        <Fold title={t("mapEffects")} note={t("mapEffectsNote")}>
           <RowList rows={withTargets(stage.mapEffect)} defs={defs} />
-        </Panel>
+        </Fold>
       )}
 
       {stage.singi && (
-        <Panel title={t("deliberations", { n: points })}
+        <Fold title={t("deliberations", { n: points })}
           note={stage.singi.gold ? t("goldSilver", { g: stage.singi.gold, s: stage.singi.silver ?? "" }) : t("sameGroup")}>
           <div className="singi-list">
-            {options.map((o) => <SingiRow key={o.id} o={o} on={chosen.has(o.id)} onToggle={() => toggle(o)} defs={defs} />)}
+            {options.map((o) => <SingiRow key={o.id} o={o} on={chosen.has(o.id)} onToggle={() => toggle(o)} defs={defs}
+              removes={o.mask && stage.spots ? removedNames(stage.spots, o.mask, lang, hard).join(", ") : ""} />)}
           </div>
           {chosen.size > 0 && <button className="hub-btn" onClick={() => setParam("d", null)}>{t("clearDelib")}</button>}
-        </Panel>
+        </Fold>
       )}
 
       <Panel title={t("enemies")} note={<>{t("enemiesNote", { then: active.length ? t("thenDelib") : "" })}{" "}
@@ -184,7 +185,19 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
   );
 }
 
-function SingiRow({ o, on, onToggle, defs }: { o: SingiOption; on: boolean; onToggle: () => void; defs: EffectDefs }) {
+/** A panel whose title folds it open and shut (chevron). */
+function Fold({ title, note, children, open: initial = true }: { title: ReactNode; note?: ReactNode; children: ReactNode; open?: boolean }) {
+  const [open, setOpen] = useState(initial);
+  return (
+    <Panel className={`fold${open ? "" : " fold--shut"}`} note={open ? note : undefined}
+      title={<button type="button" className="fold__btn" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span className="fold__chev" aria-hidden="true">{open ? "▾" : "▸"}</span>{title}</button>}>
+      {open ? children : null}
+    </Panel>
+  );
+}
+
+function SingiRow({ o, on, onToggle, defs, removes }: { o: SingiOption; on: boolean; onToggle: () => void; defs: EffectDefs; removes?: string }) {
   const [open, setOpen] = useState(false);
   const t = useT();
   const fx = useFx();
@@ -199,6 +212,7 @@ function SingiRow({ o, on, onToggle, defs }: { o: SingiOption; on: boolean; onTo
         {enemySide && <span className="hub-badge singi__enemy">{t("changesEnemies")}</span>}
       </label>
       <p className="game-text singi__text">{o.text}</p>
+      {removes && <p className="small chg-singi">{t("singiRemoves", { spots: removes })}</p>}
       {o.rows ? (
         <>
           <button type="button" className="fx-raw-btn" onClick={() => setOpen(!open)} title={t("decodedRows")}>{open ? "−" : "+"}</button>

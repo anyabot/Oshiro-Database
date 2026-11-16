@@ -88,7 +88,7 @@ export function spotsIn(info: StageSpots, layer: number, mask: number): MapSpot[
 }
 
 /** M1.. / R1.. per kind over every point the map ever has, by game ID, so a spot keeps its label. */
-function spotLabels(info: StageSpots, lang: "en" | "ja"): Map<number, string> {
+export function spotLabels(info: StageSpots, lang: "en" | "ja"): Map<number, string> {
   const n: Record<number, number> = {};
   const out = new Map<number, string>();
   for (const s of [...info.spots].sort((a, b) => a.id - b.id)) {
@@ -97,6 +97,15 @@ function spotLabels(info: StageSpots, lang: "en" | "ja"): Map<number, string> {
     out.set(s.id, `${SHORT[lang][s.k]}${n[s.k]}`);
   }
   return out;
+}
+
+/** What a deliberation mask removes, by name: deploy labels, pre-placed units, else the kind. */
+export function removedNames(info: StageSpots, mask: number, lang: "en" | "ja", hard: boolean): string[] {
+  const labels = spotLabels(info, lang);
+  const guest = new Map((info.guests ?? []).filter((g) => !g.diff || g.diff === (hard ? 2 : 1)).map((g) => [g.loc, g.name]));
+  return [...info.spots].sort((a, b) => a.id - b.id).filter((s) => s.del && (s.del & mask))
+    .map((s) => labels.get(s.id) ?? guest.get(s.id) ?? (s.k === 7 ? null : `#${s.id}`))
+    .filter((x): x is string => !!x);
 }
 
 function badge(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, kind: string, h = 18) {
@@ -117,6 +126,8 @@ function badge(ctx: CanvasRenderingContext2D, text: string, x: number, y: number
 interface DrawInput {
   img: HTMLImageElement; icons: Icons | null; info: StageSpots; spots: MapSpot[]; labels: Map<number, string>;
   show: Set<string>; text: (s: MapSpot) => string | null; footer: string;
+  /** deploy spots the chosen deliberations removed: drawn faded and crossed out */
+  gone: MapSpot[];
 }
 
 function draw(canvas: HTMLCanvasElement, d: DrawInput) {
@@ -133,12 +144,16 @@ function draw(canvas: HTMLCanvasElement, d: DrawInput) {
     ctx.drawImage(im, x - o[0] * SCALE, y - o[1] * SCALE, im.width * SCALE, im.height * SCALE);
     return o[1] * SCALE;
   };
-  // 属性強化マス rings under the markers (PlacementEffect.EffectTextureID 1-5)
+  const gone = d.gone.filter((s) => onMap(s) && MARKER[s.k] && d.show.has(kindKey(s.k)));
+  ctx.globalAlpha = 0.35;
+  for (const s of gone) icon(MARKER[s.k], s);
+  ctx.globalAlpha = 1;
+  for (const s of spots) if (MARKER[s.k]) icon(MARKER[s.k], s);
+  // 属性強化マス rings over the markers (PlacementEffect.EffectTextureID 1-5), as the game shows them
   for (const s of spots) {
     const tex = s.pe ? Number(d.info.pe?.[s.pe]?.[0]?.EffectTextureID ?? 0) : 0;
     if (tex >= 1 && tex <= 5) icon(`attr${tex}`, s);
   }
-  for (const s of spots) if (MARKER[s.k]) icon(MARKER[s.k], s);
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "bold 12px Inter, system-ui, sans-serif";
@@ -156,6 +171,25 @@ function draw(canvas: HTMLCanvasElement, d: DrawInput) {
       if (t != null) badge(ctx, t, x, s.k === 8 ? y + 24 : y, kindKey(s.k), s.k === 8 ? 17 : 20);
     }
   }
+  // removed spots: a red cross and their struck-out label
+  for (const s of gone) {
+    const [x, y] = px(s);
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y - 12); ctx.lineTo(x + 12, y + 12);
+    ctx.moveTo(x + 12, y - 12); ctx.lineTo(x - 12, y + 12);
+    ctx.stroke();
+    const top = d.icons ? (d.icons.origin[MARKER[s.k]][1] + 2) * SCALE : 10;
+    const label = d.labels.get(s.id) ?? "?";
+    badge(ctx, label, x, y - top - 8, "x");
+    const w = ctx.measureText(label).width;
+    ctx.strokeStyle = "#b91c1c";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - w / 2 - 2, y - top - 7); ctx.lineTo(x + w / 2 + 2, y - top - 7);
+    ctx.stroke();
+  }
   ctx.fillStyle = "#11141b";
   ctx.fillRect(0, H, W, FOOTER);
   ctx.fillStyle = "#e6e8ee";
@@ -164,8 +198,10 @@ function draw(canvas: HTMLCanvasElement, d: DrawInput) {
   ctx.fillText(d.footer, 8, H + FOOTER / 2);
 }
 
-export function StageMap({ info, mapNo, questId, name, hard, mask, rowList }: {
-  info: StageSpots; mapNo: number; questId: number; name: string; hard: boolean; mask: number;
+export function StageMap({ info, mapNo, questId, name, hard, removers, rowList }: {
+  info: StageSpots; mapNo: number; questId: number; name: string; hard: boolean;
+  /** chosen deliberations that remove spots (配置マス制限) */
+  removers: { name: string; mask: number }[];
   /** renders effect rows with the stage page's effect list: PlacementEffect rows, or a card's Ability rows */
   rowList: (rows: RawRow[], kind: "organized" | "ability") => ReactNode;
 }) {
@@ -181,8 +217,9 @@ export function StageMap({ info, mapNo, questId, name, hard, mask, rowList }: {
   const phases = useMemo(() => mapPhases(info), [info]);
   const cur = phases[Math.min(phase, phases.length - 1)];
   const labels = useMemo(() => spotLabels(info, lang), [info, lang]);
+  const mask = removers.reduce((m, r) => m | r.mask, 0);
   const spots = useMemo(() => spotsIn(info, cur.layer, mask), [info, cur.layer, mask]);
-  const removed = useMemo(() => spotsIn(info, cur.layer, 0).length - spots.length, [info, cur.layer, spots]);
+  const gone = useMemo(() => spotsIn(info, cur.layer, 0).filter((s) => s.del && (s.del & mask)), [info, cur.layer, mask]);
 
   const guests = useMemo(() => new Map((info.guests ?? [])
     .filter((g) => !g.diff || g.diff === (hard ? 2 : 1)).map((g) => [g.loc, g])), [info, hard]);
@@ -220,7 +257,7 @@ export function StageMap({ info, mapNo, questId, name, hard, mask, rowList }: {
 
   useEffect(() => {
     if (img && icons !== undefined && canvasRef.current) {
-      draw(canvasRef.current, { img, icons, info, spots: present, labels, show, text, footer });
+      draw(canvasRef.current, { img, icons, info, spots: present, labels, show, text, footer, gone });
     }
   });
 
@@ -294,7 +331,10 @@ export function StageMap({ info, mapNo, questId, name, hard, mask, rowList }: {
       {failed ? <p className="muted">{t("mapUnavailable")}</p> : !ready && <p className="loading">{t("mapLoading")}</p>}
       <canvas ref={canvasRef} className="stage-map-canvas" hidden={!ready || failed}
         aria-label={t("mapAria", { name, m: n(4), r: n(5), a: n(1), w: n(9) })} />
-      {removed > 0 && <p className="small chg-singi">{t("mapRemoved", { n: removed })}</p>}
+      {removers.map((r) => {
+        const names = removedNames(info, r.mask, lang, hard);
+        return names.length ? <p key={r.name} className="small chg-singi">{t("mapRemoved", { name: r.name, spots: names.join(", ") })}</p> : null;
+      })}
       {shownGuests.length > 0 && (
         <ul className="fx-plain small">
           {shownGuests.map((g) => (

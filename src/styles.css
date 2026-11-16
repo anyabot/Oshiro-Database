@@ -264,3 +264,6 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 }
 .stage-map-pe { display: flex; flex-direction: column; gap: 2px; }
 .stage-map-pe-icon { width: 30px; height: auto; vertical-align: middle; }
+.fold__btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fold__btn:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 2px; border-radius: 4px; }
+.fold__chev { display: inline-block; width: 1em; color: var(--hub-accent); }
