@@ -48,7 +48,7 @@ function category(r: BuffRow): string {
   if (r.k.startsWith("util:")) return "utility";
   if (r.sd === "e") return "debuff";
   const key = r.k.split("|")[0];
-  if (key === "dmg:dealt" || key === "dmg:bonus") return "offense";
+  if (key === "dmg:dealt" || key === "dmg:bonus" || key === "hits") return "offense";
   if (key === "dmg:taken") return "defense";
   if (key === "ki:natural" || key === "ki:periodic") return "ki";
   // inspire keys ("status:202~giver:202") rank with the status they change
@@ -67,6 +67,7 @@ const SOURCES: { value: string; label: UiKey; note: UiKey }[] = [
   { value: "stratagem", label: "srcStratagem", note: "noteStratagem" },
   { value: "special_attack", label: "srcSpecialAttack", note: "noteSpecialAttack" },
   { value: "class", label: "srcClass", note: "noteClass" },
+  { value: "weapon", label: "srcWeapon", note: "noteWeapon" },
   { value: "special", label: "srcSpecial", note: "noteSpecial" },
   { value: "possession", label: "srcPossession", note: "notePossession" },
   { value: "defeat", label: "srcDefeat", note: "noteDefeat" },
@@ -96,20 +97,22 @@ function reach(r: BuffRow): string {
 
 const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec", "/s": "per second" };
 const UNIT_TAG_JA: Record<string, string> = { "%": "%", "": "固定値", "×": "×", s: "秒", "/s": "毎秒" };
+const HITS = "hits|+|hits";
 function effectLabel(k: string, names: Record<string, string>): string {
   const [key, dir, unit] = k.split("|");
   const en = names[key] ?? key;
   const ja = getLang() === "ja" ? clauseJa(en) : "";
   const name = ja && !hasEnglish(ja) ? ja : en;
   const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
-  // utility effects have no amount: just the name
-  if (key.startsWith("util:")) return name;
+  // utility effects have no amount: just the name; hit counts likewise
+  if (key.startsWith("util:") || k === HITS) return name;
   return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
 }
 
 const fmtNum = (n: number) => String(Math.round(n * 1000) / 1000);
 function fmtAmount(k: string, v: number): string {
   const [, dir, unit] = k.split("|");
+  if (k === HITS) return getLang() === "ja" ? `${v}回` : `${v} hits`;
   if (unit === "×") return `×${fmtNum(v)}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
@@ -287,7 +290,7 @@ export default function Buffs() {
                         </td>
                         <td data-label={t("receiver")} className="buff-target">{fx.who(r.w)}</td>
                         <td data-label={t("conditions")} className="buff-target">
-                          {r.n ? <span className="small">{isUtil(r.k) ? fx.line(r.n) : fx.note(r.n)}</span> : <span className="muted small">—</span>}
+                          {r.n ? <span className="small">{isUtil(r.k) || r.k === HITS ? fx.line(r.n) : fx.note(r.n)}</span> : <span className="muted small">—</span>}
                           {r.nm && <div className="muted small">{r.nm}</div>}
                         </td>
                       </tr>

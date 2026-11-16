@@ -4,7 +4,7 @@
 // Writes public/data/buffs.json, read by src/pages/Buffs.tsx.
 import fs from "node:fs";
 import path from "node:path";
-import { describeRow, rowBases, stratagemContext, type RowContext, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
+import { describeRow, motionHits, rowBases, stratagemContext, type RowContext, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
 import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
 import type { Ability, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
@@ -67,7 +67,34 @@ function utilityRows(u: number, t: number, sl: string, lines: string[], name: st
   }
 }
 
+// Multi-hit: hits per attack, read from the worded sentences — a class-ability attack motion
+// ("Self: attack motion #6098: 4 hits, then 1 hit at ×2 + splash 150 around the target per attack") or a
+// repeating missile ("missile #4357: hits 3 times, 0.2s apart"). Ranked as "hits|+|hits" (value = hits).
+keyNames.set("hits", "Hits per attack");
+function multiHitRows(u: number, t: number, sl: string, lines: string[], name: string | undefined) {
+  for (const line of lines) {
+    const head = /^([A-Z★][^:]*?): /.exec(line)?.[1];
+    const who = head && !/^(Missile #|Field effect)/.test(head) ? head : "Self";
+    const motion = /attack motion #(\d+): (.+?) per attack/.exec(line);
+    if (motion) {
+      const v = [...motion[2].matchAll(/(\d+) hits?/g)].reduce((n, m) => n + Number(m[1]), 0);
+      if (v > 1) rows.push({ u, t, sl, k: "hits|+|hits", v, sd: "a", w: who, n: motion[0], ...(name ? { nm: name } : {}) });
+    }
+    for (const m of line.matchAll(/missile #(\d+): (?:[^;]*; )?hits (\d+) times(?:, ([\d.]+)s apart)?/g)) {
+      const v = Number(m[2]);
+      if (v > 1) rows.push({ u, t, sl, k: "hits|+|hits", v, sd: "a", w: who, n: `missile #${m[1]}${m[3] ? `, ${m[3]}s apart` : ""}`, ...(name ? { nm: name } : {}) });
+    }
+  }
+}
+
+/** A motion-based hit count (special attack, stratagem attack motion) as a "hits" row. */
+function motionRow(u: number, t: number, sl: string, motion: unknown, missile: unknown, name: string | undefined, who = "Self") {
+  const m = Number(motion) > 0 ? motionHits(defs, Number(motion), Number(missile) || 0) : null;
+  if (m && m.hits > 1) rows.push({ u, t, sl, k: "hits|+|hits", v: m.hits, sd: "a", w: who, n: m.text, ...(name ? { nm: name } : {}) });
+}
+
 function statName(key: string): string {
+  if (key === "hits") return "Hits per attack";
   if (key === "dmg:dealt") return "Damage dealt";
   if (key === "dmg:taken") return "Damage taken";
   if (key === "dmg:bonus") return "Damage multiplier (attack bonus)";
@@ -93,6 +120,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
     const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
     for (const f of s.facts as BuffFact[]) all.push({ ...f, text: s.text[f.line] ?? "" });
     utilityRows(u, t, sl, s.text, name);
+    multiHitRows(u, t, sl, s.text, name);
   });
   // a narrower group that also gets the group row (「[夏]は加算値1.5倍」): ranked with its total too
   for (const f of [...all, ...combinedFacts(all)]) {
@@ -129,6 +157,8 @@ for (const entry of index) {
     ability(u.id, f.tier, "defeat", f.defeated);
     // f.always is the card's own stat profile (ATK/DEF/HP +8%, cost…), not a buff it gives: left out
     if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
+    // special attack hits: its AttackMotionID's shots x (1 + its missile's DamageRepeatNum)
+    if (f.special_attack?.raw) motionRow(u.id, f.tier, "special_attack", f.special_attack.raw.AttackMotionID, f.special_attack.raw.MissileID, f.special_attack.ability?.name);
     for (const s of f.stratagems ?? []) {
       // GimmickType 4: the spot it changes buffs whoever is placed there
       if (s.placement) {
@@ -141,6 +171,8 @@ for (const entry of index) {
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
       const ctx = stratagemContext(defs, s);
+      // EnchantEffect.AttackMotionID: the stratagem switches the attack motion (海割れ: 2連続攻撃になり)
+      motionRow(u.id, f.tier, "stratagem", s.effect.row.AttackMotionID, 0, s.name, Number(s.effect.row.TargetType) === 2 ? "Self" : "Target");
       emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, ctx);
       emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, ctx);
       emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, ctx);
@@ -155,6 +187,11 @@ for (const entry of index) {
         for (const a of [s.token.ability, s.token.general_ability]) if (a && !a.missing) ability(u.id, f.tier, "token", { ...a, name: `${tag} · ${a.name}` });
       }
     }
+  }
+  // the weapon's own attack: WeaponType description 「敵1体に2連続攻撃を行い」 (双剣)
+  const wHits = /(\d+)連続攻撃/.exec(u.weapon?.description ?? "");
+  if (wHits && Number(wHits[1]) > 1) {
+    rows.push({ u: u.id, t: -1, sl: "weapon", k: "hits|+|hits", v: Number(wHits[1]), sd: "a", w: "Self", n: u.weapon.description, nm: u.weapon.name ?? undefined });
   }
   ability(u.id, -1, "class", u.class_ability);
   ability(u.id, -1, "class", u.sub_class?.class_ability);

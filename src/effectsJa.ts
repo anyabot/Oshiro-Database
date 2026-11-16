@@ -409,6 +409,8 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\battack motion #(\d+): (.+?) per attack/g, (_m: string, id: string, runs: string) => `攻撃モーション#${id}: 1回の攻撃で${runs
     .replace(/(\d+) hits?/g, "$1回").replace(/ at ×([\d.]+)/g, "(×$1)").replace(/ \+ splash (\d+) around the target/g, "・標的と周囲(範囲$1)")
     .replace(/, then /g, "、その後")}`],
+  [/\bHits per attack\b/g, "1回の攻撃のヒット数"],
+  [/\bmissile #(\d+), ([\d.]+)s apart\b/g, "ミサイル#$1、$2秒間隔"],
   [/\bvisual effect #(\d+)/g, "エフェクト#$1"],
   [/\bactivates ability #(\d+) \(mode (\d+)\)/g, "特技#$1を発動 (モード$2)"],
   [/\buses special attack #(\d+) \(特殊攻撃ID\)/g, "特殊攻撃#$1を使用"],
