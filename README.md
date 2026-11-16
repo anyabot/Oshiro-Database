@@ -19,7 +19,7 @@ All data lives under `public/`:
 
 - `public/data/units.json` — slim card list; `public/data/unit/<id>.json` — one full card, loaded on demand
 - `public/data/meta.json` — label tables (weapon types, regions, rarities, categories, traits) taken from the game's own text tables
-- `tools/data/unit_names_en.json` — hand-made English castle girl names (`prefix` for `[夏]`-style event tags, `name` for the rest), added to the unit JSON as `name_en` by the exporter; after an export with new cards, translate the new names there and run `python tools/names_en.py` to re-apply
+- `name_en` on castle girls, equipment and lord outfits comes from the English name tables (see [English names](#english-names))
 - `public/unit-icon/<id>.webp` — 120×120 face icons (~11 MB, published)
 
 Card art is not exported (several GB).
@@ -89,6 +89,38 @@ toggles that are applied to each enemy they target. Built by `tools/export_stage
 - Which enemies a row hits comes from the exe's target predicates (`EnemyTypeID`/`EnemyTypeID2`
   groups, flying flag; `data/target_codes.json`). % changes that don't stack keep only the
   strongest; the final number assumes % changes multiply the stage-scaled stat, then flat values add.
+
+## Update pipeline
+
+`python tools/pipeline.py` does a whole data update: fetch the changed files from the game CDN,
+run every exporter, translate new names, rebuild the buffs and build the site. `tools/watch_flp.py`
+polls the game API and runs it as soon as a new update (FLP) is live (`--publish` also commits
+`public/data` and pushes). Steps and flags are listed at the top of `pipeline.py`.
+
+## English names
+
+Castle girls, equipment and lord outfits get `name_en` from three tables in `tools/data/`:
+
+| table | entries | example |
+|---|---|---|
+| `unit_names_en.json` | `prefix` (event tags) and `name` | `[夏]仙台城` → `[Summer] Sendai Castle` |
+| `weapon_names_en.json` | `suffix` (`[改]` → `[Kai]`, `(固定)` → `(Fixed)`…) and `name` | `華の薙刀[改]` → `Flower Naginata [Kai]` |
+| `lord_names_en.json` | `name` | `侍大将` → `Samurai General` |
+
+After an update with new content:
+
+1. The pipeline's `translate` step (`tools/translate_names.py`) machine-translates only the names
+   the tables don't have yet (Groq, a translate pass then a review pass), writes them into the
+   tables and appends each one to `tools/out/translations_to_check.md`.
+2. **Check that list** (a person or an agent): readings of castle and people names are the usual
+   mistakes (`長谷堂城` came out "Nagahashido Castle"; it is Hasedo Castle). Fix the entry in the
+   table, run `python tools/names_en.py`, and tick or delete the line.
+3. `tools/names_en.py` re-applies all three tables to `public/data` (no re-export needed) and lists
+   whatever still has no English in `tools/out/untranslated.md`; those show in Japanese on the site.
+
+Without Groq keys (or with `pipeline.py --no-translate`) nothing is translated and the names wait
+in `untranslated.md`. Hand fixes are never overwritten: the translator only fills missing entries.
+`tools/` is not in the repository, so the tables live with the local tool checkout.
 
 ## Regenerate from the game
 
