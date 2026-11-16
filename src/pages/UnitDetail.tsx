@@ -11,6 +11,7 @@ import { DEFAULT_META } from "../meta";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
 import { terrainIcon, weaponIcon } from "../filterIcons";
 import { usePageMeta } from "../usePageMeta";
+import { StatSimPanel } from "../statSimPanel";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
 import { groupRows, type Line } from "../group";
@@ -487,6 +488,7 @@ export default function UnitDetail() {
         </div>
 
         <div className="detail-side">
+          <StatSimPanel u={u} />
           <StatsPanel u={u} />
           {(u.weapon.description || u.dedicated_weapon) && (
             <Panel title={t("weaponTitle", { name: u.weapon.name ?? "—" })}>

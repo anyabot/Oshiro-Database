@@ -267,3 +267,11 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .fold__btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 .fold__btn:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 2px; border-radius: 4px; }
 .fold__chev { display: inline-block; width: 1em; color: var(--hub-accent); }
+
+/* stat simulator (src/statSimPanel.tsx) */
+.sim-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.sim-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.sim-row input[type="range"] { flex: 1; min-width: 120px; }
+.sim-num { width: 64px; }
+.sim-ki { display: inline-block; margin-right: 10px; }
+.sim-ki--next { font-weight: 700; color: var(--hub-accent); }
