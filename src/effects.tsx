@@ -33,6 +33,8 @@ export interface EffectDefs {
   target_sets?: Record<string, number[]>;
   /** Quest.atb Type -> example quest names. */
   quest_types?: Record<string, string[]>;
+  /** class ability 6 motions: per shot of one attack [damage %, area around the target (0 = target only)] */
+  motion_shots?: Record<string, [number, number][]>;
   /** AbilityText names of the abilities class ability 6/7 activates. */
   ability_names?: Record<string, string>;
   labels: Record<string, MinedLabel>;
@@ -329,6 +331,18 @@ const MOVE_MODE: Record<number, string> = {
   7: "walks", 9: "moves in its second stand pose (立ち2)",
 };
 const moveMode = (d: number) => (d ? `, ${MOVE_MODE[d] ?? `move mode ${d}`}` : "");
+/** Class ability 6: the motion's shots (WeaponAttack3B<id>.amt NoteTrack: one key per shot, its missile's
+ *  TargetDamanageRatio and DamageArea), runs of equal shots grouped: "4 hits, then 1 hit at ×2 + splash 150". */
+function motionText(v: number, shots: [number, number][]): string {
+  const runs: { n: number; r: number; a: number }[] = [];
+  for (const [r, a] of shots) {
+    const last = runs[runs.length - 1];
+    if (last && last.r === r && last.a === a) last.n += 1; else runs.push({ n: 1, r, a });
+  }
+  const run = ({ n, r, a }: { n: number; r: number; a: number }) =>
+    `${n} hit${n > 1 ? "s" : ""}${r !== 100 ? ` at ×${r / 100}` : ""}${a ? ` + splash ${a} around the target` : ""}`;
+  return `attack motion #${v}: ${runs.map(run).join(", then ")} per attack`;
+}
 const CLASS_ABILITY: Record<number, (v: number, d: number) => string> = {
   // the registry FUN_0056d460 holds details 1-23 only: a detail-0 row matches no handler
   0: (v) => `no effect (class-ability detail 0 has no handler; value ${v})`,
@@ -926,7 +940,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       text.push(`${lead}${effectRow("OnTakeDamageEffect", { OTDEffectType: atd, ValueType: vt }, v, modifier, ccName)}${perGrowUp}${tl}`);
     } else if (at === 6 && CLASS_ABILITY[atd]) {
       const name = atd === 7 ? defs.ability_names?.[v] : undefined;
-      text.push(`${lead}${CLASS_ABILITY[atd](v, num("AbilityEffectDetail"))}${name ? ` 「${name}」` : ""}${tail()}`);
+      const shots = atd === 6 ? defs.motion_shots?.[v] : undefined;
+      text.push(`${lead}${shots ? motionText(v, shots) : CLASS_ABILITY[atd](v, num("AbilityEffectDetail"))}${name ? ` 「${name}」` : ""}${tail()}`);
     } else if (at === 5 && atd === 1) {
       // natural Ki tick FUN_0042ce10: 1 Ki (100 units) per tick + EffectValue units; a 2nd/3rd unit with
       // the same effect counts 1/2, 1/4 (BattleSystemConfig 205 = 2)

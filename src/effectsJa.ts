@@ -406,6 +406,9 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bwalks with its second walk motion \(歩き2\)/g, "歩き2モーションで歩行"],
   [/\bwalks\b/g, "歩行"],
   [/\bbattle motion set → #(\d+) \(its attack animation sets the hit count\)/g, "戦闘モーション → #$1 (攻撃アニメーションでヒット数が決まる)"],
+  [/\battack motion #(\d+): (.+?) per attack/g, (_m: string, id: string, runs: string) => `攻撃モーション#${id}: 1回の攻撃で${runs
+    .replace(/(\d+) hits?/g, "$1回").replace(/ at ×([\d.]+)/g, "(×$1)").replace(/ \+ splash (\d+) around the target/g, "・標的と周囲(範囲$1)")
+    .replace(/, then /g, "、その後")}`],
   [/\bvisual effect #(\d+)/g, "エフェクト#$1"],
   [/\bactivates ability #(\d+) \(mode (\d+)\)/g, "特技#$1を発動 (モード$2)"],
   [/\buses special attack #(\d+) \(特殊攻撃ID\)/g, "特殊攻撃#$1を使用"],
