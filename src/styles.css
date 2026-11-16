@@ -363,3 +363,33 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
   .sortie-page { grid-template-columns: 1fr; }
   .sortie-page__banner { position: static; max-width: 260px; margin: 0 auto; }
 }
+
+/* lord outfits (src/pages/Lords.tsx) */
+.lord-level { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; }
+.lord-level input[type="range"] { width: min(320px, 100%); accent-color: var(--hub-accent); }
+.lord-level__n { font-weight: 700; min-width: 48px; }
+.lord-table-wrap { overflow-x: auto; border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); }
+.lord-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.lord-table th, .lord-table td { padding: 6px 10px; border-bottom: 1px solid var(--hub-border); text-align: left; white-space: nowrap; }
+.lord-table tbody tr:hover { background: var(--hub-surface); }
+.lord-num { font-variant-numeric: tabular-nums; }
+.lord-sort { background: none; border: 0; color: inherit; font: inherit; font-weight: 700; cursor: pointer; padding: 0; }
+.lord-sort--on { color: var(--hub-accent); }
+.lord-sort--on::after { content: " ▼"; font-size: 10px; }
+.lord-name { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.lord-name:hover { color: var(--hub-accent); }
+.lord-alt { display: block; }
+.lord-diff { margin-left: 4px; font-size: 11px; }
+.lord-diff--up { color: #4ade80; }
+.lord-diff--down { color: #f87171; }
+.lord-dot { image-rendering: pixelated; width: 64px; height: 64px; object-fit: contain; flex: none; }
+.lord-dot--sm { width: 36px; height: 36px; }
+.lord-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 12px; margin: 16px 0; }
+.lord-card { border: 1px solid var(--hub-border); border-radius: var(--hub-radius-sm); background: var(--hub-surface); padding: 12px; scroll-margin-top: 70px; }
+.lord-card:target { border-color: var(--hub-accent); }
+.lord-card__head { display: flex; align-items: center; gap: 12px; }
+.lord-card__name { margin: 0; font-size: 16px; }
+.lord-text { white-space: pre-line; }
+.lord-gold { color: #d4a514; font-weight: 600; }
+:root[data-theme="dark"] .lord-gold { color: #ffd700; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lord-gold { color: #ffd700; } }

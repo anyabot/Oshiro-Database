@@ -53,6 +53,18 @@ export const UI = {
   navUnits: { en: "Units", ja: "城娘" },
   navBuffs: { en: "Buffs", ja: "バフ" },
   navStages: { en: "Stages", ja: "ステージ" },
+  navLords: { en: "Lord", ja: "殿" },
+  lordsTitle: { en: "Lord Outfits", ja: "殿の装束" },
+  lordsSubtitle: {
+    en: "What each outfit changes on the lord at the base camp: stats, range, attack and its effect. The table compares them at the chosen level; the small numbers are the change from the plain lord (装束なし).",
+    ja: "装束ごとの殿の性能: ステータス・射程・攻撃・効果。表は選んだレベルでの比較で、小さい数字は装束なしとの差です。",
+  },
+  lordLevel: { en: "Lord level", ja: "殿のレベル" },
+  lordVsDefault: { en: "± = change from No Outfit · HP includes the outfit effect's max HP", ja: "± = 装束なしとの差 · 耐久は装束効果の耐久上昇込み" },
+  lordOutfit: { en: "Outfit", ja: "装束" },
+  lordEffect: { en: "Outfit effect", ja: "装束効果" },
+  lordOrganized: { en: "Formation effect", ja: "編成効果" },
+  lordWait: { en: "Attack wait", ja: "攻撃間隔" },
   navEquipment: { en: "Equipment", ja: "武器" },
 
   // equipment

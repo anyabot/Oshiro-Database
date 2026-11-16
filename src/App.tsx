@@ -25,7 +25,7 @@ export default function App() {
       game="oshiro"
       logo={<img src="/logo.png" alt="" />}
       renderHomeLink={homeLink(Link, "to")}
-      nav={<><NavLink to="/" end>{t("navHome")}</NavLink><NavLink to="/units">{t("navUnits")}</NavLink><NavLink to="/buffs">{t("navBuffs")}</NavLink><NavLink to="/equipment">{t("navEquipment")}</NavLink><NavLink to="/stages">{t("navStages")}</NavLink></>}
+      nav={<><NavLink to="/" end>{t("navHome")}</NavLink><NavLink to="/units">{t("navUnits")}</NavLink><NavLink to="/buffs">{t("navBuffs")}</NavLink><NavLink to="/equipment">{t("navEquipment")}</NavLink><NavLink to="/stages">{t("navStages")}</NavLink><NavLink to="/lord">{t("navLords")}</NavLink></>}
       actions={<LanguagePicker />}
       barLabels={hub.bar}
       errorLabels={hub.error}

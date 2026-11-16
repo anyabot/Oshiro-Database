@@ -10,6 +10,7 @@ import Stages from "./pages/Stages";
 import StageDetail from "./pages/StageDetail";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
+import Lords from "./pages/Lords";
 import NotFoundPage from "./pages/NotFound";
 import "@altterisk/game-hub/hub.css";
 import "@altterisk/game-hub/base.css";
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="stages/:id" element={<StageDetail />} />
           <Route path="equipment" element={<Equipment />} />
           <Route path="equipment/:id" element={<EquipmentDetail />} />
+          <Route path="lord" element={<Lords />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

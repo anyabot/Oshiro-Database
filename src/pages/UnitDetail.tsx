@@ -115,7 +115,7 @@ function Text({ children }: { children?: string | null }) {
   return children ? <p className="game-text">{children}</p> : null;
 }
 
-function AbilityBlock({ label, a, kind = "ability", defs, from }: {
+export function AbilityBlock({ label, a, kind = "ability", defs, from }: {
   label: string; a: Ability; kind?: RowKind; defs?: EffectDefs; from?: string;
 }) {
   const t = useT();
