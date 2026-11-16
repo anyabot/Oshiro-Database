@@ -33,6 +33,37 @@ export interface SingiOption {
   rows?: RawRow[];
   /** PreBattleEffect.atb rows (2xxxx deliberations: castle girl base stats) */
   pre?: RawRow[];
+  /** 配置マス制限 (3xxxx): the Location DeleteFlag bits this option removes */
+  mask?: number;
+}
+
+/** One Location01.atb point, in the game's 1280x720 space. k = type (ObjectID % 10000 / 100): 0 本陣,
+ *  1 赤/青, 2 蔵, 3 building, 4 近接, 5 遠隔, 7 pre-placed unit, 8 配置効果 slot, 9 水上; 11/12/14 undecoded. */
+export interface MapSpot {
+  id: number; k: number; x: number; y: number;
+  /** layer (ObjectID / 10000): exists while the battle has switched to that layout */
+  l?: number;
+  /** Parameter: Building.atb ID for 蔵 / buildings */
+  p?: number;
+  /** PlacementEffect.atb ID */
+  pe?: number;
+  /** DeleteFlag bits: removed by the deliberations whose mask has one of them */
+  del?: number;
+}
+
+export interface StageSpots {
+  spots: MapSpot[];
+  /** Entry Type 12: at frame t (30 per second) the map switches to layer n (0 = the base layout) */
+  layers?: { t: number; n: number }[];
+  /** PlacementEffect.atb rows by ID */
+  pe?: Record<string, RawRow[]>;
+  buildings?: Record<string, { BuildingType?: number; Health?: number; Defense?: number; BlockCount?: number }>;
+  /** GuestUnitConfig: unit placed at the start; diff 1 = normal only, 2 = hard only */
+  guests?: { loc: number; card: number; name: string; lv: number; diff?: number }[];
+  /** LocationEffectConfig: invisible 配置効果 unit on the spot (99999 配置効果, 99998 猛毒, 99997 水没) */
+  hazards?: { loc: number; card: number; name: string }[];
+  /** the hazard cards' Ability.atb rows, by CardID */
+  hazardRows?: Record<string, RawRow[]>;
 }
 
 export interface StageDetail {
@@ -55,6 +86,7 @@ export interface StageDetail {
   };
   singi: { set: number; options: SingiOption[]; gold?: number; silver?: number } | null;
   bushin?: string;
+  spots?: StageSpots | null;
 }
 
 export interface MissileInfo { id: number; CrowdControlType?: number; DealDamageEffectID?: number; [k: string]: number | undefined }

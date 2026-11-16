@@ -10,6 +10,7 @@ import {
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
+import { StageMap } from "../stageMap";
 import { useUnits } from "../data";
 import type { RawRow } from "../types";
 
@@ -96,7 +97,16 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
       <p className="muted small"><Link to={`/stages?group=${stage.group}`}>{t("stagesTitle")}</Link> / {group ? groupLabel(group, lang) : ""}{ev ? ` / ${ev.title}` : ""}</p>
       <PageHeader title={stage.name}
         subtitle={[stage.bushin ? `武神 ${stage.bushin}` : "", t("quest", { id: stage.id }), t("mapN", { n: stage.map })].filter(Boolean).join(" · ")} />
-      <FallbackImage srcs={[mapImage(stage.map)]} alt={t("mapAlt", { name: stage.name })} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
+      {stage.spots ? (
+        <Panel title={t("mapTitle")}>
+          <StageMap info={stage.spots} mapNo={stage.map} questId={stage.id} name={stage.name} hard={hard}
+            mask={active.reduce((m, o) => m | (o.mask ?? 0), 0)}
+            rowList={(rows, kind) => kind === "ability" ? <RowList rows={rows} defs={defs} kind="ability" />
+              : <RowList rows={withTargets(rows.map(({ EffectTextureID, AttributeMatchEffectID, ...r }) => r))} defs={defs} />} />
+        </Panel>
+      ) : (
+        <FallbackImage srcs={[mapImage(stage.map)]} alt={t("mapAlt", { name: stage.name })} className="stage-hero" missingClassName="stage-hero event-sec__thumb--none" />
+      )}
       {stage.recovered && (
         <p className="muted small">{t("recovered")}{t(stage.estimate?.normal ? "recoveredEst" : "recoveredBase")}</p>
       )}

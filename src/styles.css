@@ -244,3 +244,23 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .weapon-art { display: inline-flex; width: 120px; height: 120px; align-items: center; justify-content: center;
   background: var(--hub-surface-raised, rgba(255,255,255,.04)); border-radius: 12px; }
 .weapon-art .weapon-dot { width: 112px; height: 112px; }
+
+/* deployment map (src/stageMap.tsx) */
+.stage-map { display: flex; flex-direction: column; gap: 10px; }
+.stage-map-phases { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stage-map-phases .hub-btn { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; height: auto; padding-top: 4px; padding-bottom: 4px; }
+.stage-map-phase-note { font-size: 11px; opacity: 0.8; font-weight: 400; }
+.stage-map-phase--active { border-color: var(--hub-accent); }
+.stage-map-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.stage-map-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.stage-map-key {
+  display: inline-block; min-width: 22px; padding: 0 4px; border-radius: 5px; border: 1px solid rgba(0, 0, 0, 0.85);
+  font-size: 11px; font-weight: 700; text-align: center;
+}
+.stage-map-actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; }
+.stage-map-canvas {
+  display: block; width: 100%; max-width: 960px; height: auto;
+  border-radius: var(--hub-radius-sm); border: 1px solid var(--hub-border);
+}
+.stage-map-pe { display: flex; flex-direction: column; gap: 2px; }
+.stage-map-pe-icon { width: 30px; height: auto; vertical-align: middle; }
