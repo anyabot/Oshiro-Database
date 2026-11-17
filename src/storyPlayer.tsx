@@ -1,26 +1,18 @@
-// The game's story scene, replayed: background, standing character with its expression face, and the
-// talk window, one text line at a time. Frames come from story.ts compile() (the game's own scripts).
-//
-// Text and page translators (as in the Taimanin Viewer): by default every line of the run is in the
-// page from the start, stacked and transparent but for the current one, and never re-rendered, so a
-// page translator (Chrome, Edge) translates them all up front and stepping only changes which line
-// shows; lines inserted one at a time are often left untranslated. "Per line" keeps only the current
-// line, keyed so each is a fresh element (for translator extensions that handle new text themselves).
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// The game's story scene, replayed on game-hub's scene player parts (SceneFrame, SceneTextBox,
+// SceneControls, useSceneStepper, useSceneTheater): this file only draws Oshiro's picture layers —
+// the background, the standing character and its expression face — from story.ts compile() frames.
+// The hub's text box keeps every line in the page by default, so page translators reach them all.
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  SceneControls, SceneFrame, SceneTextBox, sceneTextSetting, useSceneStepper, useSceneTheater, type SceneLine,
+} from "@altterisk/game-hub";
 import { colored, type Frame } from "./story";
 import { useT } from "./i18n";
 
 export interface Segment { title: string; frames: Frame[] }
 
-const AUTO_HOLD = 1600; // auto mode: time per line (ms) + 60 ms per character
-const PRELOAD_KEY = "oshiro.scene.preload";
-
-function readPreload(): boolean {
-  try { return localStorage.getItem(PRELOAD_KEY) !== "0"; } catch { return true; }
-}
-function writePreload(v: boolean) {
-  try { localStorage.setItem(PRELOAD_KEY, v ? "1" : "0"); } catch { /* storage off: keep the default */ }
-}
+/** Saved text mode: all lines in the page (true) or only the current one. */
+const ALL_LINES = sceneTextSetting("oshiro.scene.preload");
 
 function Colored({ text }: { text: string }) {
   return <>{colored(text).map((s, i) => (s.color ? <span key={i} style={{ color: s.color }}>{s.text}</span> : <span key={i}>{s.text}</span>))}</>;
@@ -38,57 +30,28 @@ export function StoryPlayer({ segments, start = 0, onClose }: { segments: Segmen
   // flatten: every frame knows its segment
   const flat = useMemo(() => segments.flatMap((s, si) => s.frames.map((f) => ({ f, si }))), [segments]);
   const first = useMemo(() => segments.slice(0, start).reduce((n, s) => n + s.frames.length, 0), [segments, start]);
-  const [i, setI] = useState(first);
-  const [auto, setAuto] = useState(false);
-  const [all, setAll] = useState(readPreload);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const cur = flat[i];
-
-  useEffect(() => { preload(flat[i + 1]?.f); preload(flat[i + 2]?.f); }, [i, flat]);
-  const next = useCallback(() => {
-    if (i + 1 < flat.length) setI(i + 1); else onClose();
-  }, [i, flat.length, onClose]);
-  const prev = useCallback(() => setI((n) => Math.max(0, n - 1)), []);
-  useEffect(() => {
-    if (!auto || !cur) return;
-    const id = window.setTimeout(next, AUTO_HOLD + 60 * cur.f.text.length);
-    return () => window.clearTimeout(id);
-  }, [auto, cur, next]);
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "Enter" || e.key === "ArrowRight") { e.preventDefault(); next(); }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
-      else if (e.key === "Escape" && !document.fullscreenElement) onClose();
-    };
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
-  }, [next, prev, onClose]);
-  const fullscreen = () => {
-    const el = stageRef.current?.parentElement;
-    if (!el) return;
-    if (document.fullscreenElement) void document.exitFullscreen(); else void el.requestFullscreen?.();
-  };
-  const toggleAll = () => { setAll(!all); writePreload(!all); };
-
-  // the text box: built once per mode, so a translator's replacements are never overwritten
-  const lines = useMemo(() => flat.map(({ f }, k) => (
-    <div key={k} className="sp-say" data-k={k}>
-      {f.name && <div className="sp-name">{f.name}</div>}
-      <p className="sp-text"><Colored text={f.text} /></p>
-    </div>
-  )), [flat]);
+  const autoDelay = useCallback((at: number) => 1600 + 60 * (flat[at]?.f.text.length ?? 0), [flat]);
+  const stepper = useSceneStepper({ count: flat.length, start: first, onEnd: onClose, onClose, autoDelay });
+  const [allLines, setAllLines] = ALL_LINES.use();
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [theater, toggleTheater] = useSceneTheater(wrapRef);
+  // the dialogue, built once per run so a translator's replacements are never overwritten
+  const lines = useMemo<SceneLine[]>(() => flat.map(({ f }) => ({ name: f.name || undefined, text: <Colored text={f.text} /> })), [flat]);
+  const cur = flat[stepper.at];
+  useEffect(() => { preload(flat[stepper.at + 1]?.f); preload(flat[stepper.at + 2]?.f); }, [stepper.at, flat]);
 
   if (!cur) return null;
   const { f } = cur;
   const bg = f.bg;
   return (
-    <div className="sp-wrap">
-      <div className="sp" ref={stageRef} onClick={next} role="button" tabIndex={0} aria-label={t("spNext")}>
+    <div ref={wrapRef} className={`sp-wrap${theater ? " sp-wrap--theater" : ""}`}>
+      <SceneFrame aspect="16 / 9" onAdvance={stepper.next} label={t("spNext")} className="sp">
         {bg && "src" in bg ? <img className="sp-bg" src={bg.src} alt="" /> : <div className="sp-bg" style={{ background: bg?.color ?? "#000" }} />}
         {f.chara && (
           <div className="sp-chara" style={{
             aspectRatio: `${f.chara.w} / ${f.chara.h}`,
-            transform: `translate(calc(-50% + ${(f.chara.dx / 1280) * 100}cqw), ${(f.chara.dy / 720) * 100}cqh)`,
+            // chara X/Y offsets are in the 1280x720 scene: 1 px = 100/1280 cqw
+            transform: `translate(calc(-50% + ${(f.chara.dx / 1280) * 100}cqw), ${(f.chara.dy / 1280) * 100}cqw)`,
           }}>
             <img src={f.chara.src} alt="" />
             {f.face && (
@@ -99,34 +62,15 @@ export function StoryPlayer({ segments, start = 0, onClose }: { segments: Segmen
             )}
           </div>
         )}
-        {all ? (
-          <div key="all" className="sp-window" lang="ja" data-on={i}>
-            {lines}
-          </div>
-        ) : (
-          <div key={`one-${i}`} className="sp-window sp-window--one" lang="ja">
-            <div className="sp-say sp-say--on">
-              {f.name && <div className="sp-name">{f.name}</div>}
-              <p className="sp-text"><Colored text={f.text} /></p>
-            </div>
-          </div>
-        )}
-        <style>{all ? `.sp-window[data-on="${i}"] > .sp-say[data-k="${i}"] { opacity: 1; pointer-events: auto; position: static; padding: 0; }` : ""}</style>
-        <span className="sp-more" aria-hidden="true">▼</span>
+        <SceneTextBox lines={lines} at={stepper.at} allLines={allLines} lang="ja" className="sp-window" />
         <div className="sp-title" translate="no">{segments[cur.si].title}</div>
-      </div>
-      <div className="sp-bar" translate="no">
-        <button type="button" className="hub-btn" onClick={prev} disabled={i === 0}>{t("spPrev")}</button>
-        <button type="button" className="hub-btn" onClick={next}>{t("spNext")}</button>
-        <input type="range" className="sp-range" min={0} max={flat.length - 1} value={i} onChange={(e) => setI(Number(e.target.value))} aria-label={t("spPosition")} />
-        <span className="muted small sp-count">{i + 1} / {flat.length}</span>
-        <button type="button" className={`hub-btn${auto ? " is-on" : ""}`} aria-pressed={auto} onClick={() => setAuto(!auto)}>{t("spAuto")}</button>
-        <button type="button" className={`hub-btn${all ? " is-on" : ""}`} aria-pressed={all} onClick={toggleAll} title={t("spTextTitle")}>
-          {all ? t("spTextAll") : t("spTextOne")}
-        </button>
-        <button type="button" className="hub-btn" onClick={fullscreen}>{t("spFull")}</button>
-        <button type="button" className="hub-btn" onClick={onClose}>{t("spClose")}</button>
-      </div>
+      </SceneFrame>
+      <SceneControls stepper={stepper} count={flat.length} slider allLines={allLines} onAllLines={setAllLines}
+        theater={theater} onTheater={toggleTheater} onClose={onClose} className="sp-bar"
+        labels={{
+          back: t("spPrev"), next: t("spNext"), auto: t("spAuto"), textAll: t("spTextAll"), textOne: t("spTextOne"),
+          textTitle: t("spTextTitle"), theater: t("spFull"), exitTheater: t("spFullExit"), close: t("spClose"), position: t("spPosition"),
+        }} />
       <p className="muted small sp-help" translate="no">{t("spTranslateHint")}</p>
     </div>
   );

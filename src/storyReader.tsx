@@ -1,7 +1,10 @@
 // A run of story parts (quest scenes, event scenes, skits, bond stories) as readable text, each scene
 // playable in the scene player. Used by the story page and the stage page's Story tab.
-import { useEffect, useState } from "react";
-import { LoadState } from "@altterisk/game-hub";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { LoadState, StoryLines, routerLinks, type StoryLineView } from "@altterisk/game-hub";
+import { iconUrl, useUnits } from "./data";
+import type { UnitIndexEntry } from "./types";
 import { colored, compile, lines, loadArt, loadSceneArt, loadSceneFile, type SceneFile } from "./story";
 import { StoryPlayer, type Segment } from "./storyPlayer";
 import { useHubLabels, useT, type UiKey } from "./i18n";
@@ -22,15 +25,24 @@ const mapUrl = (n: number) => `${import.meta.env.BASE_URL}stage-map/${n}.webp`;
 /** Quest scene labels: 1 before the battle, 2 after, 3 continued. */
 export const QUEST_SCENE: Record<number, UiKey> = { 1: "storyScene1", 2: "storyScene2", 3: "storyScene3" };
 
-function Line({ who, text }: { who: string; text: string }) {
-  return (
-    <div className={`story__line${who ? "" : " story__line--narr"}`}>
-      {who && <span className="story__who">{who}</span>}
-      <p className="story__text game-text">
-        {colored(text).map((s, i) => (s.color ? <span key={i} style={{ color: s.color }}>{s.text}</span> : <span key={i}>{s.text}</span>))}
-      </p>
-    </div>
-  );
+function Colored({ text }: { text: string }) {
+  return <>{colored(text).map((s, i) => (s.color ? <span key={i} style={{ color: s.color }}>{s.text}</span> : <span key={i}>{s.text}</span>))}</>;
+}
+
+const renderLink = routerLinks(Link, "to");
+
+/** A scene's lines for game-hub's StoryLines: speaker rows (with the castle girl's face and page when
+ *  the speaker's name is exactly one playable girl's), narration, "" (a new background) as a break. */
+function views(cmds: Parameters<typeof lines>[0], girl: (name: string) => UnitIndexEntry | undefined): StoryLineView[] {
+  return lines(cmds).map((l): StoryLineView => {
+    if (l === "") return { kind: "place", text: "⁂" };
+    if (!l[0]) return { kind: "narration", text: <Colored text={l[1]} /> };
+    const u = girl(l[0]);
+    return {
+      kind: "say", name: l[0], text: <Colored text={l[1]} />,
+      ...(u ? { nameHref: `/units/${u.id}`, avatar: u.face ? <img src={iconUrl(u.face)} alt="" width={40} height={40} loading="lazy" /> : undefined } : {}),
+    };
+  });
 }
 
 export function StoryReader({ parts }: { parts: ReaderPart[] }) {
@@ -41,6 +53,12 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
   const [player, setPlayer] = useState<{ segments: Segment[]; start: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const want = parts.map((p) => p.file).join("|");
+  const { data: units } = useUnits();
+  const girl = useMemo(() => {
+    const m = new Map<string, UnitIndexEntry[]>();
+    for (const u of units ?? []) if (!u.npc && !u.dup_of) m.set(u.name, [...(m.get(u.name) ?? []), u]);
+    return (name: string) => (m.get(name)?.length === 1 ? m.get(name)![0] : undefined);
+  }, [units]);
 
   useEffect(() => {
     let live = true;
@@ -95,7 +113,7 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
                     {label && <span className="story__label">{label}</span>}
                     <button type="button" className="hub-btn hub-btn--small" disabled={busy} onClick={() => play(at)}>▶ {t("spPlay")}</button>
                   </div>
-                  {lines(s.cmds).map((l, i) => (l === "" ? <hr key={i} className="story__break" /> : <Line key={i} who={l[0]} text={l[1]} />))}
+                  <StoryLines lines={views(s.cmds, girl)} lang="ja" renderLink={renderLink} className="story__lines" />
                 </div>
               );
             })}
