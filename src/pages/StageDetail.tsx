@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons, TabPanel, UrlTabs } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
+import { StackNotes } from "../stackNotes";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
 import { useFx, useHubLabels, useLang, useT } from "../i18n";
@@ -223,11 +224,14 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
   const bases = kind === "ability" ? rowBases(rows) : [];
   const t = useT();
   const fx = useFx();
+  const lines = groupRows(rows.map((r, i) => describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text));
   return (
-    <ul className="fx-plain">
-      {groupRows(rows.map((r, i) => describeRow(r, kind, defs, undefined, bases[i], { enemyOwner: enemy }).text))
-        .map((l, i) => <li key={i}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
-    </ul>
+    <>
+      <ul className="fx-plain">
+        {lines.map((l, i) => <li key={i}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
+      </ul>
+      <StackNotes texts={lines.map((l) => l.text)} />
+    </>
   );
 }
 

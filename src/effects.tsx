@@ -1218,7 +1218,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // (reduction amounts have no "set to": "Physical damage reduction 10%, grows by that amount …")
     const grown = text.map((t) => t
       .replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `)
-      .replace(/ (−?)([\d.]+%)(.*?), grows by that amount /g, (_, s, n, mid) => ` ${s}${n}${mid}, ${s || "+"}${n} more `));
+      // a signed amount (flat or %) or an unsigned % ("reduction 10%"); a bare number ("every 2s") is no amount
+      .replace(/ (?:([+−])([\d.]+%?)|()([\d.]+%))([^:·]*?), grows by that amount /g,
+        (_, s1, n1, s2, n2, mid) => { const s = s1 ?? s2 ?? "", n = n1 ?? n2; return ` ${s}${n}${mid}, ${s || "+"}${n} more `; })
+      // a multiplier grows by its own step: ×1.01 → ×1.02 → … ("Range ×1.01, +0.01 more every 4 seconds")
+      .replace(/ ×([\d.]+)([^:·]*?), grows by that amount /g, (_, n, mid) =>
+        ` ×${n}${mid}, ${Number(n) >= 1 ? "+" : "−"}${fmt(Math.abs(Number(n) - 1))} more `));
     return { text: grown, evidence, rest, facts };
   }
 }

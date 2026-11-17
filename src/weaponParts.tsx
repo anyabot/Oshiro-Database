@@ -5,6 +5,7 @@ import { WEAPON_EN } from "./labels";
 import { getLang, useFx, useT } from "./i18n";
 import { nameOf } from "./data";
 import { describeRow, rowBases, type EffectDefs } from "./effects";
+import { StackNotes } from "./stackNotes";
 import { groupRows } from "./group";
 import { STAT_KEYS, weaponAbilityRows, type StatKey, type Weapon, type WeaponData, type WeaponSource } from "./weapons";
 import type { RawRow, UnitIndexEntry } from "./types";
@@ -35,9 +36,12 @@ export function AbilityLines({ rows, defs }: { rows: RawRow[]; defs: EffectDefs 
   const bases = rowBases(conv);
   const lines = groupRows(conv.map((r, i) => describeRow(r, "ability", defs, undefined, bases[i]).text));
   return (
-    <ul className="fx-plain">
-      {lines.map((l, i) => <li key={i} title={l.text && fx.line(l.text) !== l.text ? l.text : undefined}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
-    </ul>
+    <>
+      <ul className="fx-plain">
+        {lines.map((l, i) => <li key={i} title={l.text && fx.line(l.text) !== l.text ? l.text : undefined}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
+      </ul>
+      <StackNotes texts={lines.map((l) => l.text)} />
+    </>
   );
 }
 

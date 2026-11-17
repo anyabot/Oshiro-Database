@@ -330,7 +330,7 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\bgrows by that amount ((?:each|every) [a-z0-9. ]+?)(?= \(|,|$|\))/g, (_m, t) => `${stepJa(t)}に同量上昇`],
   [/ \(shrinks instead while Reversal \(反転化\) is on\)/g, " (反転化中は減少)"],
   // N is signed: "+5% more each hit" grows, "−10% more each trigger" keeps lowering (its stat's −10% above)
-  [new RegExp(`, ([+−-])(\\d+(?:\\.\\d+)?%?) more ((?:each|every) [a-z0-9. ]+?)(?=,|$)`, "g"),
+  [new RegExp(`, ([+−-])(\\d+(?:\\.\\d+)?%?) more ((?:each|every) [a-z0-9. ]+?)(?=,|$| \\()`, "g"),
     (_m, sign, n, t) => `、${stepJa(t)}に${sign === "+" ? "+" : "−"}${n}ずつ${sign === "+" ? "上昇" : "低下"}`],
   [/(?<=^|, |\d%? )per ((?:\d+ )?[A-Za-z](?:[a-zA-Z' -]|(?<=set )\d+)*?(?: \([^)]*\))?(?: it has taken| in the formation| deployed| in range)?)(?=,|$)/g, (_m, t) => perJa(t)],
   // leads
