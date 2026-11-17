@@ -362,6 +362,25 @@ export const UI = {
   max: { en: "max {v}", ja: "最大 {v}" },
   noCap: { en: "no cap", ja: "上限なし" },
   stacks: { en: "stacks", ja: "重複" },
+  immuneTo: { en: "Immune", ja: "無効" },
+  immuneTitle: {
+    en: "Changes this enemy ignores (from its ability's immunity rows). ↓ = it can't be lowered, ↑ = it can't be raised.",
+    ja: "この敵が受けない効果 (特技の無効化設定より)。低下 = 下げられない、上昇 = 上げられない。",
+  },
+  cancelsOnGirls: { en: "Cancels on castle girls", ja: "城娘の効果を無効" },
+  cancelsTitle: {
+    en: "Buffs this enemy denies the castle girls its ability reaches (see its ability line for which ones).",
+    ja: "この敵の特技が及ぶ城娘に対して無効化する効果 (対象は特技の行を参照)。",
+  },
+  attackEffects: { en: "Its attacks", ja: "攻撃時" },
+  attackEffectsTitle: { en: "Effects its normal attacks carry besides damage (its missile rows)", ja: "通常攻撃がダメージ以外に与える効果 (ミサイル設定より)" },
+  givesEnemies: { en: "Gives enemies immunity", ja: "敵に無効付与" },
+  givesTitle: {
+    en: "Immunities this enemy hands other enemies its ability reaches (see its ability line for which ones).",
+    ja: "この敵の特技が及ぶ他の敵に付与する無効化 (対象は特技の行を参照)。",
+  },
+  allAilments: { en: "All status ailments", ja: "全状態異常" },
+  ailmentsN: { en: "{n} status ailments", ja: "状態異常{n}種" },
   stackNoteTitle: { en: "How these stack", ja: "効果の重複について" },
   stackNoteSource: {
     en: "Read from the game's battle code: modifiers are summed per stat (plain % keeps only the largest increase and decrease), and a status set already on the unit from the same source is replaced or grown, never added twice, with its timer restarted.",

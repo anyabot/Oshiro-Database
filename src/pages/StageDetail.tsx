@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons, TabPanel, UrlTabs } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { StackNotes } from "../stackNotes";
+import { immunityChips } from "../immunity";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
 import { useFx, useHubLabels, useLang, useT } from "../i18n";
@@ -297,6 +298,10 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
     const bases = rowBases(rows);
     return groupTexts(rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text));
   }, [e, defs]);
+  // what its attacks do besides damage (状態異常, debuffs), so it shows without opening the enemy
+  const attacks = useMemo(() => [...new Set(e.missiles.map((m) => missileText(m, defs))
+    .filter((x) => !/\(no extra effects\)$/.test(x))
+    .map((x) => x.replace(/^Missile #\d+:\s*/, "")))], [e, defs]);
   return (
     <>
       <tr className={open ? "is-open" : undefined}>
@@ -313,6 +318,7 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
             {types.join(" · ")}{e.flying ? ` · ${t("flying")}` : ""}{e.magic ? ` · ${t("magicAttack")}` : ""}{e.boss ? ` · ${t("boss")}` : ""}
           </div>
           {dot && <span className="hub-badge dot-badge" title={dot}>DoT</span>}
+          <ImmunityChips texts={innate} />
           </div>
           </div>
         </td>
@@ -325,6 +331,7 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
         <td data-label={t("thMove")}>{statCell(Math.round(e.move), 1, by(STAT.move))}</td>
         <td data-label={t("thAbilities")} className="enemy-mods">
           {innate.map((tx, i) => <div key={`i${i}`} className="small chg-innate" title={t("ownAbility")}>{fx.line(tx)}</div>)}
+          {attacks.map((tx, i) => <div key={`a${i}`} className="small chg-innate" title={t("attackEffectsTitle")}>{t("attackEffects")}: {fx.line(tx)}</div>)}
           {other.map((m, i) => <div key={i} className="small chg-singi" title={m.src}>{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
           {notes.map((m, i) => <div key={`n${i}`} className={`small chg-singi${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
           {unknown.map((m, i) => <div key={`u${i}`} className="small muted" title={`${m.src}: its target isn't an enemy type the page can test`}>? {fx.line(m.text)}</div>)}
@@ -357,6 +364,42 @@ function hasDot(e: Enemy, defs: EffectDefs): string {
 function missileText(m: MissileInfo, defs: EffectDefs): string {
   // class-ability row shape 6/2: EffectValue is a Missile.atb id (worded by the shared missile describer)
   return describeRow({ AbilityType: 6, AbilityTypeDetail: 2, EffectValue: m.id }, "ability", defs).text.join(" · ").replace(/^:\s*/, "");
+}
+
+/** What the enemy ignores (its own immunities, debuffs first) and the buffs it cancels on castle girls. */
+function ImmunityChips({ texts }: { texts: string[] }) {
+  const t = useT();
+  const lang = useLang();
+  const { own, blocks, gives, ailments } = useMemo(() => immunityChips(texts), [texts]);
+  if (!own.length && !blocks.length && !gives.length && !ailments.length) return null;
+  const name = (c: { en: string; ja: string }) => (lang === "ja" ? c.ja : c.en);
+  return (
+    <div className="imm">
+      {(own.length > 0 || ailments.length > 0) && (
+        <div className="imm__row" title={t("immuneTitle")}>
+          <span className="imm__label">{t("immuneTo")}</span>
+          {own.map((c) => <span key={c.key} className={`imm__chip${c.down ? " is-debuff" : ""}`}>{name(c)}</span>)}
+          {ailments.length > 0 && (
+            <span className="imm__chip is-debuff" title={ailments.join(", ")}>
+              {ailments.length >= 8 ? t("allAilments") : t("ailmentsN", { n: ailments.length })}
+            </span>
+          )}
+        </div>
+      )}
+      {blocks.length > 0 && (
+        <div className="imm__row" title={t("cancelsTitle")}>
+          <span className="imm__label">{t("cancelsOnGirls")}</span>
+          {blocks.map((c) => <span key={c.key} className="imm__chip is-cancel">{name(c)}</span>)}
+        </div>
+      )}
+      {gives.length > 0 && (
+        <div className="imm__row" title={t("givesTitle")}>
+          <span className="imm__label">{t("givesEnemies")}</span>
+          {gives.map((c) => <span key={c.key} className={`imm__chip${c.down ? " is-debuff" : ""}`}>{name(c)}</span>)}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function EnemyDetail({ id, e, defs }: { id: number; e: Enemy; defs: EffectDefs }) {

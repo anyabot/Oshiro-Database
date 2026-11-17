@@ -236,11 +236,29 @@ function effectRow(table: string, row: RawRow, v: number, modifierText: (code: n
     case "ImmunityEffect": {
       // value 0: immune to every such change (「攻撃上昇効果無効」), else to changes up to the value
       const val = Number(row.ImmunityValue ?? 0);
-      let what = modifierText(Number(row.StatusModifierID ?? 0), val);
-      if (!val) what = what.replace(/ ([+−])0%?(, (?:doesn't )?stacks?)?$/, (_m, s: string) => (s === "+" ? " increases" : " decreases"));
+      const code = Number(row.StatusModifierID ?? 0);
+      const op = Number(row.ConditionOperator ?? 0);
+      let what = modifierText(code, val);
+      if (!val) {
+        // the blocked kind of change, read off the modifier worded with a value of 1: its sign or multiplier
+        // gives the direction (ExpressionType add / sub), "%" / flat / "×" its ValueType, "set to" a set
+        const probe = modifierText(code, 1).replace(/, (?:doesn't )?stacks?\b.*$/, "");
+        const sgn = /^(.*?) ([+−])1(%?)$/.exec(probe);
+        const mul = /^(.*?) ×([\d.]+)$/.exec(probe);
+        const set = /^(.*?) set to 1%?$/.exec(probe);
+        if (sgn) what = `${sgn[1]} ${sgn[2] === "+" ? "increases" : "decreases"} (${sgn[3] ? "%" : "flat"})`;
+        else if (mul) what = `${mul[1]} ${Number(mul[2]) >= 1 ? "increases" : "decreases"} (×)`;
+        else if (set) {
+          // ImmunityEffect 1 / 22 (exe comparator FUN_00af9c20: 5 <, 1 ==) on "move speed set to v": the game's
+          // texts name them 後退 (pushed back = a negative speed; 「後退効果を無効」, 7001 on 792 enemies) and
+          // 移動速度変更 / 停止 (set to 0; 金覆輪形兜 「後退と移動速度変更効果を受けない(低下は有効)」 = 7001 + 8023)
+          if (/^Move speed$/.test(set[1]) && op === 5) return "immune to knockback (後退)";
+          if (/^Move speed$/.test(set[1]) && op === 1) return "can't be stopped (immune to move speed being set to 0)";
+          what = `${set[1]} being set to a fixed value`;
+        }
+      }
       what = what.replace(/, (?:doesn't )?stacks?$/, "");
-      if (!val) what = what.replace(/ ×1$/, " multipliers");
-      what = what.replace(/ set to /, " being set to ");
+      what = what.replace(/(?<! being) set to /, " being set to ");
       // 「再び攻撃対象になる」 blocked: the unit can't be made targetable / blockable again
       const again = /^can be (targeted|blocked) again$/.exec(what);
       if (again) return `can't be made ${again[1] === "targeted" ? "targetable" : "blockable"} again`;
