@@ -70,16 +70,20 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
   }, [want]);
 
   // every scene of every part, in order, as player segments
-  const scenes = parts.flatMap((p) => (files[p.file]?.scenes ?? []).map((s) => ({ p, s })));
+  const scenes = parts.flatMap((p) => (files[p.file]?.scenes ?? []).map((s) => ({ p, s, key: `${p.key}|${s.n}` })));
+  // collapsed scenes: their text is hidden and playing skips them (a scene's own ▶ still plays it)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggle = (key: string) => setCollapsed((c) => { const n = new Set(c); if (n.has(key)) n.delete(key); else n.add(key); return n; });
   const play = async (from: number) => {
     setBusy(true);
     try {
       const [art, scene] = await Promise.all([loadArt().catch(() => null), loadSceneArt().catch(() => null)]);
-      const segments = scenes.map(({ p, s }) => ({
+      const picked = scenes.filter((x, i) => i === from || !collapsed.has(x.key));
+      const segments = picked.map(({ p, s }) => ({
         title: [p.title, p.sceneLabel?.(s.n)].filter(Boolean).join(" · "),
         frames: compile(s.cmds, art, scene, mapUrl),
       }));
-      setPlayer({ segments, start: from });
+      setPlayer({ segments, start: Math.max(0, picked.indexOf(scenes[from])) });
     } finally {
       setBusy(false);
     }
@@ -92,7 +96,14 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
     <div className="story">
       {scenes.length > 0 && (
         <div className="story__tools">
-          <button type="button" className="hub-btn" disabled={busy} onClick={() => play(0)}>▶ {t("spPlayAll")}</button>
+          <button type="button" className="hub-btn" disabled={busy || scenes.every((x) => collapsed.has(x.key))}
+            onClick={() => play(Math.max(0, scenes.findIndex((x) => !collapsed.has(x.key))))}>▶ {t("spPlayAll")}</button>
+          {scenes.length > 1 && (
+            <>
+              <button type="button" className="hub-btn hub-btn--small" onClick={() => setCollapsed(new Set(scenes.map((x) => x.key)))}>{t("storyCollapseAll")}</button>
+              <button type="button" className="hub-btn hub-btn--small" onClick={() => setCollapsed(new Set())}>{t("storyExpandAll")}</button>
+            </>
+          )}
           <span className="muted small">{t("spHint")}</span>
         </div>
       )}
@@ -107,13 +118,21 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
               idx += 1;
               const at = idx;
               const label = p.sceneLabel?.(s.n);
+              const key = scenes[at].key;
+              const shut = collapsed.has(key);
+              const count = s.cmds.filter(([c, x]) => c === "text" && x.trim()).length;
               return (
-                <div key={s.n} className="story__scene">
+                <div key={s.n} className={`story__scene${shut ? " is-collapsed" : ""}`}>
                   <div className="story__scene-head">
-                    {label && <span className="story__label">{label}</span>}
+                    <button type="button" className="story__toggle" aria-expanded={!shut} onClick={() => toggle(key)}
+                      title={t(shut ? "storyExpand" : "storyCollapse")}>
+                      <span aria-hidden="true">{shut ? "▸" : "▾"}</span>
+                      {label ? <span className="story__label">{label}</span> : <span className="story__label">{t("storySceneN", { n: s.n })}</span>}
+                      <span className="muted small">{t("storyLines", { n: count })}</span>
+                    </button>
                     <button type="button" className="hub-btn hub-btn--small" disabled={busy} onClick={() => play(at)}>▶ {t("spPlay")}</button>
                   </div>
-                  <StoryLines lines={views(s.cmds, girl)} lang="ja" renderLink={renderLink} className="story__lines" />
+                  {!shut && <StoryLines lines={views(s.cmds, girl)} lang="ja" renderLink={renderLink} className="story__lines" />}
                 </div>
               );
             })}

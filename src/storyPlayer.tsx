@@ -82,8 +82,10 @@ export function StoryPlayer({ segments, start = 0, onClose }: { segments: Segmen
         {bg && "src" in bg ? <RetryImg className="sp-bg" src={bg.src} /> : <div className="sp-bg" style={{ background: bg?.color ?? "#000" }} />}
         {f.chara && (
           <div className="sp-chara" style={{
+            // the picture at its own pixel size in the 1280x720 scene (1 px = 100/1280 cqw), hanging from the top
+            // and centred; taller card art runs off the bottom. X/Y are pixel offsets in the same scene.
             aspectRatio: `${f.chara.w} / ${f.chara.h}`,
-            // chara X/Y offsets are in the 1280x720 scene: 1 px = 100/1280 cqw
+            height: `${(f.chara.h / 1280) * 100}cqw`,
             transform: `translate(calc(-50% + ${(f.chara.dx / 1280) * 100}cqw), ${(f.chara.dy / 1280) * 100}cqw)`,
           }}>
             <RetryImg src={f.chara.src} />
