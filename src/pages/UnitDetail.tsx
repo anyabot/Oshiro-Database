@@ -511,6 +511,9 @@ export default function UnitDetail() {
               {u.transform_into.main_class && <ClassSection label={t("weapon")} block={u.transform_into.main_class} defs={defs} />}
               {u.transform_into.sub_class && <ClassSection label={t("switchWeapon")} block={u.transform_into.sub_class} defs={defs} />}
               {u.transform_into.ability && <AbilityBlock label={t("specialty")} a={u.transform_into.ability} defs={defs} />}
+              {u.transform_into.ability_tiers?.map((x) => x.ability && (
+                <AbilityBlock key={x.tier} label={t("specialty")} a={x.ability} defs={defs} from={x.label} />
+              ))}
               {u.transform_into.special_ability && <SpecialAbilityBlock s={u.transform_into.special_ability} defs={defs} />}
             </Panel>
           )}

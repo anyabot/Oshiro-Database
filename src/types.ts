@@ -154,6 +154,8 @@ export interface Transformed {
   main_class: ClassBlock | null;
   sub_class?: ClassBlock | null;
   ability?: Ability | null;
+  /** the twin's renovated specialties (Renovation{n}AbilityID) */
+  ability_tiers?: { tier: number; label: string; ability: Ability | null }[];
   general_ability?: Ability | null;
   special_ability?: SpecialAbility | null;
 }
