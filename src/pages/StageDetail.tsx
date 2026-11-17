@@ -278,6 +278,17 @@ function statCell(base: number, rateMul: number, mods: EnemyMod[]) {
   );
 }
 
+/** ATK / DEF that the enemy's own ability sets from its HP (大薙刀僧兜: 「攻撃と防御が現在耐久の半分の値になる」):
+ *  the stage table shows that value at full HP instead of the meaningless base 1. */
+function hpBasedCell(pct: number, hpFull: number, t: ReturnType<typeof useT>) {
+  const v = Math.round((hpFull * pct) / 100);
+  return (
+    <span className="up" title={t("fromHpTitle", { pct, v: v.toLocaleString() })}>
+      ≤{v.toLocaleString()}<span className="small muted"> ({t("fromHp", { pct })})</span>
+    </span>
+  );
+}
+
 function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
   id: number; e: Enemy; n: number; r: [number, number, number]; active: SingiOption[]; data: EnemyData; defs: EffectDefs;
   form?: string; depth?: number; unit?: number;
@@ -298,6 +309,16 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
     const bases = rowBases(rows);
     return groupTexts(rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text));
   }, [e, defs]);
+  // ATK / DEF set to N% of its current HP by its own ability
+  const fromHp = (stat: "ATK" | "DEF") => {
+    for (const tx of innate) {
+      const m = new RegExp(`(?:^|· )Self: [^·]*?\\b${stat}\\b[^·]*? set to (\\d+(?:\\.\\d+)?)% of (?:its |the giver's )?Current HP`).exec(tx);
+      if (m) return Number(m[1]);
+    }
+    return 0;
+  };
+  const hpFull = applyStat(Math.round(e.hp * rate(r[1])), by(STAT.hp));
+  const atkHp = fromHp("ATK"), defHp = fromHp("DEF");
   // what its attacks do besides damage (状態異常, debuffs), so it shows without opening the enemy
   const attacks = useMemo(() => [...new Set(e.missiles.map((m) => missileText(m, defs))
     .filter((x) => !/\(no extra effects\)$/.test(x))
@@ -324,8 +345,8 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
         </td>
         <td data-label="#">{form ? "–" : n}</td>
         <td data-label={t("thHp")}>{statCell(e.hp, rate(r[1]), by(STAT.hp))}</td>
-        <td data-label={t("thAtk")}>{statCell(e.atk, rate(r[0]), by(STAT.atk))}</td>
-        <td data-label={t("thDef")}>{statCell(e.def, rate(r[2]), by(STAT.def))}</td>
+        <td data-label={t("thAtk")}>{atkHp ? hpBasedCell(atkHp, hpFull, t) : statCell(e.atk, rate(r[0]), by(STAT.atk))}</td>
+        <td data-label={t("thDef")}>{defHp ? hpBasedCell(defHp, hpFull, t) : statCell(e.def, rate(r[2]), by(STAT.def))}</td>
         <td data-label={t("thMdef")}>{statCell(e.mdef, 1, by(STAT.mdef))}</td>
         <td data-label={t("thRange")}>{statCell(e.range, 1, by(STAT.range))}</td>
         <td data-label={t("thMove")}>{statCell(Math.round(e.move), 1, by(STAT.move))}</td>

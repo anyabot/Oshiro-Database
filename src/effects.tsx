@@ -697,7 +697,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       return `${statName} ${v}%`;
     }
     let amount: string;
-    if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
+    // set from another status (ValueType 6, FUN_00ae7f10): 大薙刀僧兜 「自身の攻撃と防御が現在耐久の半分の値になる」 =
+    // SMT 403 / 419 set ATK / DEF to 50% of status 102 (current HP)
+    if (expr === 3 && vt === 6) amount = `set to ${v}% of ${refSender ? "the giver's " : ""}${word(`status:${ref}`, `stat ${ref}`)}`;
+    else if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
     else if (w?.unit === "倍" && w.form === "mul") amount = `×${fmt(v / 100)}`;
     else if (w?.unit === "秒") amount = `${sign}${w.form === "milli" ? fmt(v / 1000) : v}s`;
@@ -1235,6 +1238,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // "Physical damage reduction 10%, +10% more each time it is attacked, up to 50%"
     // (reduction amounts have no "set to": "Physical damage reduction 10%, grows by that amount …")
     const grown = text.map((t) => t
+      // on its own unit the giver is itself: "Self: DEF set to 50% of its Current HP"
+      .replace(/^(Self: [^·]*?) of the giver's /, "$1 of its ")
       .replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `)
       // a signed amount (flat or %) or an unsigned % ("reduction 10%"); a bare number ("every 2s") is no amount
       .replace(/ (?:([+−])([\d.]+%?)|()([\d.]+%))([^:·]*?), grows by that amount /g,

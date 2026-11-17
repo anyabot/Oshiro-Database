@@ -352,6 +352,9 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/\battacks gain ([^,]+)/g, (_m, x) => `攻撃に${words(x)}を付与`],
   [/\battacks lose ([^,]+)/g, (_m, x) => `攻撃の${words(x)}を除去`],
   [/\battack properties set to: /g, "攻撃属性を変更: "],
+  // 「自身の攻撃と防御が現在耐久の半分の値になる」: "DEF set to 50% of (the giver's) Current HP"
+  [/\b([A-Za-z][A-Za-z .'-]*?) set to (\d+(?:\.\d+)?)% of (the giver's |its )?([A-Za-z][A-Za-z .'-]*?)(?=,|$| ·)/g,
+    (_m, a, n, g, b) => `${words(a)}が${g === "the giver's " ? "付与者の" : ""}${words(b)}の${n}%の値になる`],
   [/\beach attack it makes, /g, "攻撃毎に\u0005"],
   [/\beach time it is attacked, /g, "被攻撃毎に\u0005"],
   [/\beach enemy it defeats, /g, "敵撃破毎に\u0005"],

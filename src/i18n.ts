@@ -372,6 +372,11 @@ export const UI = {
     en: "Buffs this enemy denies the castle girls its ability reaches (see its ability line for which ones).",
     ja: "この敵の特技が及ぶ城娘に対して無効化する効果 (対象は特技の行を参照)。",
   },
+  fromHp: { en: "{pct}% of current HP", ja: "現在耐久の{pct}%" },
+  fromHpTitle: {
+    en: "Its ability sets this to {pct}% of its current HP: {v} at full HP (stage multiplier included), falling as it loses HP. Per-wave and other enemies' HP buffs raise it further.",
+    ja: "特技により現在耐久の{pct}%の値になる: 最大耐久時 {v} (ステージ倍率込み)。耐久が減るほど低下。波毎の上昇や他の敵の耐久上昇でさらに高くなる。",
+  },
   attackEffects: { en: "Its attacks", ja: "攻撃時" },
   attackEffectsTitle: { en: "Effects its normal attacks carry besides damage (its missile rows)", ja: "通常攻撃がダメージ以外に与える効果 (ミサイル設定より)" },
   givesEnemies: { en: "Gives enemies immunity", ja: "敵に無効付与" },
