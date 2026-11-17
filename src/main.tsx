@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import UnitList from "./pages/UnitList";
 import UnitDetail from "./pages/UnitDetail";
 import Buffs from "./pages/Buffs";
+import Team from "./pages/Team";
+import Collection from "./pages/Collection";
 import Stages from "./pages/Stages";
 import StageDetail from "./pages/StageDetail";
 import Equipment from "./pages/Equipment";
@@ -27,6 +29,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="units" element={<UnitList />} />
           <Route path="units/:id" element={<UnitDetail />} />
           <Route path="buffs" element={<Buffs />} />
+          <Route path="team" element={<Team />} />
+          <Route path="collection" element={<Collection />} />
           <Route path="stages" element={<Stages />} />
           <Route path="stages/:id" element={<StageDetail />} />
           <Route path="equipment" element={<Equipment />} />

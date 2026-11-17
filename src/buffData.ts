@@ -1,0 +1,78 @@
+// public/data/buffs.json (scripts/buffs.ts) and the words for its effect keys, shared by the buff ranking
+// (pages/Buffs.tsx) and the team builder (pages/Team.tsx).
+import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
+import { getLang } from "./i18n";
+import { clauseJa, hasEnglish } from "./effectsJa";
+import type { ReachRule } from "./reach";
+
+/** One row of public/data/buffs.json (scripts/buffs.ts). */
+export interface BuffRow {
+  u: number;
+  /** renovation tier the slot comes from; -1 = every tier */
+  t: number;
+  sl: string;
+  /** "<stat key>|<+|->|<unit>" */
+  k: string;
+  v: number;
+  mx?: number;
+  /** grows with no cap (LimitValue 9999+) */
+  nc?: 1;
+  sd: "a" | "e";
+  w: string;
+  n?: string;
+  st?: 0 | 1 | string;
+  nm?: string;
+  /** per giantification: mx = v × the giver's highest grade at this tier */
+  pg?: 1;
+}
+export interface BuffData {
+  keys: Record<string, string>;
+  rows: BuffRow[];
+  /** highest giantification grade per renovation tier, for castle girls where it isn't 5 */
+  gm?: Record<string, number[]>;
+}
+/** A castle girl's highest giantification grade at a renovation tier. */
+export const giantGrade = (d: BuffData | undefined, u: number, tier: number) => {
+  const g = d?.gm?.[u];
+  return g ? g[Math.max(0, Math.min(tier, g.length - 1))] : 5;
+};
+
+const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data/${n}.json`] });
+
+export const useBuffData = () => useJson<BuffData>(loader, "buffs");
+/** "a|<receiver>" / "e|<receiver>" -> who it reaches (src/reach.ts) */
+export const useReach = () => useJson<Record<string, ReachRule>>(loader, "reach");
+
+const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec", "/s": "per second" };
+const UNIT_TAG_JA: Record<string, string> = { "%": "%", "": "固定値", "×": "×", s: "秒", "/s": "毎秒" };
+export const HITS = "hits|+|hits";
+export function effectLabel(k: string, names: Record<string, string>): string {
+  const [key, dir, unit] = k.split("|");
+  const en = names[key] ?? key;
+  const ja = getLang() === "ja" ? clauseJa(en) : "";
+  const name = ja && !hasEnglish(ja) ? ja : en;
+  const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
+  // utility effects have no amount: just the name; hit counts likewise
+  if (key.startsWith("util:") || k === HITS) return name;
+  return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
+}
+
+/** Just the effect's name ("ATK", "Damage dealt"), for chips that print the signed amount next to it. */
+export function effectName(k: string, names: Record<string, string>): string {
+  const key = k.split("|")[0];
+  const en = names[key] ?? key;
+  const ja = getLang() === "ja" ? clauseJa(en) : "";
+  return ja && !hasEnglish(ja) ? ja : en;
+}
+
+const fmtNum = (n: number) => String(Math.round(n * 1000) / 1000);
+export function fmtAmount(k: string, v: number): string {
+  const [, dir, unit] = k.split("|");
+  if (k === HITS) return getLang() === "ja" ? `${v}回` : `${v} hits`;
+  if (unit === "×") return `×${fmtNum(v)}`;
+  return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
+}
+/** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */
+export const PERMANENT = 1e9;
+export const isUtil = (k: string) => k.startsWith("util:");
+

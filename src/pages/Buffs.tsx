@@ -2,34 +2,11 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FallbackImage, FilterChip, FilterRow, GroupCard, LoadState, PageHeader, SegmentedButtons } from "@altterisk/game-hub";
 import { listState, searchParamsAdapter } from "@altterisk/game-hub/filters";
-import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 import { altName, iconUrl, nameOf, rarityLabel, tierName, useMeta, useUnits, weaponLabel } from "../data";
 import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
-import { getLang, useFx, useHubLabels, useT, type UiKey } from "../i18n";
-import { clauseJa, hasEnglish } from "../effectsJa";
-
-/** One row of public/data/buffs.json (scripts/buffs.ts). */
-interface BuffRow {
-  u: number;
-  /** renovation tier the slot comes from; -1 = every tier */
-  t: number;
-  sl: string;
-  /** "<stat key>|<+|->|<unit>" */
-  k: string;
-  v: number;
-  mx?: number;
-  /** grows with no cap (LimitValue 9999+) */
-  nc?: 1;
-  sd: "a" | "e";
-  w: string;
-  n?: string;
-  st?: 0 | 1 | string;
-  nm?: string;
-}
-interface BuffData { keys: Record<string, string>; rows: BuffRow[] }
-
-const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data/${n}.json`] });
+import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
+import { HITS, PERMANENT, effectLabel, fmtAmount, isUtil, useBuffData, type BuffRow } from "../buffData";
 
 const CATEGORIES: { k: string; label: UiKey }[] = [
   { k: "offense", label: "catOffense" },
@@ -95,31 +72,6 @@ function reach(r: BuffRow): string {
 
 
 
-const UNIT_TAG: Record<string, string> = { "%": "%", "": "flat", "×": "×", s: "sec", "/s": "per second" };
-const UNIT_TAG_JA: Record<string, string> = { "%": "%", "": "固定値", "×": "×", s: "秒", "/s": "毎秒" };
-const HITS = "hits|+|hits";
-function effectLabel(k: string, names: Record<string, string>): string {
-  const [key, dir, unit] = k.split("|");
-  const en = names[key] ?? key;
-  const ja = getLang() === "ja" ? clauseJa(en) : "";
-  const name = ja && !hasEnglish(ja) ? ja : en;
-  const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
-  // utility effects have no amount: just the name; hit counts likewise
-  if (key.startsWith("util:") || k === HITS) return name;
-  return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
-}
-
-const fmtNum = (n: number) => String(Math.round(n * 1000) / 1000);
-function fmtAmount(k: string, v: number): string {
-  const [, dir, unit] = k.split("|");
-  if (k === HITS) return getLang() === "ja" ? `${v}回` : `${v} hits`;
-  if (unit === "×") return `×${fmtNum(v)}`;
-  return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
-}
-/** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */
-const PERMANENT = 1e9;
-const isUtil = (k: string) => k.startsWith("util:");
-
 /** Multipliers below 1 rank the smaller one first; everything else the bigger amount. */
 const lowerFirst = (k: string) => k.endsWith("|-|×");
 
@@ -127,7 +79,7 @@ const PREVIEW = 10;
 
 /** Who gives the biggest X to whom: one ranked list per effect and source. */
 export default function Buffs() {
-  const { data, loading, error } = useJson<BuffData>(loader, "buffs");
+  const { data, loading, error } = useBuffData();
   const { data: index } = useUnits();
   const { data: meta } = useMeta();
   const [params, setParams] = useSearchParams();

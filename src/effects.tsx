@@ -919,7 +919,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       : trigger
       ? `${cap(trigger)}${subject ? `, ${subject.charAt(0).toLowerCase()}${subject.slice(1)}` : ""}: `
       : subject ? `${subject}: ` : "";
-    const perGrowUp = num("EachGrowUp") ? `, ${word("field:EachGrowUp", "per giantification")}` : "";
+    // EachGrowUp with GrowUpLimitOnly is a flat amount once at max size: every such row's text says so
+    // (九龍城砦「最大化時、攻撃が敵の防御を40%無視」, 高鍋城「最大化時、射程内の城娘の耐久が15%上昇」; 5 of 5)
+    const perGrowUp = num("EachGrowUp") && !num("GrowUpLimitOnly") ? `, ${word("field:EachGrowUp", "per giantification")}` : "";
     // receiver and side of the row's stat changes, for the ranking
     const tgJp = defs.labels[`target:${num("AbilityTargetType")}`]?.jp;
     const hitEnemy = at === 2 && trigger && subject === "Self";

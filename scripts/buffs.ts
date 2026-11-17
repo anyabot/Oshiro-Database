@@ -7,12 +7,20 @@ import path from "node:path";
 import { describeRow, motionHits, rowBases, stratagemContext, type RowContext, type BuffFact, type EffectDefs, type RowKind } from "../src/effects";
 import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
+import { reachParser, type ReachRule } from "../src/reach";
+import { maxGrade, type Growth, type Reno } from "../src/statSim";
 import type { Ability, PossessionRule, PossessionSource, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
 
 const root = path.resolve(process.argv[2] ?? ".");
 const data = (p: string) => JSON.parse(fs.readFileSync(path.join(root, "public/data", p), "utf8"));
 const defs: EffectDefs = data("effects.json");
 const index: UnitIndexEntry[] = data("units.json");
+const growth: Growth = data("growth.json");
+/** each castle girl's highest giantification grade per renovation tier (Rarity.GrowUpLimit by effective ★:
+ *  3 / 4 / 5; Card.GrowUpLimitType 1000 = 9 for 九龍城砦, 1001 = 1 for lords); written to buffs.json as gm
+ *  where it isn't 5 at every tier */
+const grades = new Map<number, number[]>();
+const gradeAt = (u: number, t: number) => { const g = grades.get(u) ?? [5]; return g[t < 0 ? g.length - 1 : Math.min(t, g.length - 1)]; };
 
 /** One row of buffs.json (short keys: ~10k rows). */
 export interface BuffRow {
@@ -33,6 +41,8 @@ export interface BuffRow {
   st?: 0 | 1 | string;
   /** ability / stratagem name */
   nm?: string;
+  /** per giantification (EachGrowUp): mx is v × her highest grade at this tier */
+  pg?: 1;
 }
 
 const rows: BuffRow[] = [];
@@ -129,13 +139,13 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
       const sd = (side ?? f.side) === "enemy" ? "e" : "a";
       const k = `${f.key}|${f.dir}|${f.unit}`;
       keyNames.set(f.key, statName(f.key));
-      // EachGrowUp (「巨大化毎に」): the amount per giantification stage, so at full size (5 stages, the most a
-      // castle girl reaches) it is five times the row's value; ranked at that maximum
+      // EachGrowUp (「巨大化毎に」): the amount per giantification stage, so at full size it is the row's value
+      // times her highest grade (5 for most, 9 for 九龍城砦); ranked at that maximum
       const perGiant = !f.max && f.unit !== "×" && /per giantification/.test(`${f.note ?? ""} ${f.text}`);
       rows.push({
         u, t, sl, k, v: f.v, sd, w: f.who,
         // LimitValue 9999 / 10000 / 999999: the texts give no cap (e.g. さらに5%ずつ上昇): ranked by the step
-        ...(f.max && f.max >= 9999 ? { nc: 1 as const } : f.max ? { mx: f.max } : perGiant ? { mx: f.v * 5 } : {}), ...(f.note ? { n: f.note } : {}),
+        ...(f.max && f.max >= 9999 ? { nc: 1 as const } : f.max ? { mx: f.max } : perGiant ? { mx: f.v * gradeAt(u, t), pg: 1 as const } : {}), ...(f.note ? { n: f.note } : {}),
         ...(f.stack ? { st: f.stack === "stacks" ? 1 : f.stack === "doesn't stack" ? 0 : f.stack } : {}),
         ...(name ? { nm: name } : {}),
       });
@@ -175,6 +185,8 @@ for (const entry of index) {
   // playable cards only: no NPC / duplicate entries, and transformed states belong to their stratagem
   if (entry.npc || entry.dup_of || entry.transform_of) continue;
   const u: UnitDetail = data(`unit/${entry.id}.json`);
+  const tiers = Array.from({ length: Math.min(2, Number(u.max_renovation) || 0) + 1 }, (_, r) => maxGrade(growth, u.raw, r as Reno) || 5);
+  grades.set(u.id, tiers);
   const before = rows.length;
   for (const f of u.forms) {
     ability(u.id, f.tier, "skill", f.ability);
@@ -255,7 +267,20 @@ rows.length = 0;
 rows.push(...unique);
 const keys = Object.fromEntries([...keyNames.entries()].sort());
 const out = path.join(root, "public/data/buffs.json");
-fs.writeFileSync(out, JSON.stringify({ keys, rows }));
+const gm = Object.fromEntries([...grades].filter(([, g]) => g.some((x) => x !== 5)));
+fs.writeFileSync(out, JSON.stringify({ keys, rows, gm }));
+// who each receiver text reaches, for the team builder (src/reach.ts): "a|<text>" / "e|<text>" -> rule
+const parseReach = reachParser(data("meta.json"));
+const reach: Record<string, ReachRule> = {};
+const unparsed = new Set<string>();
+for (const r of rows) {
+  const k = `${r.sd}|${r.w}`;
+  if (k in reach || unparsed.has(k)) continue;
+  const rule = parseReach(r.w, r.sd === "e");
+  if (rule) reach[k] = rule; else unparsed.add(k);
+}
+fs.writeFileSync(path.join(root, "public/data/reach.json"), JSON.stringify(reach));
+console.log(`${Object.keys(reach).length} receivers -> public/data/reach.json${unparsed.size ? `; unparsed (left out of the team builder): ${[...unparsed].join(" · ")}` : ""}`);
 const pout = path.join(root, "public/data/possessions.json");
 fs.writeFileSync(pout, JSON.stringify({ rules: possessionRules, sources: possessions }));
 console.log(`${possessions.length} group possession abilities -> ${path.relative(root, pout)}${unruled.size ? `; no match rule for target ${[...unruled].join(", ")}` : ""}`);

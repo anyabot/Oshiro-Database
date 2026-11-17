@@ -72,6 +72,23 @@ of castle girls, with a match rule read from the exe-decoded target label (weapo
 the ones that buff her; gold/EXP (lord, all castle girls) and enemy-debuff possessions are left out. Left out: the card's own stat profile
 (`always` rows), potentials, quest-only rows, and anything still shown as raw codes.
 
+## Team builder and collection
+
+`/collection` tracks which castle girls the viewer owns and the renovation reached (browser storage,
+`src/collection.ts`; backup code / file), and can be filled from screenshots of the in-game list (城娘確認):
+`src/iconMatch.ts` (ported from the Taimanin site) finds the icon grid and matches each icon against
+`public/data/icon_hashes.json` (`tools/icon_hashes.py`, a pipeline step after the icons; the hashed crop
+skips the list's 編成中 / lock / 改 / level / ★ overlays), and reads the 改 / 改弐 badge for the renovation.
+`/team` picks a castle girl to buff and ranks who to add to
+her formation: offensive (ATK, damage dealt, multipliers, attack speed/gap, enemy DEF down, enemy
+damage taken up…) or defensive (DEF, HP, regen, damage taken down, enemy ATK/speed down…) buffs from
+`buffs.json` that reach her, new effects first, then by the share of each effect's new total
+(`src/team.ts`). Who a row reaches comes from `public/data/reach.json`, written by the same
+`npm run buffs`: each receiver text ("All Water castle girls", "Melee castle girls in the formation")
+parsed by `src/reach.ts` into a rule (self / castle girls, maybe a weapon, region, trait, category,
+terrain, rarity or melee/ranged group / enemies / someone else). The run lists any receiver it can't
+parse; those rows are left out of the team builder until `src/reach.ts` learns them.
+
 ## Card art (image repos)
 
 Full card art is too big for this repo, so it lives in separate public GitHub repos served by

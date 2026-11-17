@@ -45,6 +45,16 @@ export const LIST_META: Record<string, PageMeta> = {
     description:
       "Every Shiro Project:RE lord outfit (殿の装束): what it changes on the lord at the base camp: HP, ATK, DEF, range, attack wait, targets and its effect, at any lord level.",
   },
+  "/team": {
+    title: "Team Builder",
+    description:
+      "Shiro Project:RE team builder: pick a castle girl to buff, add her formation, and see which castle girls in your collection add the most offensive or defensive buffs (ATK, damage dealt, enemy DEF down, damage taken down, enemy ATK down) that reach her.",
+  },
+  "/collection": {
+    title: "Collection Tracker",
+    description:
+      "Track which Shiro Project:RE castle girls you own and how far each is renovated; the team builder ranks buffers from your collection. Saved in your browser, with a backup code.",
+  },
   "/buffs": {
     title: "Buff Ranking",
     description:
