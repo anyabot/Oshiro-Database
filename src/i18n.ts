@@ -372,6 +372,16 @@ export const UI = {
     en: "Buffs this enemy denies the castle girls its ability reaches (see its ability line for which ones).",
     ja: "この敵の特技が及ぶ城娘に対して無効化する効果 (対象は特技の行を参照)。",
   },
+  dmgTakenTitle: { en: "Why enemies here take less damage", ja: "この合戦で敵が受けるダメージが減る理由" },
+  dmgTakenAll: { en: "each one alive cuts damage again; all {n} alive at once: ×{x}", ja: "生存している数だけ重ねて軽減。{n}体すべて生存時: ×{x}" },
+  dmgTakenYokai: {
+    en: "妖怪 ({n} here) take only 50% of the damage from attacks without 妖怪特攻 (anti-yokai): the game's default, applied to the attack before DEF.",
+    ja: "妖怪 (この合戦に{n}体) は妖怪特攻のない攻撃のダメージが50%になる (ゲームの既定値)。防御より前に攻撃側で適用。",
+  },
+  dmgTakenRule: {
+    en: "Damage-taken cuts multiply one after another (each cut, each copy); it is not “only the strongest”. Attacks that ignore damage-taken effects (被ダメ効果無視) skip all of them.",
+    ja: "被ダメージ軽減は1つずつ掛け合わされます (効果ごと・敵ごと)。「最大値のみ」ではありません。被ダメ効果無視の攻撃はこれらをすべて無視します。",
+  },
   fromHp: { en: "{pct}% of current HP", ja: "現在耐久の{pct}%" },
   fromHpTitle: {
     en: "Its ability sets this to {pct}% of its current HP: {v} at full HP (stage multiplier included), falling as it loses HP. Per-wave and other enemies' HP buffs raise it further.",
