@@ -18,11 +18,40 @@ function Colored({ text }: { text: string }) {
   return <>{colored(text).map((s, i) => (s.color ? <span key={i} style={{ color: s.color }}>{s.text}</span> : <span key={i}>{s.text}</span>))}</>;
 }
 
-function preload(f: Frame | undefined) {
-  if (!f) return;
-  for (const src of [f.bg && "src" in f.bg ? f.bg.src : null, f.chara?.src, f.face?.src]) {
-    if (src) { const im = new Image(); im.src = src; }
+const picturesOf = (f: Frame) => [f.bg && "src" in f.bg ? f.bg.src : null, f.chara?.src, f.face?.src].filter((x): x is string => !!x);
+
+// Pictures fetched and decoded ahead of time. The Image objects are kept (not just requested), so the
+// browser can't drop them before they are shown and a line change paints at once.
+const warmed = new Map<string, Promise<void>>();
+const kept: HTMLImageElement[] = [];
+function warm(src: string): Promise<void> {
+  let p = warmed.get(src);
+  if (!p) {
+    const im = new Image();
+    im.decoding = "async";
+    im.src = src;
+    kept.push(im);
+    // a failed first fetch (the image CDN on a never-requested file) is forgotten so it can be tried again
+    p = im.decode().catch(() => { warmed.delete(src); });
+    warmed.set(src, p);
   }
+  return p;
+}
+
+/** Every picture of the run, the ones just ahead of `at` first, fetched a few at a time. */
+function useWarmPictures(frames: Frame[], at: number) {
+  useEffect(() => {
+    let stop = false;
+    const order = [...frames.slice(at), ...frames.slice(0, at)].flatMap(picturesOf);
+    const todo = [...new Set(order)].filter((src) => !warmed.has(src));
+    const worker = async () => {
+      while (!stop && todo.length) await warm(todo.shift()!);
+    };
+    for (let i = 0; i < 4; i++) void worker();
+    return () => { stop = true; };
+  }, [frames, at]);
+  // drop the kept images when the player closes
+  useEffect(() => () => { kept.length = 0; warmed.clear(); }, []);
 }
 
 export function StoryPlayer({ segments, start = 0, onClose }: { segments: Segment[]; start?: number; onClose: () => void }) {
@@ -38,7 +67,11 @@ export function StoryPlayer({ segments, start = 0, onClose }: { segments: Segmen
   // the dialogue, built once per run so a translator's replacements are never overwritten
   const lines = useMemo<SceneLine[]>(() => flat.map(({ f }) => ({ name: f.name || undefined, text: <Colored text={f.text} /> })), [flat]);
   const cur = flat[stepper.at];
-  useEffect(() => { preload(flat[stepper.at + 1]?.f); preload(flat[stepper.at + 2]?.f); }, [stepper.at, flat]);
+  const frames = useMemo(() => flat.map((x) => x.f), [flat]);
+  // restarts only when the reader jumps, not on every line: in order, the next lines are already queued
+  const [warmFrom, setWarmFrom] = useState(stepper.at);
+  useEffect(() => { if (Math.abs(stepper.at - warmFrom) > 20) setWarmFrom(stepper.at); }, [stepper.at, warmFrom]);
+  useWarmPictures(frames, warmFrom);
 
   if (!cur) return null;
   const { f } = cur;
