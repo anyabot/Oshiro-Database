@@ -260,7 +260,7 @@ function tierViews(u: Unit): TierView[] {
   return views;
 }
 
-function FormPanel({ view, defs }: { view: TierView; defs?: EffectDefs }) {
+function FormPanel({ view, defs, general }: { view: TierView; defs?: EffectDefs; general?: Ability | null }) {
   const sl = view.slots;
   const strat = sl.stratagems;
   const sa = sl.special_attack;
@@ -274,6 +274,11 @@ function FormPanel({ view, defs }: { view: TierView; defs?: EffectDefs }) {
       })}
       {strat?.[0].stratagems?.map((s, i) => <StratagemBlock key={`${s.id}-${i}`} s={s} defs={defs} from={strat[1]} />)}
       {sa?.[0].special_attack && <SpecialAttackBlock sa={sa[0].special_attack} defs={defs} from={sa[1]} />}
+      {/* a general ability (汎用特技) has no text of its own: its effects are the part other texts describe, e.g.
+          [雲耀]鹿児島城 「自身が敵を撃破した数に応じて特殊攻撃で与えるダメージが5%ずつ上昇」 = 100073 */}
+      {general && !general.missing && !general.description && general.effects?.length ? (
+        <AbilityBlock label={t("generalAbility")} a={{ ...general, description: t("generalAbilityNote") }} defs={defs} />
+      ) : null}
       {Object.keys(sl).length === 0 && <p className="muted">{t("noAbilities")}</p>}
     </Panel>
   );
@@ -496,7 +501,7 @@ export default function UnitDetail() {
           )}
           {view && (
             <TabPanel tab={String(view.tier)} idBase="kai">
-              <FormPanel view={view} defs={defs} />
+              <FormPanel view={view} defs={defs} general={u.general_ability} />
             </TabPanel>
           )}
           {u.special_ability && <Panel title={t("specialAbility")}><SpecialAbilityBlock s={u.special_ability} defs={defs} /></Panel>}

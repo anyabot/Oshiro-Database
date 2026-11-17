@@ -378,6 +378,10 @@ export const UI = {
     en: "Numbers are waypoints in the order the enemy walks them (as in “On its path”); a coloured stretch is where that route ability holds, with the seconds it waits there.",
     ja: "数字は敵が通る経由点の順番 (「経路上」と同じ)。色の区間はその経路効果が有効な範囲、秒数はそこでの待機時間。",
   },
+  generalAbilityNote: {
+    en: "No text of its own: these are the effects the texts above describe (e.g. a special attack's “+5% per enemy defeated”). Active in every tier.",
+    ja: "固有のテキストなし: 上のテキストが説明している効果 (例: 特殊攻撃の「撃破数に応じて5%ずつ上昇」)。全段階で有効。",
+  },
   onItsPath: { en: "On its path:", ja: "経路上:" },
   routeSpan: { en: "from waypoint {a} until waypoint {b} of {n}", ja: "経由点{a}から{b}まで (全{n})" },
   routeToEnd: { en: "from waypoint {a} to the end of its path ({n} waypoints)", ja: "経由点{a}から経路の最後まで (全{n})" },
