@@ -216,6 +216,20 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
               <RowList rows={withTargets(stage.mapEffect)} defs={defs} />
             </Panel>
           )}
+          {stage.waveEffects && stage.waveEffects.length > 0 && (
+            <Panel title={t("waveEffects")} note={t("waveEffectsNote")}>
+              {stage.waveEffects.map((w, i) => (
+                <div key={i} className="wave-fx">
+                  <span className="small">
+                    <b>{w.wave ? t("waveN", { n: w.wave }) : t("mapStart")}</b>{" "}
+                    <span className="muted">({Math.floor(w.t / 1800)}:{String(Math.floor(w.t / 30) % 60).padStart(2, "0")})</span>{" "}
+                    {w.on ? t("waveOn", { id: w.on }) : t("waveOff", { id: w.off ?? 0 })}
+                  </span>
+                  {w.rows && <RowList rows={withTargets(w.rows)} defs={defs} />}
+                </div>
+              ))}
+            </Panel>
+          )}
         </TabPanel>
       )}
 

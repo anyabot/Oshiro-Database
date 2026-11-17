@@ -107,6 +107,8 @@ export interface StageDetail {
    *  enemy -> paths, each [waypoint index along the whole path, AbilityID (0 = taken away), hold seconds] */
   routeEvents?: Record<string, RoutePath[]>;
   routeAbilities?: Record<string, RawRow[]>;
+  /** map effects the spawn script switches on (on) / off (off) during the battle; wave 0 = before the first */
+  waveEffects?: { wave: number; t: number; on?: number; off?: number; rows?: RawRow[] }[];
   bushin?: string;
   spots?: StageSpots | null;
 }
