@@ -66,6 +66,24 @@ export interface StageSpots {
   hazardRows?: Record<string, RawRow[]>;
 }
 
+export interface RoutePath { r: number; n: number; ev: [number, number, number][]; end: "goal" | "loop" }
+
+/** One stretch of a path an ability holds for: from waypoint `from` to `to` (exclusive; null = to the end). */
+export interface RouteSpan { aid: number; from: number; to: number | null; hold: number; n: number }
+
+/** A path's route abilities as spans: a new route ability replaces the running one, 0 takes it away. */
+export function routeSpans(p: RoutePath): RouteSpan[] {
+  const out: RouteSpan[] = [];
+  let cur: RouteSpan | null = null;
+  for (const [step, aid, hold] of p.ev) {
+    if (cur && aid === cur.aid) continue;
+    if (cur) { cur.to = step; out.push(cur); cur = null; }
+    if (aid) cur = { aid, from: step, to: null, hold, n: p.n };
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
 export interface StageDetail {
   id: number; name: string; group: StageGroup; tab: number; tabNo: number; type: number; map: number;
   event?: number | null; live?: boolean; recovered?: boolean;
@@ -85,6 +103,10 @@ export interface StageDetail {
     from: number[];
   };
   singi: { set: number; options: SingiOption[]; gold?: number; silver?: number } | null;
+  /** abilities route points give the enemy walking them (@RouteEventType 5 -> RouteEventAbility.atb):
+   *  enemy -> paths, each [waypoint index along the whole path, AbilityID (0 = taken away), hold seconds] */
+  routeEvents?: Record<string, RoutePath[]>;
+  routeAbilities?: Record<string, RawRow[]>;
   bushin?: string;
   spots?: StageSpots | null;
 }

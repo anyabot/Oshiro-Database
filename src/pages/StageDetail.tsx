@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons, TabPanel, UrlTabs } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
 import { immunityChips } from "../immunity";
+import { routeSpans, type RoutePath } from "../stages";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
 import { useFx, useHubLabels, useLang, useT } from "../i18n";
@@ -157,14 +158,15 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
           )}
           <Panel title={t("enemies")} note={<>{t("enemiesNote", { then: active.length ? t("thenDelib") : "" })}{" "}
             <span className="chg-innate">{t("ownAbility")}</span> <span className="chg-singi">{t("fromDelib")}</span></>}>
-            <DamageTakenSummary ids={order.map((o) => o.id)} counts={stage.counts} data={data} defs={defs} />
+            <DamageTakenSummary ids={order.map((o) => o.id)} counts={stage.counts} data={data} defs={defs}
+              routes={stage.routeEvents} routeAb={stage.routeAbilities} />
             <table className="hub-table hub-table--stack enemy-table">
               <thead><tr><th>{t("enemy")}</th><th>#</th><th>{t("thHp")}</th><th>{t("thAtk")}</th><th>{t("thDef")}</th><th>{t("thMdef")}</th><th>{t("thRange")}</th><th>{t("thMove")}</th><th>{t("thAbilities")}</th></tr></thead>
               <tbody>
                 {order.map(({ id: eid, form, depth }) => {
                   const e = data.enemies[eid];
                   return e ? <EnemyRow key={eid} id={eid} e={e} n={stage.counts[eid] ?? 0} r={r} active={active} data={data} defs={defs}
-                    form={form} depth={depth} unit={girlLink(e)} /> : null;
+                    form={form} depth={depth} unit={girlLink(e)} paths={stage.routeEvents?.[eid]} routeAb={stage.routeAbilities} /> : null;
                 })}
               </tbody>
             </table>
@@ -288,9 +290,47 @@ function hpBasedCell(pct: number, hpFull: number, t: ReturnType<typeof useT>) {
   );
 }
 
-function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
+/** A route ability's rows as one sentence (RouteEventAbility.atb rows have the enemy-ability shape). */
+function routeAbilityText(rows: RawRow[] | undefined, defs: EffectDefs): string {
+  if (!rows) return "";
+  const rs = enemyAbilityRows(rows);
+  const bases = rowBases(rs);
+  return groupTexts(rs.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text)).join(" · ");
+}
+
+/** What its path does to it: the abilities route points give it, with where they hold. */
+function RouteLines({ paths, routeAb, defs }: { paths?: RoutePath[]; routeAb?: Record<string, RawRow[]>; defs: EffectDefs }) {
+  const t = useT();
+  const fx = useFx();
+  const lines = useMemo(() => {
+    const out: { text: string; span: string }[] = [];
+    for (const p of paths ?? []) {
+      for (const sp of routeSpans(p)) {
+        const text = routeAbilityText(routeAb?.[sp.aid], defs) || `route ability ${sp.aid}`;
+        const span = sp.to === null
+          ? t("routeToEnd", { a: sp.from + 1, n: sp.n })
+          : t("routeSpan", { a: sp.from + 1, b: sp.to + 1, n: sp.n });
+        const hold = sp.hold ? ` ${t("routeHold", { s: sp.hold, a: sp.from + 1 })}` : "";
+        const line = { text, span: span + hold };
+        if (!out.some((x) => x.text === line.text && x.span === line.span)) out.push(line);
+      }
+    }
+    return out;
+  }, [paths, routeAb, defs, t]);
+  return (
+    <>
+      {lines.map((l, i) => (
+        <div key={`r${i}`} className="small chg-route" title={t("routeTitle")}>
+          <b>{t("onItsPath")}</b> {fx.line(l.text)} <span className="muted">({l.span})</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit, paths, routeAb }: {
   id: number; e: Enemy; n: number; r: [number, number, number]; active: SingiOption[]; data: EnemyData; defs: EffectDefs;
-  form?: string; depth?: number; unit?: number;
+  form?: string; depth?: number; unit?: number; paths?: RoutePath[]; routeAb?: Record<string, RawRow[]>;
 }) {
   const [open, setOpen] = useState(false);
   const t = useT();
@@ -351,6 +391,7 @@ function EnemyRow({ id, e, n, r, active, data, defs, form, depth = 0, unit }: {
         <td data-label={t("thMove")}>{statCell(Math.round(e.move), 1, by(STAT.move))}</td>
         <td data-label={t("thAbilities")} className="enemy-mods">
           {innate.map((tx, i) => <div key={`i${i}`} className="small chg-innate" title={t("ownAbility")}>{fx.line(tx)}</div>)}
+          <RouteLines paths={paths} routeAb={routeAb} defs={defs} />
           {attacks.map((tx, i) => <div key={`a${i}`} className="small chg-innate" title={t("attackEffectsTitle")}>{t("attackEffects")}: {fx.line(tx)}</div>)}
           {other.map((m, i) => <div key={i} className="small chg-singi" title={m.src}>{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
           {notes.map((m, i) => <div key={`n${i}`} className={`small chg-singi${m.sure ? "" : " muted"}`} title={m.src}>{m.sure ? "" : "? "}{fx.line(m.text.replace(/^[^:]*: /, ""))}</div>)}
@@ -393,8 +434,9 @@ function missileText(m: MissileInfo, defs: EffectDefs): string {
  *    copies from different enemies are separate entries (status sets are keyed by source, FUN_00546780).
  *  - FUN_004cd680: a 妖怪 target hit by an attack without 妖怪特攻 (flag 128) takes status 214 % of it, else
  *    BattleSystemConfig PropertyID 12 = 50%. */
-function DamageTakenSummary({ ids, counts, data, defs }: {
+function DamageTakenSummary({ ids, counts, data, defs, routes, routeAb }: {
   ids: number[]; counts: Record<string, number>; data: EnemyData; defs: EffectDefs;
+  routes?: Record<string, RoutePath[]>; routeAb?: Record<string, RawRow[]>;
 }) {
   const t = useT();
   const fx = useFx();
@@ -418,7 +460,21 @@ function DamageTakenSummary({ ids, counts, data, defs }: {
     }
     return { auras, yokai };
   }, [ids, counts, data, defs]);
-  if (!auras.length && !yokai) return null;
+  // route abilities: which enemies get each one from their paths, and how many of them spawn
+  const routeUse = useMemo(() => {
+    const m = new Map<number, { names: Set<string>; n: number }>();
+    for (const [eid, ps] of Object.entries(routes ?? {})) {
+      const e = data.enemies[Number(eid)];
+      for (const aid of new Set(ps.flatMap((p) => routeSpans(p).map((s) => s.aid)))) {
+        const u = m.get(aid) ?? { names: new Set<string>(), n: 0 };
+        if (e) u.names.add(e.name);
+        u.n += counts[eid] ?? 0;
+        m.set(aid, u);
+      }
+    }
+    return [...m].map(([aid, u]) => ({ aid, text: routeAbilityText(routeAb?.[aid], defs), names: [...u.names], n: u.n }));
+  }, [routes, routeAb, data, counts, defs]);
+  if (!auras.length && !yokai && !routeUse.length) return null;
   const fmtX = (x: number) => (x >= 0.01 ? x.toFixed(x >= 0.1 ? 2 : 3) : x.toPrecision(2));
   return (
     <div className="fx-stack dmg-summary">
@@ -428,6 +484,11 @@ function DamageTakenSummary({ ids, counts, data, defs }: {
           <li key={i}>
             <b>{a.name}</b>{a.n > 1 ? ` ×${a.n}` : ""}: {fx.line(a.text)}
             {a.n > 1 && <> — {t("dmgTakenAll", { n: a.n, x: fmtX(Math.pow(1 - a.pct / 100, a.n)) })}</>}
+          </li>
+        ))}
+        {routeUse.map((u) => (
+          <li key={`ra${u.aid}`}>
+            <b>{t("routeAbility")}</b> {fx.line(u.text)} — {t("routeAbilityWho", { n: u.n, names: u.names.slice(0, 6).join(", ") + (u.names.length > 6 ? ", …" : "") })}
           </li>
         ))}
         {yokai > 0 && <li>{t("dmgTakenYokai", { n: yokai })}</li>}

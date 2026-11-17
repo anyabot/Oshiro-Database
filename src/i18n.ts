@@ -372,6 +372,16 @@ export const UI = {
     en: "Buffs this enemy denies the castle girls its ability reaches (see its ability line for which ones).",
     ja: "この敵の特技が及ぶ城娘に対して無効化する効果 (対象は特技の行を参照)。",
   },
+  onItsPath: { en: "On its path:", ja: "経路上:" },
+  routeSpan: { en: "from waypoint {a} until waypoint {b} of {n}", ja: "経由点{a}から{b}まで (全{n})" },
+  routeToEnd: { en: "from waypoint {a} to the end of its path ({n} waypoints)", ja: "経由点{a}から経路の最後まで (全{n})" },
+  routeHold: { en: "· waits {s}s at waypoint {a}", ja: "· 経由点{a}で{s}秒待機" },
+  routeTitle: {
+    en: "Given by points on the route this enemy walks (map route events → RouteEventAbility). Not part of its own ability, so it isn't in its effect list.",
+    ja: "この敵が通る経路の地点で付与される効果 (経路イベント → RouteEventAbility)。敵自身の特技ではないため効果一覧には出ません。",
+  },
+  routeAbility: { en: "Route ability:", ja: "経路効果:" },
+  routeAbilityWho: { en: "given by points on the paths of {n} spawns ({names}); see “On its path” on each enemy for where it holds", ja: "{n}体の経路上で付与 ({names})。どこで有効かは各敵の「経路上」を参照" },
   dmgTakenTitle: { en: "Why enemies here take less damage", ja: "この合戦で敵が受けるダメージが減る理由" },
   dmgTakenAll: { en: "each one alive cuts damage again; all {n} alive at once: ×{x}", ja: "生存している数だけ重ねて軽減。{n}体すべて生存時: ×{x}" },
   dmgTakenYokai: {
