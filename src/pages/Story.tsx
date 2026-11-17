@@ -317,7 +317,10 @@ function StoryRead({ kind, id }: { kind: string; id: string }) {
       if (at < 0) return null;
       return {
         title: s?.name ?? `#${id}`, back: s ? <Link to={`/stages/${s.id}`}>{t("storyOpenStage")}</Link> : null,
-        parts: [{ key: id, title: "", file: `q/${id}`, sceneLabel: questLabel }] as ReaderPart[],
+        parts: [
+          ...(index.quests.includes(Number(id)) ? [{ key: id, title: "", file: `q/${id}`, sceneLabel: questLabel }] : []),
+          ...(index.talks?.includes(Number(id)) ? [{ key: `t${id}`, title: t("battleTalk"), file: `t/${id}` }] : []),
+        ] as ReaderPart[],
         prev: at > 0 ? index.quests[at - 1] : null, next: at + 1 < index.quests.length ? index.quests[at + 1] : null,
       };
     }

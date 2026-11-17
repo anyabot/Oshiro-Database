@@ -5,7 +5,9 @@ import { createJsonLoader, useJson } from "@altterisk/game-hub/data";
 const loader = createJsonLoader({ urls: (n) => [`${import.meta.env.BASE_URL}data/${n}.json`] });
 
 export type Cmd = [string, string];
-export interface Scene { n: number; cmds: Cmd[] }
+/** A battle talk's trigger (story/t/): battle start, a wave, or an enemy (form) appearing */
+export interface TalkWhen { on: "start" | "wave" | "form" | "transform"; wave?: number; enemy?: number; name?: string }
+export interface Scene { n: number; cmds: Cmd[]; when?: TalkWhen }
 export interface SceneFile { scenes: Scene[] }
 
 /** One entry of an event book: a scene (AnyEventText) or a quest's own scenes. */
@@ -14,10 +16,10 @@ export interface BookPart {
 }
 export interface Book { id: string; kind: string; title: string; parts: BookPart[] }
 export interface Skit { id: number; title: string; date: string; n: number; first: string }
-export interface StoryIndex { quests: number[]; books: Book[]; skits: Skit[]; bonds: [number, number][] }
+export interface StoryIndex { quests: number[]; books: Book[]; skits: Skit[]; bonds: [number, number][]; talks?: number[] }
 
 export const useStoryIndex = () => useJson<StoryIndex>(loader, "story/index");
-/** file: q/<QuestID>, e/<SceneID>, s/<SkitID>, b/<CardID> */
+/** file: q/<QuestID>, e/<SceneID>, s/<SkitID>, b/<CardID>, t/<QuestID> (battle talks) */
 export const useSceneFile = (file: string | null) => useJson<SceneFile>(loader, file ? `story/${file}` : null);
 export const loadSceneFile = (file: string) => loader.load<SceneFile>(`story/${file}`);
 

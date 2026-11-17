@@ -98,7 +98,9 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   const { data: events } = useEvents();
   const ev = stage.event != null ? events?.find((e) => e.id === stage.event) : undefined;
   const { data: storyIndex } = useStoryIndex();
-  const hasStory = !!storyIndex?.quests.includes(stage.id);
+  const hasQuestStory = !!storyIndex?.quests.includes(stage.id);
+  const hasTalk = !!storyIndex?.talks?.includes(stage.id);
+  const hasStory = hasQuestStory || hasTalk;
   // sections as tabs (?tab=); Enemies is the default and keeps the URL clean
   // enemy paths whose route points give the enemy abilities, for the map (one button per distinct path)
   const fxm = useFx();
@@ -253,7 +255,10 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
       {tab === "story" && hasStory && (
         <TabPanel tab="story" idBase="stage">
           <Panel title={t("story")} note={<>{t("storyNote")} · <Link to={`/story/q/${stage.id}`}>{t("storyReadOn")}</Link></>}>
-            <StoryReader parts={[{ key: String(stage.id), title: "", file: `q/${stage.id}`, sceneLabel: (n) => t(QUEST_SCENE[n] ?? "storyScene3") }]} />
+            <StoryReader parts={[
+              ...(hasQuestStory ? [{ key: String(stage.id), title: "", file: `q/${stage.id}`, sceneLabel: (n: number) => t(QUEST_SCENE[n] ?? "storyScene3") }] : []),
+              ...(hasTalk ? [{ key: `t${stage.id}`, title: t("battleTalk"), file: `t/${stage.id}` }] : []),
+            ]} />
           </Panel>
         </TabPanel>
       )}

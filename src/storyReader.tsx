@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { LoadState, StoryLines, routerLinks, type StoryLineView } from "@altterisk/game-hub";
 import { iconUrl, useUnits } from "./data";
 import type { UnitIndexEntry } from "./types";
-import { colored, compile, lines, loadArt, loadSceneArt, loadSceneFile, type SceneFile } from "./story";
+import { colored, compile, lines, loadArt, loadSceneArt, loadSceneFile, type SceneFile, type TalkWhen } from "./story";
 import { StoryPlayer, type Segment } from "./storyPlayer";
 import { useHubLabels, useT, type UiKey } from "./i18n";
 
@@ -24,6 +24,13 @@ const mapUrl = (n: number) => `${import.meta.env.BASE_URL}stage-map/${n}.webp`;
 
 /** Quest scene labels: 1 before the battle, 2 after, 3 continued. */
 export const QUEST_SCENE: Record<number, UiKey> = { 1: "storyScene1", 2: "storyScene2", 3: "storyScene3" };
+
+/** A battle talk's label from its trigger. */
+function talkLabel(t: ReturnType<typeof useT>, w: TalkWhen): string {
+  if (w.on === "start") return t("talkStart");
+  if (w.on === "wave") return w.wave ? t("talkWave", { n: w.wave }) : t("talkStart");
+  return t("talkEnemy", { name: w.name || `#${w.enemy}` });
+}
 
 function Colored({ text }: { text: string }) {
   return <>{colored(text).map((s, i) => (s.color ? <span key={i} style={{ color: s.color }}>{s.text}</span> : <span key={i}>{s.text}</span>))}</>;
@@ -80,7 +87,7 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
       const [art, scene] = await Promise.all([loadArt().catch(() => null), loadSceneArt().catch(() => null)]);
       const picked = scenes.filter((x, i) => i === from || !collapsed.has(x.key));
       const segments = picked.map(({ p, s }) => ({
-        title: [p.title, p.sceneLabel?.(s.n)].filter(Boolean).join(" · "),
+        title: [p.title, p.sceneLabel?.(s.n) ?? (s.when ? talkLabel(t, s.when) : undefined)].filter(Boolean).join(" · "),
         frames: compile(s.cmds, art, scene, mapUrl),
       }));
       setPlayer({ segments, start: Math.max(0, picked.indexOf(scenes[from])) });
@@ -117,7 +124,7 @@ export function StoryReader({ parts }: { parts: ReaderPart[] }) {
             {f?.scenes.map((s) => {
               idx += 1;
               const at = idx;
-              const label = p.sceneLabel?.(s.n);
+              const label = p.sceneLabel?.(s.n) ?? (s.when ? talkLabel(t, s.when) : undefined);
               const key = scenes[at].key;
               const shut = collapsed.has(key);
               const count = s.cmds.filter(([c, x]) => c === "text" && x.trim()).length;
