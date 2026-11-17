@@ -365,6 +365,7 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   // notes
   [/(^|, )doesn't stack\b/g, "$1重複不可"],
   [/(^|, )stacks\b/g, "$1重複可"],
+  [/(^|, )refreshes\b/g, "$1再発動で時間更新"],
   [/\bfor the rest of the battle\b|\(the rest of the battle\)/g, "戦闘終了まで"],
   [new RegExp(`\\bfor (${N})ms\\b`, "g"), "$1ミリ秒間"],
   [new RegExp(`\\bfor (${N})s\\b`, "g"), "$1秒間"],

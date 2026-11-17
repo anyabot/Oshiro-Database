@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { FallbackImage, LoadState, PageHeader, Panel, SegmentedButtons, TabPanel, UrlTabs } from "@altterisk/game-hub";
 import { describeRow, rowBases, useEffectDefs, type EffectDefs } from "../effects";
-import { StackNotes } from "../stackNotes";
 import { immunityChips } from "../immunity";
 import { groupRows, groupTexts } from "../group";
 import { tagEN } from "../labels";
@@ -232,7 +231,6 @@ function RowList({ rows, defs, kind = "organized", enemy = false }: { rows: RawR
       <ul className="fx-plain">
         {lines.map((l, i) => <li key={i}>{l.text ? fx.line(l.text) : t("notDecoded")}</li>)}
       </ul>
-      <StackNotes texts={lines.map((l) => l.text)} />
     </>
   );
 }

@@ -16,7 +16,6 @@ import { StatSimPanel } from "../statSimPanel";
 import { combinedLines, type Fact } from "../combine";
 import { describeRow, rowBases, stratagemContext, useEffectDefs, type EffectDefs, type RowContext, type RowKind, type Sentence } from "../effects";
 import { groupRows, type Line } from "../group";
-import { StackNotes } from "../stackNotes";
 import type {
   Ability, ClassBlock, FieldLink, Form, PossessionSource, RawRow, SpecialAbility, SpecialAttack, Stratagem, UnitDetail as Unit, UnitIndexEntry,
 } from "../types";
@@ -79,7 +78,6 @@ function EffectList({ title, rows, kind, defs, links, ctx }: {
           {combined.map((c, i) => <div key={i}>{fx.line(c)}</div>)}
         </div>
       )}
-      <StackNotes texts={shown.map((l) => l.text)} />
     </div>
   );
 }

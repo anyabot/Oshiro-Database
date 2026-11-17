@@ -1238,6 +1238,9 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // "Physical damage reduction 10%, +10% more each time it is attacked, up to 50%"
     // (reduction amounts have no "set to": "Physical damage reduction 10%, grows by that amount …")
     const grown = text.map((t) => t
+      // a triggered effect with a timer is re-applied by each new trigger: the game replaces the live copy and
+      // restarts its timer (FUN_00546780 -> FUN_00498840 copy / FUN_00ae8ae0 growth, then FUN_00414720 reset)
+      .replace(/^(.*\b(?:each time (?:it is )?attacked|each attack(?: it makes)?|each hit(?: taken)?|each (?:enemy it defeats|enemy defeated|kill)|on hit|with its special attack)\b.*?, for [\d.]+s)(?=,|$)/i, "$1, refreshes")
       // on its own unit the giver is itself: "Self: DEF set to 50% of its Current HP"
       .replace(/^(Self: [^·]*?) of the giver's /, "$1 of its ")
       .replace(/ set to ([\d.]+%?)(.*?), grows by that amount /g, (_, n, mid) => ` ${n}${mid}, +${n} more `)

@@ -396,35 +396,6 @@ export const UI = {
   },
   allAilments: { en: "All status ailments", ja: "全状態異常" },
   ailmentsN: { en: "{n} status ailments", ja: "状態異常{n}種" },
-  stackNoteTitle: { en: "How these stack", ja: "効果の重複について" },
-  stackNoteSource: {
-    en: "Read from the game's battle code: modifiers are summed per stat (plain % keeps only the largest increase and decrease), and a status set already on the unit from the same source is replaced or grown, never added twice, with its timer restarted.",
-    ja: "ゲームの戦闘処理から確認: 補正はステータスごとに集計 (通常の%は最大の上昇・低下のみ)。同じ発生源の効果が既に付いている場合は上書き(または段階上昇)され、二重には付かず、効果時間はリセットされます。",
-  },
-  stackNoteStrongest: {
-    en: "“doesn't stack” = a plain % change. When several effects (other castle girls, equipment, stratagems…) raise the same stat by a plain %, only the biggest increase counts, and of the decreases only the biggest: ATK +30% and ATK +50% give +50%, not +80%. Effects marked “stacks” still apply as well.",
-    ja: "「重複不可」= 通常の%補正。同じステータスを%で上げる効果が複数あっても (他の城娘・武器・計略など)、上昇は最も大きいもの1つ、低下も最も大きいもの1つだけが適用されます。攻撃+30%と攻撃+50%なら+50% (+80%にはなりません)。「重複可」の効果はそれとは別に適用されます。",
-  },
-  stackNoteAdds: {
-    en: "“stacks” = adds up with every other effect of its kind, whatever the source: two ATK +10% that stack give +20%; flat amounts add the same way (ATK +100 and +50 = +150).",
-    ja: "「重複可」= 同種の効果と発生源に関係なく合算されます。重複可の攻撃+10%が2つなら+20%、固定値も同様に合算 (攻撃+100と+50で+150)。",
-  },
-  stackNoteRetrigger: {
-    en: "Triggered again while it is still active (another hit taken, attack, kill…): the effect never stacks with itself. The new trigger replaces the running one: the amount stays the same and the timer starts over from the full {d}. So while it keeps being triggered, a “for {d}” effect simply stays up.",
-    ja: "効果中に再び発動した場合 (被攻撃・攻撃・撃破など): 同じ効果は自身と重複しません。新しい発動が現在の効果を上書きし、値はそのまま、効果時間は{d}にリセットされます。発動し続ける限り、「{d}間」の効果は切れずに続きます。",
-  },
-  stackNoteRetriggerAny: {
-    en: "Triggered again while it is still active (another hit taken, attack, kill…): the effect never stacks with itself. The new trigger replaces the running one: the amount stays the same and its timer starts over from its full duration.",
-    ja: "効果中に再び発動した場合 (被攻撃・攻撃・撃破など): 同じ効果は自身と重複しません。新しい発動が現在の効果を上書きし、値はそのまま、効果時間は最初からやり直しになります。",
-  },
-  stackNoteRetriggerNoTimer: {
-    en: "Triggered again while it is still active: the effect never stacks with itself; the new trigger just replaces the running one at the same amount.",
-    ja: "効果中に再び発動しても、同じ効果は自身と重複せず、同じ値で上書きされるだけです。",
-  },
-  stackNoteGrow: {
-    en: "“+N more each …, up to M”: a new trigger while it is still active doesn't add a second copy; it raises that same effect by another N (never past M) and restarts its timer. Once the timer runs out, it starts again from the first step.",
-    ja: "「…ごとに+N、上限M」: 効果中に再び発動しても2つ目は付かず、同じ効果がさらにN上昇し (上限Mまで)、効果時間もリセットされます。効果時間が切れると、最初の段階からやり直しです。",
-  },
   strongestOnly: { en: "strongest only", ja: "最大値のみ" },
   showTop: { en: "Show top {n}", ja: "上位{n}件を表示" },
   showAll: { en: "Show all {n}", ja: "全{n}件を表示" },
