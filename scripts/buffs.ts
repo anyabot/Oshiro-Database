@@ -219,6 +219,17 @@ for (const entry of index) {
   ability(u.id, -1, "class", u.class_ability);
   ability(u.id, -1, "class", u.sub_class?.class_ability);
   ability(u.id, -1, "special", u.special_ability?.sub_ability);
+  // its transformed twin (the special ability / stratagem turns it into a CardType-15 card): that card's
+  // specialty per renovation tier, its stratagem effects and special ability apply while transformed
+  const tw = u.transform_into;
+  if (tw) {
+    if (tw.ability_tiers?.length) {
+      ability(u.id, 0, "transformed", tw.ability);
+      for (const x of tw.ability_tiers) ability(u.id, x.tier, "transformed", x.ability);
+    } else ability(u.id, -1, "transformed", tw.ability);
+    ability(u.id, -1, "transformed", tw.general_ability);
+    ability(u.id, -1, "transformed", tw.special_ability?.sub_ability);
+  }
   if (rows.length > before) units++;
   for (const f of u.forms) {
     const p = f.possessed;

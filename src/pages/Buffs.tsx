@@ -69,6 +69,7 @@ const SOURCES: { value: string; label: UiKey; note: UiKey }[] = [
   { value: "class", label: "srcClass", note: "noteClass" },
   { value: "weapon", label: "srcWeapon", note: "noteWeapon" },
   { value: "special", label: "srcSpecial", note: "noteSpecial" },
+  { value: "transformed", label: "srcTransformed", note: "noteTransformed" },
   { value: "possession", label: "srcPossession", note: "notePossession" },
   { value: "defeat", label: "srcDefeat", note: "noteDefeat" },
   { value: "token", label: "srcToken", note: "noteToken" },

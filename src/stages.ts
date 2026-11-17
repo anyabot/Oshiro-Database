@@ -66,7 +66,7 @@ export interface StageSpots {
   hazardRows?: Record<string, RawRow[]>;
 }
 
-export interface RoutePath { r: number; n: number; ev: [number, number, number][]; end: "goal" | "loop" }
+export interface RoutePath { r: number; n: number; ev: [number, number, number][]; end: "goal" | "loop"; xy?: [number, number][] }
 
 /** One stretch of a path an ability holds for: from waypoint `from` to `to` (exclusive; null = to the end). */
 export interface RouteSpan { aid: number; from: number; to: number | null; hold: number; n: number }

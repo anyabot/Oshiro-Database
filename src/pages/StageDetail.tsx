@@ -12,7 +12,7 @@ import {
   type Enemy, type EnemyData, type EnemyMod, type MissileInfo, type SingiOption, type StageDetail as Stage,
 } from "../stages";
 import { usePageMeta } from "../usePageMeta";
-import { StageMap, removedNames } from "../stageMap";
+import { StageMap, removedNames, type MapPath, type MapPathAbility } from "../stageMap";
 import { useUnits } from "../data";
 import { useStoryIndex } from "../story";
 import { QUEST_SCENE, StoryReader } from "../storyReader";
@@ -100,6 +100,30 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
   const { data: storyIndex } = useStoryIndex();
   const hasStory = !!storyIndex?.quests.includes(stage.id);
   // sections as tabs (?tab=); Enemies is the default and keeps the URL clean
+  // enemy paths whose route points give the enemy abilities, for the map (one button per distinct path)
+  const fxm = useFx();
+  const mapPaths = useMemo(() => {
+    const abilities: MapPathAbility[] = [];
+    const abIndex = (aid: number) => {
+      let i = abilities.findIndex((a) => a.id === aid);
+      if (i < 0) { i = abilities.length; abilities.push({ id: aid, text: fxm.line(routeAbilityText(stage?.routeAbilities?.[aid], defs!)) }); }
+      return i;
+    };
+    const paths: MapPath[] = [];
+    if (stage?.routeEvents && defs && data) {
+      for (const [eid, ps] of Object.entries(stage.routeEvents)) {
+        const name = data.enemies[Number(eid)]?.name ?? `#${eid}`;
+        ps.forEach((p, i) => {
+          if (!p.xy?.length) return;
+          paths.push({
+            key: `${eid}-${i}`, label: ps.length > 1 ? `${name} (${i + 1})` : name, xy: p.xy,
+            spans: routeSpans(p).map((sp) => ({ from: sp.from, to: sp.to, ab: abIndex(sp.aid), hold: sp.hold })),
+          });
+        });
+      }
+    }
+    return { paths, abilities };
+  }, [stage, defs, data, fxm]);
   const tabs = [
     { id: "enemies", label: t("enemies") },
     { id: "map", label: t("mapTitle") },
@@ -179,6 +203,7 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
           {stage.spots ? (
             <Panel title={t("mapTitle")}>
               <StageMap info={stage.spots} mapNo={stage.map} questId={stage.id} name={stage.name} hard={hard}
+                paths={mapPaths.paths} pathAbilities={mapPaths.abilities}
                 removers={active.filter((o) => o.mask).map((o) => ({ name: o.name, mask: o.mask! }))}
                 rowList={(rows, kind) => kind === "ability" ? <RowList rows={rows} defs={defs} kind="ability" />
                   : <RowList rows={withTargets(rows.map(({ EffectTextureID, AttributeMatchEffectID, ...r }) => r))} defs={defs} />} />

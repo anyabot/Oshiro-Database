@@ -40,6 +40,16 @@ const kindKey = (k: number) => (k in BADGE ? String(k) : "x");
 const onMap = (s: MapSpot) => s.x >= 0 && s.y >= 0 && s.x <= GAME_W && s.y <= GAME_H;
 
 type Icons = { img: Record<string, HTMLImageElement>; origin: Record<string, [number, number]> };
+
+/** An enemy path whose route points give it abilities (stage routeEvents): its waypoints and where each
+ *  route ability holds. `ab` indexes MapPathAbility. */
+export interface MapPath {
+  key: string; label: string; xy: [number, number][];
+  spans: { from: number; to: number | null; ab: number; hold: number }[];
+}
+export interface MapPathAbility { id: number; text: string }
+const PATH_COLORS = ["#f97316", "#ef4444", "#a855f7", "#22c55e", "#eab308", "#06b6d4"];
+const letter = (i: number) => String.fromCharCode(65 + i);
 let iconsPromise: Promise<Icons | null> | null = null;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -128,6 +138,61 @@ interface DrawInput {
   show: Set<string>; text: (s: MapSpot) => string | null; footer: string;
   /** deploy spots the chosen deliberations removed: drawn faded and crossed out */
   gone: MapSpot[];
+  /** the chosen enemy path with its route abilities */
+  path?: MapPath;
+}
+
+/** An enemy's path: the route as a line, stretches where a route ability holds in that ability's colour
+ *  (letter at its start), numbered waypoints and the seconds it waits where it holds. */
+function drawPath(ctx: CanvasRenderingContext2D, p: MapPath) {
+  const pt = (i: number) => [p.xy[i][0] * SCALE, p.xy[i][1] * SCALE] as const;
+  const on = (i: number) => { const [x, y] = p.xy[i]; return x >= 0 && y >= 0 && x <= GAME_W && y <= GAME_H; };
+  const seg = (a: number, b: number, color: string, width: number) => {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    let open = false;
+    for (let i = a; i <= b && i < p.xy.length; i++) {
+      if (!on(i)) { open = false; continue; }
+      const [x, y] = pt(i);
+      if (open) ctx.lineTo(x, y); else { ctx.moveTo(x, y); open = true; }
+    }
+    ctx.stroke();
+  };
+  seg(0, p.xy.length - 1, "rgba(0,0,0,0.6)", 6);
+  seg(0, p.xy.length - 1, "rgba(255,255,255,0.85)", 3);
+  for (const s of p.spans) seg(s.from, s.to ?? p.xy.length - 1, PATH_COLORS[s.ab % PATH_COLORS.length], 5);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  // waypoints: points on top of each other (a 1 px step before a hold) share one number range
+  const placed: { x: number; y: number; n: string[] }[] = [];
+  p.xy.forEach((_, i) => {
+    if (!on(i)) return;
+    const [x, y] = pt(i);
+    const near = placed.find((q) => Math.hypot(q.x - x, q.y - y) < 10);
+    if (near) near.n.push(String(i + 1)); else placed.push({ x, y, n: [String(i + 1)] });
+  });
+  ctx.font = "bold 11px Inter, system-ui, sans-serif";
+  for (const q of placed) {
+    const label = q.n.length > 1 ? `${q.n[0]}–${q.n[q.n.length - 1]}` : q.n[0];
+    const w = Math.max(18, ctx.measureText(label).width + 8);
+    ctx.fillStyle = "#11141b"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(q.x - w / 2, q.y - 9, w, 18, 9); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#fff"; ctx.fillText(label, q.x, q.y + 1);
+  }
+  // ability letters (and hold seconds) beside the waypoint where each stretch starts
+  for (const s of p.spans) {
+    if (!on(s.from)) continue;
+    const [x, y] = pt(s.from);
+    const tag = `${letter(s.ab)}${s.hold ? ` ${s.hold}s` : ""}`;
+    badgeAt(ctx, tag, x + 14, y - 16, PATH_COLORS[s.ab % PATH_COLORS.length]);
+  }
+}
+
+function badgeAt(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, fill: string) {
+  ctx.font = "bold 12px Inter, system-ui, sans-serif";
+  const w = ctx.measureText(text).width + 10;
+  ctx.fillStyle = fill; ctx.strokeStyle = "rgba(0,0,0,0.85)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(x, y - 9, w, 18, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(text, x + 5, y + 1); ctx.textAlign = "center";
 }
 
 function draw(canvas: HTMLCanvasElement, d: DrawInput) {
@@ -190,6 +255,7 @@ function draw(canvas: HTMLCanvasElement, d: DrawInput) {
     ctx.moveTo(x - w / 2 - 2, y - top - 7); ctx.lineTo(x + w / 2 + 2, y - top - 7);
     ctx.stroke();
   }
+  if (d.path) drawPath(ctx, d.path);
   ctx.fillStyle = "#11141b";
   ctx.fillRect(0, H, W, FOOTER);
   ctx.fillStyle = "#e6e8ee";
@@ -198,8 +264,10 @@ function draw(canvas: HTMLCanvasElement, d: DrawInput) {
   ctx.fillText(d.footer, 8, H + FOOTER / 2);
 }
 
-export function StageMap({ info, mapNo, questId, name, hard, removers, rowList }: {
+export function StageMap({ info, mapNo, questId, name, hard, removers, rowList, paths, pathAbilities }: {
   info: StageSpots; mapNo: number; questId: number; name: string; hard: boolean;
+  /** enemy paths whose route points give the enemy abilities, and those abilities' texts */
+  paths?: MapPath[]; pathAbilities?: MapPathAbility[];
   /** chosen deliberations that remove spots (配置マス制限) */
   removers: { name: string; mask: number }[];
   /** renders effect rows with the stage page's effect list: PlacementEffect rows, or a card's Ability rows */
@@ -214,6 +282,8 @@ export function StageMap({ info, mapNo, questId, name, hard, removers, rowList }
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [phase, setPhase] = useState(0);
   const [note, setNote] = useState("");
+  const [pathKey, setPathKey] = useState("");
+  const path = paths?.find((p) => p.key === pathKey);
   const phases = useMemo(() => mapPhases(info), [info]);
   const cur = phases[Math.min(phase, phases.length - 1)];
   const labels = useMemo(() => spotLabels(info, lang), [info, lang]);
@@ -257,7 +327,7 @@ export function StageMap({ info, mapNo, questId, name, hard, removers, rowList }
 
   useEffect(() => {
     if (img && icons !== undefined && canvasRef.current) {
-      draw(canvasRef.current, { img, icons, info, spots: present, labels, show, text, footer, gone });
+      draw(canvasRef.current, { img, icons, info, spots: present, labels, show, text, footer, gone, path });
     }
   });
 
@@ -328,9 +398,36 @@ export function StageMap({ info, mapNo, questId, name, hard, removers, rowList }
           {note && <span className="muted small" role="status">{note}</span>}
         </span>
       </div>
+      {paths && paths.length > 0 && (
+        <div className="stage-map-phases" role="group" aria-label={t("mapPaths")}>
+          <span className="muted small">{t("mapPaths")}</span>
+          <button type="button" aria-pressed={!path} className={`hub-btn hub-btn--sm${!path ? " stage-map-phase--active" : ""}`}
+            onClick={() => setPathKey("")}>{t("mapPathNone")}</button>
+          {paths.map((p) => (
+            <button key={p.key} type="button" aria-pressed={pathKey === p.key}
+              className={`hub-btn hub-btn--sm${pathKey === p.key ? " stage-map-phase--active" : ""}`} onClick={() => setPathKey(p.key)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
       {failed ? <p className="muted">{t("mapUnavailable")}</p> : !ready && <p className="loading">{t("mapLoading")}</p>}
       <canvas ref={canvasRef} className="stage-map-canvas" hidden={!ready || failed}
         aria-label={t("mapAria", { name, m: n(4), r: n(5), a: n(1), w: n(9) })} />
+      {path && (
+        <ul className="fx-plain small stage-map-path-legend">
+          {[...new Set(path.spans.map((x) => x.ab))].map((ab) => (
+            <li key={ab}>
+              <span className="stage-map-key" style={{ background: PATH_COLORS[ab % PATH_COLORS.length], color: "#fff" }}>{letter(ab)}</span>{" "}
+              {pathAbilities?.[ab]?.text}{" "}
+              <span className="muted">({path.spans.filter((x) => x.ab === ab).map((x) => x.to === null
+                ? t("routeToEnd", { a: x.from + 1, n: path.xy.length })
+                : t("routeSpan", { a: x.from + 1, b: x.to + 1, n: path.xy.length })).join("; ")})</span>
+            </li>
+          ))}
+          <li className="muted">{t("mapPathNote")}</li>
+        </ul>
+      )}
       {removers.map((r) => {
         const names = removedNames(info, r.mask, lang, hard);
         return names.length ? <p key={r.name} className="small chg-singi">{t("mapRemoved", { name: r.name, spots: names.join(", ") })}</p> : null;
