@@ -141,6 +141,9 @@ export default function Buffs() {
   const cat = CATEGORIES.find((c) => c.k === url.text("cat"))?.k ?? "offense";
   const sources = url.list("source");
   const reaches = url.list("to");
+  // stacking: "1" stacks, "0" strongest only, "x" anything else (a rule in words, or none given)
+  const stacking = url.list("stack");
+  const stackOf = (r: BuffRow) => (r.st === 1 ? "1" : r.st === 0 ? "0" : "x");
   const base = url.text("tier") === "base";
   const byValue = url.text("rank") === "value";
   // castle girl filters (same as the castle girl list): only buffs from matching castle girls
@@ -164,8 +167,9 @@ export default function Buffs() {
   const filtered = useMemo(() => tiered.filter((r) =>
     (!sources.length || sources.includes(r.sl))
     && (!reaches.length || reaches.includes(reach(r)))
+    && (!stacking.length || stacking.includes(stackOf(r)))
     && (!unitFilter.activeCount || unitFilter.matches(units.get(r.u)))),
-  [tiered, sources.join(), reaches.join(), unitFilter.matches, unitFilter.activeCount, units]);
+  [tiered, sources.join(), reaches.join(), stacking.join(), unitFilter.matches, unitFilter.activeCount, units]);
 
   const unitsIn = (list: BuffRow[]) => new Set(list.map((r) => r.u)).size;
   const byCat = useMemo(() => {
@@ -234,6 +238,12 @@ export default function Buffs() {
         {REACH.map((o) => (
           <FilterChip key={o.value} active={reaches.includes(o.value)} onClick={() => url.toggle("to", o.value)}>{t(o.label)}</FilterChip>
         ))}
+      </FilterRow>
+      <FilterRow label={t("stacking")}>
+        <FilterChip active={!stacking.length} onClick={() => url.clear(["stack"])}>{t("all")}</FilterChip>
+        <FilterChip active={stacking.includes("1")} onClick={() => url.toggle("stack", "1")}>{t("stacks")}</FilterChip>
+        <FilterChip active={stacking.includes("0")} onClick={() => url.toggle("stack", "0")}>{t("strongestOnly")}</FilterChip>
+        <FilterChip active={stacking.includes("x")} onClick={() => url.toggle("stack", "x")}>{t("stackOther")}</FilterChip>
       </FilterRow>
       <FilterRow label={t("source")}>
         <FilterChip active={!sources.length} onClick={() => url.clear(["source"])}>{t("all")}</FilterChip>

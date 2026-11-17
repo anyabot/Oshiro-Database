@@ -362,6 +362,8 @@ export const UI = {
   max: { en: "max {v}", ja: "最大 {v}" },
   noCap: { en: "no cap", ja: "上限なし" },
   stacks: { en: "stacks", ja: "重複" },
+  stacking: { en: "Stacking", ja: "重複" },
+  stackOther: { en: "other / not stated", ja: "その他・記載なし" },
   immuneTo: { en: "Immune", ja: "無効" },
   immuneTitle: {
     en: "Changes this enemy ignores (from its ability's immunity rows). ↓ = it can't be lowered, ↑ = it can't be raised.",

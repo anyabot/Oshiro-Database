@@ -129,10 +129,13 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
       const sd = (side ?? f.side) === "enemy" ? "e" : "a";
       const k = `${f.key}|${f.dir}|${f.unit}`;
       keyNames.set(f.key, statName(f.key));
+      // EachGrowUp (「巨大化毎に」): the amount per giantification stage, so at full size (5 stages, the most a
+      // castle girl reaches) it is five times the row's value; ranked at that maximum
+      const perGiant = !f.max && f.unit !== "×" && /per giantification/.test(`${f.note ?? ""} ${f.text}`);
       rows.push({
         u, t, sl, k, v: f.v, sd, w: f.who,
         // LimitValue 9999 / 10000 / 999999: the texts give no cap (e.g. さらに5%ずつ上昇): ranked by the step
-        ...(f.max && f.max >= 9999 ? { nc: 1 as const } : f.max ? { mx: f.max } : {}), ...(f.note ? { n: f.note } : {}),
+        ...(f.max && f.max >= 9999 ? { nc: 1 as const } : f.max ? { mx: f.max } : perGiant ? { mx: f.v * 5 } : {}), ...(f.note ? { n: f.note } : {}),
         ...(f.stack ? { st: f.stack === "stacks" ? 1 : f.stack === "doesn't stack" ? 0 : f.stack } : {}),
         ...(name ? { nm: name } : {}),
       });
