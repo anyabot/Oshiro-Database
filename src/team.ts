@@ -13,14 +13,17 @@ const DEF_UP = new Set([101, 102, 103, 111, 301, 302, 303, 305]);
 const SKIP_SLOTS = new Set(["possession", "defeat"]);
 
 // utility: Ki coming in (per kill, over time, at once, back on retreat), natural Ki gain, and shorter
-// stratagem / Great Magic cooldowns (10104 reuse %, 10101 s, 10102 progress, 10107 first use, 10454 Great Magic)
+// stratagem / Great Magic cooldowns (10104 reuse %, 10101 s, 10102 progress, 10107 first use, 10454 Great Magic),
+// cheaper giantification (10204 %, 10205 flat)
 const KI_GAIN = new Set(["status:10206", "status:10201", "ki:periodic", "ki:natural", "abilitytype:5/2"]);
 const COOLDOWN = new Set([10101, 10102, 10104, 10107, 10454]);
-export const UTIL_GROUP = (k: string): "ki" | "natural" | "cdr" | null => {
+const GIANT_COST = new Set([10204, 10205]);
+export const UTIL_GROUP = (k: string): "ki" | "natural" | "cdr" | "giant" | null => {
   const [key, dir] = k.split("|");
   if (key === "ki:natural") return dir === "+" ? "natural" : null;
   if (KI_GAIN.has(key)) return dir === "+" ? "ki" : null;
   const s = Number(/^status:(\d+)/.exec(key)?.[1] ?? NaN);
+  if (GIANT_COST.has(s)) return dir === "-" ? "giant" : null;
   return COOLDOWN.has(s) && dir === "-" ? "cdr" : null;
 };
 
