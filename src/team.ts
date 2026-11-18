@@ -3,7 +3,7 @@
 import type { BuffRow } from "./buffData";
 import { groupMatches, type ReachRule, type ReachUnit } from "./reach";
 
-export type Mode = "off" | "def";
+export type Mode = "off" | "def" | "util";
 
 // StatusType numbers by what an increase does for the receiver
 const OFF_UP = new Set([202, 203, 205, 206, 208, 209, 210, 212, 213, 214, 219, 220]);
@@ -12,12 +12,25 @@ const DEF_UP = new Set([101, 102, 103, 111, 301, 302, 303, 305]);
 // (撃破時) when she falls
 const SKIP_SLOTS = new Set(["possession", "defeat"]);
 
-/** Offense / defense for the team builder, or null when the row is neither (Ki, utility, a stat going the bad way). */
+// utility: Ki coming in (per kill, over time, at once, back on retreat), natural Ki gain, and shorter
+// stratagem / Great Magic cooldowns (10104 reuse %, 10101 s, 10102 progress, 10107 first use, 10454 Great Magic)
+const KI_GAIN = new Set(["status:10206", "status:10201", "ki:periodic", "ki:natural", "abilitytype:5/2"]);
+const COOLDOWN = new Set([10101, 10102, 10104, 10107, 10454]);
+export const UTIL_GROUP = (k: string): "ki" | "natural" | "cdr" | null => {
+  const [key, dir] = k.split("|");
+  if (key === "ki:natural") return dir === "+" ? "natural" : null;
+  if (KI_GAIN.has(key)) return dir === "+" ? "ki" : null;
+  const s = Number(/^status:(\d+)/.exec(key)?.[1] ?? NaN);
+  return COOLDOWN.has(s) && dir === "-" ? "cdr" : null;
+};
+
+/** Offense / defense / utility for the team builder, or null (a stat going the bad way, or none of them). */
 export function modeOf(r: BuffRow): Mode | null {
   if (SKIP_SLOTS.has(r.sl)) return null;
   const [key, dir] = r.k.split("|");
   const s = Number(/^status:(\d+)/.exec(key)?.[1] ?? NaN);
   const up = dir === "+";
+  if (r.sd === "a" && UTIL_GROUP(r.k)) return "util";
   if (r.sd === "a") {
     if (key === "dmg:dealt" || key === "dmg:bonus") return up ? "off" : null;
     if (key === "dmg:taken") return up ? null : "def";
@@ -88,6 +101,11 @@ export function reaching(rows: BuffRow[], giver: number, target: TeamUnit, reach
     if (modeOf(r) !== mode) continue;
     const rule = reach[`${r.sd}|${r.w}`];
     if (!rule || rule.s === "no") continue;
+    // Ki and cooldowns help the whole formation whoever they land on: every member's count
+    if (mode === "util") {
+      out.push({ row: r, giver, v: r.nc ? r.v : r.pg ? r.v * grade : r.mx ?? r.v, near: rule.p === "range" });
+      continue;
+    }
     if (rule.s === "self" && giver !== target.id) continue;
     if (rule.s === "ally" && ((rule.x && giver === target.id) || !groupMatches(rule, target, target.terrainWords))) continue;
     out.push({ row: r, giver, v: r.nc ? r.v : r.pg ? r.v * grade : r.mx ?? r.v, near: rule.p === "range" || (rule.s === "enemy" && /in range|area|hit|blocks|^Target/.test(r.w)) });

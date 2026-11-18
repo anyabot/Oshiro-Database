@@ -50,7 +50,7 @@ export default function Team() {
   const owned = Object.keys(coll).length;
   const targetId = Number(params.get("t")) || null;
   const members = (params.get("m") || "").split(",").map(Number).filter((n) => n && n !== targetId);
-  const mode: Mode = params.get("mode") === "def" ? "def" : "off";
+  const mode: Mode = params.get("mode") === "def" ? "def" : params.get("mode") === "util" ? "util" : "off";
   // the pool: the viewer's collection when they have one, unless they ask for every castle girl
   const fromCollection = owned > 0 && params.get("pool") !== "all";
   const focus = new Set((params.get("k") || "").split(",").filter(Boolean));
@@ -80,6 +80,7 @@ export default function Team() {
   const both = useMemo(() => ({
     off: byKey(team.flatMap((g) => contribOf(g, "off"))),
     def: byKey(team.flatMap((g) => contribOf(g, "def"))),
+    util: byKey(team.flatMap((g) => contribOf(g, "util"))),
   }), [team.join(), target, reach, rowsBy, coll]);
   const current = both[mode];
 
@@ -201,9 +202,9 @@ export default function Team() {
 
           <Panel title={t("teamOverall", { name: nameOf(units.get(target.id)) })}>
             <div className="team-overall">
-              {(["off", "def"] as const).map((m) => (
+              {(["off", "def", "util"] as const).map((m) => (
                 <div key={m} className="team-overall__col">
-                  <h3 className="team-overall__h">{t(m === "off" ? "teamOffense" : "teamDefense")}</h3>
+                  <h3 className="team-overall__h">{t(m === "off" ? "teamOffense" : m === "def" ? "teamDefense" : "teamUtility")}</h3>
                   {both[m].size ? (
                     <ul className="team-overall__list">
                       {sortKeys(both[m]).map(([k, cs]) => (
@@ -222,6 +223,7 @@ export default function Team() {
           <FilterRow label={t("type")}>
             <FilterChip active={mode === "off"} onClick={() => { const n = new URLSearchParams(params); n.delete("mode"); n.delete("k"); setParams(n, { replace: true }); }}>{t("teamOffense")}</FilterChip>
             <FilterChip active={mode === "def"} onClick={() => { const n = new URLSearchParams(params); n.set("mode", "def"); n.delete("k"); setParams(n, { replace: true }); }}>{t("teamDefense")}</FilterChip>
+            <FilterChip active={mode === "util"} onClick={() => { const n = new URLSearchParams(params); n.set("mode", "util"); n.delete("k"); setParams(n, { replace: true }); }}>{t("teamUtility")}</FilterChip>
           </FilterRow>
 
           <Panel title={t("teamCurrent", { name: nameOf(units.get(target.id)) })}>

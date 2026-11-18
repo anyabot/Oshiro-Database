@@ -74,6 +74,7 @@ export const UI = {
   teamClear: { en: "Clear formation", ja: "編成をクリア" },
   teamOffense: { en: "Offensive buffs", ja: "攻撃バフ" },
   teamDefense: { en: "Defensive buffs", ja: "防御バフ" },
+  teamUtility: { en: "Utility (Ki gain, natural Ki, cooldowns)", ja: "補助 (気獲得・自然回復・再使用短縮)" },
   teamOverall: { en: "Everything {name} gets now", ja: "{name}が受けている効果（全体）" },
   teamMaxNote: {
     en: "Amounts assume each castle girl at full giantification (her own max: 3–5 by rarity, 9 for Kowloon) and buffs that grow at their cap.",
