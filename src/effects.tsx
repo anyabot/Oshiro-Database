@@ -1094,6 +1094,13 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (resolved == null) { resolved = `${word(key, `effect ${et}`)} ${amountFor(key, v)}`; labelFact(key, v); }
     // a spot's bonus stacks with the terrain bonus (its texts: 地形属性と重複); one spot, one occupant
     if (kind === "placement") resolved = resolved.replace(/, doesn't stack$/, "");
+    // formation specialties all add up with each other (FUN_00588220 -> FUN_005894a0 applies every row in turn,
+    // no strongest-only step), unlike battle buffs
+    if (kind === "organized") {
+      resolved = resolved.replace(/, doesn't stack\b/g, ", stacks");
+      const lf = last as { stack?: string } | null;
+      if (lf?.stack === "doesn't stack") lf.stack = "stacks";
+    }
     const tl = tail();
     // quest-only rows apply in one quest type only: not ranked
     if (kind === "quest") last = null;

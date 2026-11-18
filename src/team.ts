@@ -31,6 +31,8 @@ export function modeOf(r: BuffRow): Mode | null {
   const s = Number(/^status:(\d+)/.exec(key)?.[1] ?? NaN);
   const up = dir === "+";
   if (r.sd === "a" && UTIL_GROUP(r.k)) return "util";
+  // enemies give more Ki when defeated (撃破時獲得気 on enemies): Ki for the formation
+  if (r.sd === "e" && key === "status:10206" && up) return "util";
   if (r.sd === "a") {
     if (key === "dmg:dealt" || key === "dmg:bonus") return up ? "off" : null;
     if (key === "dmg:taken") return up ? null : "def";
