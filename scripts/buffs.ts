@@ -103,6 +103,30 @@ function motionRow(u: number, t: number, sl: string, motion: unknown, missile: u
   if (m && m.hits > 1) rows.push({ u, t, sl, k: "hits|+|hits", v: m.hits, sd: "a", w: who, n: m.text, ...(name ? { nm: name } : {}) });
 }
 
+// DEF ignore as an attack property: StatusType 201 holds bit flags (bit 2 = 防御無視), set (expr 3) or added
+// (expr 4) by StatusModifierType 21/22/23 — 「攻撃の9倍の防御無視ダメージ」, 「攻撃が敵の防御を無視」. It ignores all
+// of the DEF, so it ranks with the DEF ignore % buffs (status 203) at 100%.
+const DEF_IGNORE_KEY = "status:203|+|%";
+function defIgnoreFlagRow(u: number, t: number, sl: string, r: RawRow, text: string[], name: string | undefined) {
+  // ability rows carry one StatusModifierType; stratagem (EnchantEffect) rows AllyModifierType1..n
+  const pairs: [unknown, unknown][] = [[r.StatusModifierType, r.EffectValue]];
+  for (let i = 1; `AllyModifierType${i}` in r; i++) pairs.push([r[`AllyModifierType${i}`], r[`AllyEffectValue${i}`]]);
+  const flagged = pairs.some(([code, v]) => {
+    const d = defs.smt[Number(code)];
+    return !!d && d[0] === 201 && (d[1] === 3 || d[1] === 4) && !!(Number(v) & 2);
+  });
+  if (!flagged) return;
+  const line = text.find((l) => /\bDEF ignore\b/.test(l)) ?? text[0] ?? "";
+  const head = /^([A-Z★][^:]*?): /.exec(line)?.[1];
+  const who = head && !/^(Missile #|Field effect)/.test(head) ? head : "Self";
+  const secs = /\bfor (\d+(?:\.\d+)?)s\b/.exec(line);
+  keyNames.set("status:203", statName("status:203"));
+  rows.push({
+    u, t, sl, k: DEF_IGNORE_KEY, v: 100, sd: /^(All )?enem/i.test(who) ? "e" : "a", w: who,
+    n: `attack ignores DEF entirely (attack property)${secs ? `, for ${secs[1]}s` : ""}`, ...(name ? { nm: name } : {}),
+  });
+}
+
 function statName(key: string): string {
   if (key === "hits") return "Hits per attack";
   if (key === "dmg:dealt") return "Damage dealt";
@@ -131,6 +155,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
     for (const f of s.facts as BuffFact[]) all.push({ ...f, text: s.text[f.line] ?? "" });
     utilityRows(u, t, sl, s.text, name);
     multiHitRows(u, t, sl, s.text, name);
+    defIgnoreFlagRow(u, t, sl, r, s.text, name);
   });
   // a narrower group that also gets the group row (「[夏]は加算値1.5倍」): ranked with its total too
   for (const f of [...all, ...combinedFacts(all)]) {

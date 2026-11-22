@@ -341,6 +341,8 @@ const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
   [/^Each time attacked, /, "被攻撃毎に、"],
   [/^Each attack, /, "攻撃毎に、"],
   [/^Great Magic, /, "大魔法、"],
+  // buff ranking note for the 防御無視 attack property (scripts/buffs.ts defIgnoreFlagRow)
+  [/^attack ignores DEF entirely \(attack property\)/, "攻撃が敵の防御を無視 (攻撃属性)"],
   [/^On hit \(the enemy it attacks\), /, "攻撃した敵、"],
   [/^On hit, /, "攻撃時、"],
   [/\bwhen attacked \(from ([^()]+)\): /g, (_m, x) => `被攻撃時 (${splitList(x).map((y) => words(y, true)).join("・")}から): `],
