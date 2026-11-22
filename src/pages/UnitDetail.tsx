@@ -8,7 +8,8 @@ import {
   traitLabel, traitTitle, useMeta, usePossessions, useUnit, useUnits, weaponLabel,
 } from "../data";
 import { DEFAULT_META } from "../meta";
-import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
+import { useFx, useHubLabels, useLang, useT, type UiKey } from "../i18n";
+import { vaNames } from "../vaFilter";
 import { terrainIcon, weaponIcon } from "../filterIcons";
 import { usePageMeta } from "../usePageMeta";
 import { artUrl, useArt, useStoryIndex, type ArtData } from "../story";
@@ -415,6 +416,7 @@ export default function UnitDetail() {
   const [params, setParams] = useSearchParams();
   const viewTab = params.get("view") === "images" ? "images" : "details";
   const t = useT();
+  const lang = useLang();
   const hub = useHubLabels();
 
   usePageMeta(
@@ -469,7 +471,16 @@ export default function UnitDetail() {
             {u.traits.map((tr) => (
               <MetaChip key={tr} label={t("trait")} value={traitLabel(meta, tr)} title={traitTitle(meta, tr)} renderLink={renderLink} href={`/units?trait=${tr}`} />
             ))}
-            {u.voice_actor && <MetaChip label={t("cv")} value={u.voice_actor} />}
+            {vaNames({ va: u.voice_actor }).map((jp, i, all) => {
+              // one chip per credited voice actor, each opening the list of her castle girls
+              const en = u.voice_actor_en?.split(" & ");
+              const enName = (en?.length === all.length ? en[i] : all.length === 1 ? u.voice_actor_en : "") || "";
+              const name = lang === "ja" || !enName ? jp : enName;
+              return (
+                <MetaChip key={jp} label={t("cv")} value={name} title={t("vaTitle", { name: lang === "ja" || !enName ? jp : `${enName} (${jp})` })}
+                  renderLink={renderLink} href={`/units?va=${encodeURIComponent(jp)}`} />
+              );
+            })}
             {u.npc && <MetaChip label={t("cardTypeLabel")} value={u.card_type} />}
           </MetaChips>
         )}

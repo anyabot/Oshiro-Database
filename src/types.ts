@@ -28,6 +28,10 @@ export interface UnitIndexEntry {
   water?: boolean | null;
   /** general ability class-ability row 6/13: can be placed on boat (舟) spots, a stage gimmick. */
   boat?: boolean | null;
+  /** voice actor credit (VoiceActor.atb, 「声：」 dropped); shared credits joined with ＆ */
+  va?: string | null;
+  /** its romanized form (tools/data/va_names_en.json), when known */
+  va_en?: string | null;
 }
 
 export type Placement = "melee" | "ranged" | "both";
@@ -197,6 +201,7 @@ export interface UnitDetail {
   dedicated_weapon: { id: number; name: string; description: string } | null;
   max_renovation: number;
   voice_actor: string | null;
+  voice_actor_en?: string | null;
   flavor: string[];
   introduction: string | null;
   welcome: string | null;

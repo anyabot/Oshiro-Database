@@ -10,6 +10,7 @@ import {
 import type { UnitIndexEntry } from "../types";
 import { terrainOptionLabel, weaponOptionLabel } from "../filterIcons";
 import { useHubLabels, useT } from "../i18n";
+import { VaFilter, vaMatches } from "../vaFilter";
 
 const PAGE = 60;
 const renderLink = routerLinks(Link, "to");
@@ -45,6 +46,7 @@ export default function UnitList() {
   const terrainF = csv("terrain");
   const kaiF = csv("kai");
   const placeF = csv("place");
+  const vaF = csv("va");
 
   // any filter/search change resets pagination; ?page= is 0-based
   const setParam = (key: string, value: string | null) => {
@@ -104,8 +106,9 @@ export default function UnitList() {
       if (terrainF.length && !terrainParts(meta, u.terrain).some((t) => terrainF.includes(t.slug))) return false;
       if (kaiF.length && !has(kaiF, u.renovation)) return false;
       if (placeF.length && !placementTags(u).some((x) => placeF.includes(x))) return false;
+      if (vaF.length && !vaMatches(u, vaF)) return false;
       if (term) {
-        const hay = `${u.id} ${u.name} ${u.name_en || ""} ${u.ruby || ""}`.toLowerCase();
+        const hay = `${u.id} ${u.name} ${u.name_en || ""} ${u.ruby || ""} ${u.va || ""} ${u.va_en || ""}`.toLowerCase();
         if (!hay.includes(term)) return false;
       }
       return true;
@@ -114,11 +117,11 @@ export default function UnitList() {
     // newest date first, same date by higher ID; undated entries last, by higher ID
     const date = (u: UnitIndexEntry) => added?.units[String(u.id)] ?? "";
     return out.sort((a, b) => date(b).localeCompare(date(a)) || b.id - a.id);
-  }, [units, added, meta, q, showNpc, showDup, byId, rarityF, weaponF, regionF, traitF, categoryF, terrainF, kaiF, placeF]);
+  }, [units, added, meta, q, showNpc, showDup, byId, rarityF, weaponF, regionF, traitF, categoryF, terrainF, kaiF, placeF, vaF]);
 
   if (loading || error) return <div className="page"><LoadState loading={loading} error={error} labels={hub.load} /></div>;
 
-  const activeCount = rarityF.length + weaponF.length + regionF.length + traitF.length + categoryF.length + terrainF.length + kaiF.length + placeF.length;
+  const activeCount = rarityF.length + weaponF.length + regionF.length + traitF.length + categoryF.length + terrainF.length + kaiF.length + placeF.length + vaF.length;
   const activeParams = [...new Set(params.keys())].filter((k) => k !== "page" && params.get(k)).length;
   const pages = Math.ceil(filtered.length / PAGE);
   const shown = filtered.slice(page * PAGE, page * PAGE + PAGE);
@@ -155,6 +158,7 @@ export default function UnitList() {
         <CheckboxGroup title={t("region")} options={opts.region} selected={regionF} onToggle={(v) => toggleCsv("region", regionF, v)} />
         <CheckboxGroup title={t("trait")} options={opts.trait} selected={traitF} onToggle={(v) => toggleCsv("trait", traitF, v)} />
         <CheckboxGroup title={t("category")} options={opts.category} selected={categoryF} onToggle={(v) => toggleCsv("cat", categoryF, v)} />
+        <VaFilter units={units ?? undefined} selected={vaF} onToggle={(v) => toggleCsv("va", vaF, v)} />
       </FilterPanel>
 
       {traitF.length === 1 && meta?.traits[traitF[0]] && !meta.traits[traitF[0]].label && (

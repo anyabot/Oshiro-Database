@@ -1,4 +1,4 @@
-// The castle girl list's filters (rarity, weapon, region, trait, category, terrain, renovation) as a
+// The castle girl list's filters (rarity, weapon, region, trait, category, terrain, renovation, voice actor) as a
 // reusable piece: options, a match test and the panel. State lives in URL params under a prefix.
 import { useMemo, useState } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
@@ -10,8 +10,9 @@ import {
 import type { Meta, UnitIndexEntry } from "./types";
 import { terrainOptionLabel, weaponOptionLabel } from "./filterIcons";
 import { useHubLabels, useT } from "./i18n";
+import { VaFilter, vaMatches } from "./vaFilter";
 
-const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai", "place"] as const;
+const KEYS = ["rarity", "weapon", "region", "trait", "cat", "terrain", "kai", "place", "va"] as const;
 
 export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta | undefined,
   params: URLSearchParams, setParams: SetURLSearchParams, prefix = "f") {
@@ -78,6 +79,7 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
       if (sel.terrain.length && !terrainParts(meta, u.terrain).some((t) => sel.terrain.includes(t.slug))) return false;
       if (sel.kai.length && !has(sel.kai, u.renovation)) return false;
       if (sel.place.length && !placementTags(u).some((x) => sel.place.includes(x))) return false;
+      if (sel.va.length && !vaMatches(u, sel.va)) return false;
       return true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,6 +96,7 @@ export function useUnitFilters(units: UnitIndexEntry[] | undefined, meta: Meta |
       <CheckboxGroup title={t("placement")} options={PLACEMENTS.map((p) => ({ value: p, label: t(`place_${p}`) }))} selected={sel.place} onToggle={(v) => toggle("place", v)} />
       <CheckboxGroup title={t("renovation")} options={renovationOpts} selected={sel.kai} onToggle={(v) => toggle("kai", v)} />
       <CheckboxGroup title={t("trait")} options={opts.trait} selected={sel.trait} onToggle={(v) => toggle("trait", v)} />
+      <VaFilter units={units} selected={sel.va} onToggle={(v) => toggle("va", v)} />
       {activeCount > 0 && <button className="hub-btn" onClick={clear}>{t("clearUnitFilters")}</button>}
     </FilterPanel>
   );
