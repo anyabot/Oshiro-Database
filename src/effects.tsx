@@ -55,13 +55,16 @@ export interface Sentence {
   rest: RawRow;
   /** The stat changes in the sentences, for the buff ranking (scripts/buffs.ts). */
   facts: BuffFact[];
+  /** Who each sentence's effects land on, where the describer knows it (index into text). */
+  lineWho: ({ who: string; side: "ally" | "enemy" } | undefined)[];
 }
 
 /** One stat change a row makes, as the sentence states it. */
 export interface BuffFact {
   /** "status:<StatusType>", or "dmg:dealt" / "dmg:taken" (OnGiveDamage / OnTakeDamage %). */
   key: string;
-  dir: "+" | "-";
+  /** "=" = set to a value ("Targets set to 2"); a set to 0 is filed as −100% */
+  dir: "+" | "-" | "=";
   /** "%", "" (flat), "s" (seconds), "×" (the descriptions print it as a multiplier; v is then the multiplier) */
   unit: string;
   v: number;
@@ -557,6 +560,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const num = (k: string) => { used.add(k); return typeof r[k] === "number" ? (r[k] as number) : 0; };
   const evidence: string[] = [];
   const facts: BuffFact[] = [];
+  const lineWho: Sentence["lineWho"] = [];
   // the last stat change modifier() worded; take() files it under the sentence about to be pushed
   let last: Omit<BuffFact, "who" | "side" | "line"> | null = null;
   // unit of the row's amount, for its LimitValue cap (same scale as EffectValue, FUN_00ae8700)
@@ -564,11 +568,28 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   const take = (who: string, side: "ally" | "enemy", note = "") => {
     // a change can carry its own condition (attack bonus: "while own ATK ≥ 10000"); it leads the note
     const n = [last?.note, note.replace(/^, /, "")].filter(Boolean).join(", ");
+    lineWho[text.length] = { who, side };
     if (last) facts.push({ ...last, who, side, line: text.length, ...(rowMax ? { max: rowMax } : {}), ...(n ? { note: n } : { note: undefined }) });
     last = null;
   };
-  const damageFact = (which: "dealt" | "taken", dir: "+" | "-", unit: string, v: number) => {
-    last = { key: `dmg:${which}`, dir, unit, v };
+  // a sentence that words several changes (a missile's modifiers, a field effect's parts): each one is
+  // stashed with its own duration, then all are filed under that sentence
+  const bag: Omit<BuffFact, "who" | "side" | "line">[] = [];
+  const stash = (note = "") => {
+    if (last) bag.push({ ...last, ...(last.note || note ? { note: [last.note, note].filter(Boolean).join(", ") } : {}) });
+    last = null;
+  };
+  const fileBag = (who: string, side: "ally" | "enemy", note = "") => {
+    lineWho[text.length] = { who, side };
+    for (const b of bag) {
+      const n = [b.note, note.replace(/^, /, "")].filter(Boolean).join(", ");
+      facts.push({ ...b, who, side, line: text.length, ...(n ? { note: n } : { note: undefined }) });
+    }
+    bag.length = 0;
+  };
+  const damageFact = (which: "dealt" | "taken", dir: "+" | "-", unit: string, v: number, only = "") => {
+    // a change limited to some attacks ("from magic") ranks as its own kind: "dmg:taken~magic"
+    last = { key: `dmg:${which}${only ? `~${only}` : ""}`, dir, unit, v };
   };
   /** A change worded only by a mined label (effect / ability type codes): ranked under that label. */
   const labelFact = (key: string, v: number) => {
@@ -679,7 +700,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     if (status === 401 && expr === 3 && v < 0) return `knocked back (move speed −${-v})`;
     if (status === 401 && expr === 3 && v === 0) return "can't move (move speed 0)";
     // 104 is a time in ms (regen interval, FUN_0050e710)
-    if (status === 104 && expr === 3) return `Regen interval set to ${fmt(v / 1000)}s`;
+    if (status === 104 && expr === 3) {
+      last = { key: "status:104", dir: "=", unit: "s", v: v / 1000 };
+      return `Regen interval set to ${fmt(v / 1000)}s`;
+    }
     // statuses that hold an amount of change, not a level: ExpressionType 3 sets that amount, so the
     // texts say 軽減 / 短縮 (「大魔法消費気が10%軽減」, 「受けるダメージが50%軽減」), never "set to"
     if (expr === 3 && CUT_STATUS[status]) {
@@ -688,7 +712,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     }
     // multipliers held in % (100 = ×1): 「飛行敵に対して攻撃が2.3倍」 = AntiAirBonus set to 230,
     // 「攻撃が飛行敵に半減されず」 = DamageVsFlying set to 100
-    if (expr === 3 && MULT_STATUS.has(status)) return `${statName} ×${fmt(v / 100)}`;
+    if (expr === 3 && MULT_STATUS.has(status)) {
+      last = { key: `status:${status}`, dir: "+", unit: "×", v: v / 100, note: "set (override)" };
+      return `${statName} ×${fmt(v / 100)}`;
+    }
     // 10104 set (EffectType 1107, MissileEffect of 沈黙): 0 = 計略使用不可 (all 77 deliberation rows and the
     // Silence missiles), 600 = 「計略の使用可能までの時間が40％短縮」 (deliberation 1257) = ×v/1000
     if (expr === 3 && status === 10104) return v === 0 ? "can't use stratagems (計略使用不可)" : `${statName} ×${fmt(v / 1000)}`;
@@ -700,7 +727,15 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // set from another status (ValueType 6, FUN_00ae7f10): 大薙刀僧兜 「自身の攻撃と防御が現在耐久の半分の値になる」 =
     // SMT 403 / 419 set ATK / DEF to 50% of status 102 (current HP)
     if (expr === 3 && vt === 6) amount = `set to ${v}% of ${refSender ? "the giver's " : ""}${word(`status:${ref}`, `stat ${ref}`)}`;
-    else if (expr === 3) amount = `set to ${v}${pctStatus ? "%" : ""}`;
+    else if (expr === 3) {
+      amount = `set to ${v}${pctStatus ? "%" : ""}`;
+      // a stat set to 0 is the whole stat gone (「防御が0になる」): ranked as −100%; other sets as their own kind
+      // (only named statuses: an unnamed one such as 402, set by every movement ability, has no traced effect)
+      if (defs.labels[`status:${status}`] || STATUS_TEXT[status]) {
+        last = v === 0 ? { key: `status:${status}`, dir: "-", unit: "%", v: 100, note: "set to 0" }
+          : { key: `status:${status}`, dir: "=", unit: vt === 2 || vt === 4 || pctStatus ? "%" : "", v };
+      }
+    }
     else if (w?.unit === "倍" && w.form === "add") amount = `×${fmt(dir === "-" ? 1 - v / 100 : 1 + v / 100)}`;
     else if (w?.unit === "倍" && w.form === "mul") amount = `×${fmt(v / 100)}`;
     else if (w?.unit === "秒") amount = `${sign}${w.form === "milli" ? fmt(v / 1000) : v}s`;
@@ -710,7 +745,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     else if (vt === 2 || vt === 3 || vt === 4 || vt === 5) amount = `${sign}${v}%`;
     // ValueType 6 = v% of another status. A count status (505 special-attack stock: +StockValue each time
     // the gauge fills, FUN_00508050) reads as "+v/100 per stock": 50000 on 505 = +500 while 1 stock is held
-    else if (vt === 6 && COUNT_STATUS[ref]) amount = `${sign}${fmt(v / 100)} per ${COUNT_STATUS[ref]}`;
+    else if (vt === 6 && COUNT_STATUS[ref]) {
+      amount = `${sign}${fmt(v / 100)} per ${COUNT_STATUS[ref]}`;
+      if (dir) last = { key: `status:${status}`, dir: dir as "+" | "-", unit: "", v: v / 100, note: `per ${COUNT_STATUS[ref]}` };
+    }
     else if (vt === 6) amount = `${sign}${v}% of ${refSender ? "the giver's " : ""}${word(`status:${ref}`, `stat ${ref}`)}`;
     else amount = `${sign}${v} (value type ${vt})`;
     const stack = vt === 1 && (expr === 1 || expr === 2) ? (FLAT_MAX_STATUS.has(status) ? "doesn't stack" : "stacks")
@@ -757,10 +795,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
   };
   /** The fact an OnGiveDamage / OnTakeDamage row makes, when it applies to all damage. */
   const damageRowFact = (table: string, row: RawRow, v: number) => {
-    if (restriction(row).length) return;
+    const only = restriction(row).join(", ");
     const unit = row.ValueType === 2 ? "" : "%";
-    if (table === "OnGiveDamageEffect" && (row.OGDEffectType === 1 || row.OGDEffectType === 2)) damageFact("dealt", row.OGDEffectType === 1 ? "+" : "-", unit, v);
-    if (table === "OnTakeDamageEffect" && (row.OTDEffectType === 6 || row.OTDEffectType === 7)) damageFact("taken", row.OTDEffectType === 7 ? "+" : "-", unit, v);
+    if (table === "OnGiveDamageEffect" && (row.OGDEffectType === 1 || row.OGDEffectType === 2)) damageFact("dealt", row.OGDEffectType === 1 ? "+" : "-", unit, v, only);
+    if (table === "OnTakeDamageEffect" && (row.OTDEffectType === 6 || row.OTDEffectType === 7)) damageFact("taken", row.OTDEffectType === 7 ? "+" : "-", unit, v, only);
   };
 
   /** Any EffectType / EnchantEffectType / UnitEffectID: a UnitEffect row (every such column in the
@@ -832,11 +870,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const mods = defs.missiles[id] ?? [];
     const cc = defs.missile_cc?.[id];
     const rep = defs.missile_repeat?.[id];
-    const parts = mods.map(([code, v, ms]) => `${modifier(code, v)}${ms ? `, ${forTime(ms)}` : ""}`);
+    const parts = mods.map(([code, v, ms]) => { const m = modifier(code, v); stash(ms ? forTime(ms) : ""); return `${m}${ms ? `, ${forTime(ms)}` : ""}`; });
     if (rep) parts.unshift(`hits ${rep[0] + 1} times${rep[1] ? `, ${fmt(rep[1] / 1000)}s apart` : ""}`);
     const dde = defs.missile_dde?.[id];
     const ddeRow = dde ? defs.effect_tables?.DealDamageEffect?.[dde[0]] : undefined;
-    if (dde && ddeRow) parts.push(`${effectRow("DealDamageEffect", ddeRow, dde[1], modifier, ccName)}${dde[2] ? `, for ${fmt(dde[2] / 1000)}s` : ""}`);
+    if (dde && ddeRow) { parts.push(`${effectRow("DealDamageEffect", ddeRow, dde[1], modifier, ccName)}${dde[2] ? `, for ${fmt(dde[2] / 1000)}s` : ""}`); last = null; }
     if (cc) parts.unshift(`inflicts ${ccName(cc[0])}${cc[1] ? ` (${forTime(cc[1]).replace(/^for /, "")})` : ""}`);
     if (!parts.length) return `missile #${id} (no extra effects)`;
     return `missile #${id}: ${parts.join("; ")}`;
@@ -948,10 +986,11 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       const ddeRow = dde ? defs.effect_tables?.DealDamageEffect?.[dde] : undefined;
       if (ddeRow) parts.push(effectRow("DealDamageEffect", ddeRow, Number(m.DealDamageEffectValue ?? 0), modifier, ccName)
         + (m.DealDamageEffectDurationInMillis ? `, for ${fmt(Number(m.DealDamageEffectDurationInMillis) / 1000)}s` : ""));
+      last = null;
       for (const i of [1, 2]) {
         const code = Number(m[`StatusModifierType${i}`] ?? 0), val = Number(m[`StatusEffectValue${i}`] ?? 0);
         const ms = Number(m[`DurationInMillis${i}`] ?? 0);
-        if (code) parts.push(`${modifier(code, val)}${ms ? `, ${forTime(ms)}` : ""}`);
+        if (code) { parts.push(`${modifier(code, val)}${ms ? `, ${forTime(ms)}` : ""}`); stash(ms ? forTime(ms) : ""); }
       }
       // 21/2 (while deployed): AbilityEffectDetail = re-apply interval in ms (text-supported, see fieldpulse:2)
       const pulse = num("AbilityTypeDetail") === 2 ? num("AbilityEffectDetail") : 0;
@@ -959,7 +998,17 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       if (pulse && !every) used.delete("AbilityEffectDetail");
       // the re-apply interval is AbilityEffectDetail, which tail() would print again
       if (every) skipEvery = true;
-      text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tail()}`);
+      const tl = tail();
+      // who the field's missile lands on is FieldEffect.TargetType, not the ability's target (its 自身 is where the
+      // field starts): 2 = the enemy that defeated her (「自身を撃破した敵の防御が9秒間0」), 3 = enemies in the area
+      // (「射程内の敵の移動速度が…」, also on heal fields: 「射程内敵の被ダメ40%上昇」), 4 = herself, 5 = allies in the area
+      // (「射程内の味方の攻撃が20秒間1.5倍」)
+      const fieldWho: Record<number, [string, "ally" | "enemy"]> = {
+        2: ["Enemy that defeated her", "enemy"], 3: ["Enemies in the area", "enemy"], 4: ["Self", "ally"], 5: ["Allies in the area", "ally"],
+      };
+      const [fw, fs] = fieldWho[Number(f.TargetType)] ?? [factWho, factSide];
+      fileBag(fw, fs, [trigger ? cap(trigger) : "", `${every}${tl}`.replace(/^, /, "")].filter(Boolean).join(", "));
+      text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tl}`);
     } else if (num("UnitEffectID") && defs.unit_effect[num("UnitEffectID")]) {
       // UnitEffect.atb dispatch: ActualEffectID is in exactly one table for these types (every row)
       const id = num("UnitEffectID");
@@ -978,7 +1027,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       }
     } else if (at === 6 && (atd === 2 || atd === 4)) {
       // class-ability types 6/2 and 6/4: EffectValue is a Missile.atb id (every such row)
-      text.push(`${lead}${lead ? missile(v) : cap(missile(v))}${tail()}`);
+      // the castle girl's attack fires this missile: its changes land on the enemy hit
+      const body = lead ? missile(v) : cap(missile(v)), tl = tail();
+      fileBag("Enemy hit", "enemy", [trigger ? cap(trigger) : "", tl.replace(/^, /, "")].filter(Boolean).join(", "));
+      text.push(`${lead}${body}${tl}`);
     } else if (at === 9 && defs.effect_tables?.DealDamageEffect?.[atd]) {
       // AbilityType 9 handler FUN_00af5150: AbilityTypeDetail looked up by FUN_00aa9b40 = DealDamageEffectID
       // (all 35 ids in the data are DealDamageEffect rows; e.g. 1028 = magic, ATK, every 2s = 2秒毎に攻撃の
@@ -1125,7 +1177,7 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     // their DealDamageEffect / modifiers are the hit's extra effects (e.g. 敵の現在耐久の10%のダメージ)
     for (const f of ["MissileID", "SpreadMissileID"]) {
       const id = num(f);
-      if (id) text.push(`Special attack ${missile(id)}`);
+      if (id) { const m = missile(id); fileBag("Enemy hit", "enemy", "special attack"); text.push(`Special attack ${m}`); }
     }
   } else if (kind === "enchant") {
     const secs = num("DurationInSeconds");
@@ -1143,9 +1195,14 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       const code = num(`AllyModifierType${i}`), v = num(`AllyEffectValue${i}`);
       if (code) { const m = modifier(code, v); take(ally, "ally", dur); text.push(`${ally}: ${m}${dur}`); }
     }
+    // MissileID / SpreadMissileID replace the receiver's weapon shot (「攻撃した敵の…低下」): their changes land on
+    // the enemy hit; ShotMissileID is the stratagem's own shot at its target (「対象の攻撃が100上昇」)
     for (const f of ["MissileID", "SpreadMissileID", "ShotMissileID"]) {
       const id = num(f);
-      if (id) text.push(`${ally}: ${missile(id)}`);
+      if (!id) continue;
+      const m = missile(id);
+      if (f === "ShotMissileID") fileBag(ally, "ally"); else fileBag("Enemy hit", "enemy", `with ${ally === "Self" ? "its" : "the target's"} attacks${dur}`);
+      text.push(`${ally}: ${m}`);
     }
     // EnchantEffect columns worded from their own header names (tools/data/column_names.json)
     const bq = num("BarrierQuantity");
@@ -1259,6 +1316,6 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       // a multiplier grows by its own step: ×1.01 → ×1.02 → … ("Range ×1.01, +0.01 more every 4 seconds")
       .replace(/ ×([\d.]+)([^:·]*?), grows by that amount /g, (_, n, mid) =>
         ` ×${n}${mid}, ${Number(n) >= 1 ? "+" : "−"}${fmt(Math.abs(Number(n) - 1))} more `));
-    return { text: grown, evidence, rest, facts };
+    return { text: grown, evidence, rest, facts, lineWho };
   }
 }

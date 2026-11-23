@@ -72,6 +72,8 @@ export interface Ability {
   /** Keyed by index into effects. */
   field_links?: Record<string, FieldLink>;
   missing?: boolean;
+  /** abilities its class-ability 6/7 rows activate, by AbilityID */
+  activates?: Record<string, Ability>;
 }
 
 export interface EnchantEffect {

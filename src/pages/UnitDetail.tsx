@@ -133,6 +133,10 @@ export function AbilityBlock({ label, a, kind = "ability", defs, from }: {
       </div>
       <Text>{a.description}</Text>
       {a.effects && <EffectList title="effect rows" rows={a.effects} kind={kind} defs={defs} links={a.field_links} />}
+      {/* class-ability 6/7 rows: the abilities they activate, with their own rows */}
+      {Object.values(a.activates ?? {}).map((sub) => (
+        <div key={sub.id} className="nested"><AbilityBlock label={t("activatedAbility")} a={sub} defs={defs} /></div>
+      ))}
     </div>
   );
 }

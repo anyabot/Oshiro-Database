@@ -369,6 +369,7 @@ export const UI = {
   movingAttack: { en: "Moving attack", ja: "移動攻撃" },
   classTitle: { en: "Class", ja: "クラス" },
   classAbility: { en: "Class ability", ja: "クラス特性" },
+  activatedAbility: { en: "Ability it activates", ja: "発動する特技" },
   potential: { en: "Potential 潜在", ja: "潜在" },
   stats: { en: "Stats", ja: "ステータス" },
   statsNote: {

@@ -54,6 +54,8 @@ export function effectLabel(k: string, names: Record<string, string>): string {
   const tag = getLang() === "ja" ? UNIT_TAG_JA[unit] ?? unit : UNIT_TAG[unit] ?? unit;
   // utility effects have no amount: just the name; hit counts likewise
   if (key.startsWith("util:") || k === HITS) return name;
+  // "set to" a value: "Targets = (set)"
+  if (dir === "=") return `${name} = ${getLang() === "ja" ? "設定" : "set"}${unit === "%" ? " %" : ""}`;
   return `${name} ${dir === "+" ? "↑" : "↓"} ${tag}`;
 }
 
@@ -70,6 +72,7 @@ export function fmtAmount(k: string, v: number): string {
   const [, dir, unit] = k.split("|");
   if (k === HITS) return getLang() === "ja" ? `${v}回` : `${v} hits`;
   if (unit === "×") return `×${fmtNum(v)}`;
+  if (dir === "=") return `=${fmtNum(v)}${unit === "s" ? "s" : unit}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
 /** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */

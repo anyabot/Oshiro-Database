@@ -23,10 +23,12 @@ const OFFENSE = new Set([202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 
 const DEFENSE = new Set([101, 102, 103, 105, 107, 111, 113, 301, 302, 303, 304, 305, 306, 307, 314, 316, 321]);
 function category(r: BuffRow): string {
   if (r.k.startsWith("util:")) return "utility";
-  if (r.sd === "e") return "debuff";
   const key = r.k.split("|")[0];
-  if (key === "dmg:dealt" || key === "dmg:bonus" || key === "hits") return "offense";
-  if (key === "dmg:taken") return "defense";
+  // damage an effect deals (× ATK, % of HP): offense, whoever it lands on
+  if (key.startsWith("dmgfx:")) return "offense";
+  if (r.sd === "e") return "debuff";
+  if (key.startsWith("dmg:dealt") || key === "dmg:bonus" || key === "hits") return "offense";
+  if (key.startsWith("dmg:taken") || key.startsWith("counter:") || key === "evade" || key === "barrier" || key === "nullify") return "defense";
   if (key === "ki:natural" || key === "ki:periodic") return "ki";
   // inspire keys ("status:202~giver:202") rank with the status they change
   const m = /^status:(\d+)/.exec(key);
@@ -63,7 +65,7 @@ const REACH: { value: string; label: UiKey }[] = [
 function reach(r: BuffRow): string {
   const w = r.w;
   if (w === "Self") return "self";
-  if (w === "Target" || w === "Enemy hit" || w === "Enemies it blocks" || w === "Chosen placement spot" || / placed on the spot$/.test(w)) return "single";
+  if (w === "Target" || w === "Enemy hit" || w === "Enemy that defeated her" || w === "Enemies it blocks" || w === "Chosen placement spot" || / placed on the spot$/.test(w)) return "single";
   if (/in range|in the target's range|in the area$/.test(w)) return "range";
   // Ki over time goes to the side's shared pool: "Your side"
   if (/^All |in the formation$|^Allies$|^Castle girls$|^Enemies$|^Your side$/.test(w)) return "wide";
@@ -73,7 +75,8 @@ function reach(r: BuffRow): string {
 
 
 /** Multipliers below 1 rank the smaller one first; everything else the bigger amount. */
-const lowerFirst = (k: string) => k.endsWith("|-|×");
+// an attack gap set to a value (「攻撃後の隙が…になる」): the shorter one first
+const lowerFirst = (k: string) => k.endsWith("|-|×") || k.startsWith("status:207|=|");
 
 const PREVIEW = 10;
 
@@ -230,7 +233,7 @@ export default function Buffs() {
                       <tr key={`${r.u}-${i}`}>
                         <td data-label="#" className="muted">{i + 1}</td>
                         <td data-label={t("value")} className="buff-val">
-                          <strong>{isUtil(r.k) ? (r.v >= PERMANENT ? t("permanent") : t("seconds", { n: r.v })) : fmtAmount(r.k, r.v)}</strong>
+                          <strong>{isUtil(r.k) ? (r.v >= PERMANENT ? t("permanent") : r.v === 0 ? "✓" : t("seconds", { n: r.v })) : fmtAmount(r.k, r.v)}</strong>
                           {r.mx != null && r.mx !== r.v && <div className="small muted">{t("max", { v: fmtAmount(r.k, r.mx) })}</div>}
                           {r.nc && <div className="small muted">{t("noCap")}</div>}
                           {r.st != null && (

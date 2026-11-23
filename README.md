@@ -66,6 +66,13 @@ filters. Its data, `public/data/buffs.json`, is built by `npm run buffs` (`scrip
 the same effect describer the castle girl pages use: `describeRow` returns, next to each sentence,
 the stat changes it worded (stat, direction, value, cap, stacking, receiver, ally/enemy side).
 Rebuild it after re-exporting effects or units.
+A sentence may word several changes (a missile's modifiers, a field effect's parts): each is its own row.
+"Set to" values rank as their own kind ("Targets = 2"); a stat set to 0 ranks as −100%. Effects with no stat
+(ailments inflicted / immunities, knockback, can't move, attack properties such as magic or direct-hit bonus,
+movement, knockout guard, cover…) are read from the sentences by the rule table in `scripts/buffs.ts` and rank
+by duration; counters, evasion, barriers, hit nullify and extra damage (× ATK, % of HP) rank by their amount.
+Every sentence must be ranked or match the skip list (with its reason): the run writes
+`tools/out/buff_coverage.md`, whose "Uncategorized" section must stay empty.
 The same run writes `public/data/possessions.json`: every possession ability (所持) aimed at a group
 of castle girls, with a match rule read from the exe-decoded target label (weapon type, region
 `Card.AreaType`, trait `Tokusei`, or terrain via the castle-type lists). Each castle girl's page lists
