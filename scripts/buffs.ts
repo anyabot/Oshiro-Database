@@ -486,6 +486,7 @@ const AUDIT_EXPLAINED: [number, string, string, string][] = [
   [9243, "ベクトル操作", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon 禁書目録変身)`],
   [9032, "シュタルクハドロン", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon モルドレッド[アーニャ変身])`],
   [9032, "おしまい、かくれんぼは", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon モルドレッド[アーニャ変身])`],
+  [9056, "超高校級のギャンブラー", "DEF ignore", "its 「防御無視」 random shot is missile 92008, a magic (術) hit ×1 ATK, and magic ignores DEF: ranked as Extra damage ×1 (magic)"],
   [3122, "夢双の休日", "DEF ignore", "not in the game data: ability 7536's only row plays a voice; the text describes effects no row has"],
   [964, "ステュクスの神誓", "撃破獲得気 change", "not in the game data: the formation rows (OrganizedAbility 964) hold only HP / ATK / DEF +10%"],
   [9221, "王国を守護せし者", "reflect", "not in the game data: the ambush unit's ability 99226 rows are only ATK +100 and DEF +100"],
@@ -636,7 +637,11 @@ function stratagemRows(u: number, t: number, list: Stratagem[] | undefined) {
       motionRow(u, t, "stratagem", s.effect.row.AttackMotionID, 0, s.name, Number(s.effect.row.TargetType) === 2 ? "Self" : "Target");
       emit(u, t, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, ctx);
       // the special attack the stratagem fires (EnchantEffect.SpecialAttackID)
-      if (s.effect.special_attack) specialAttackRows(u, t, { ...s.effect.special_attack, ability: s.effect.special_attack.ability && { ...s.effect.special_attack.ability, name: s.name } });
+      if (s.effect.special_attack) {
+        const at = rows.length;
+        specialAttackRows(u, t, { ...s.effect.special_attack, ability: s.effect.special_attack.ability && { ...s.effect.special_attack.ability, name: s.name } });
+        for (const r of rows.slice(at)) r.sl = "stratagem";
+      }
       emit(u, t, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, ctx);
       emit(u, t, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, ctx);
     }
@@ -655,6 +660,14 @@ function stratagemRows(u: number, t: number, list: Stratagem[] | undefined) {
         const aName = s.token.ability?.name ?? s.token.name;
         if (shot) emit(u, t, "token", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: shot }], "ability", `${tag} · ${aName}`);
         if (card?.class_ability && !card.class_ability.missing) ability(u, t, "token", { ...card.class_ability, name: `${tag} · ${card.class_ability.name}` });
+        // the ambush unit card's own special attack and weapon (アクセラレータ 9249: special attack missile 99430)
+        if (card) {
+          const at = rows.length;
+          for (const f of card.forms) specialAttackRows(u, t, f.special_attack && { ...f.special_attack, ability: f.special_attack.ability && { ...f.special_attack.ability, name: `${tag} · ${f.special_attack.ability.name}` } });
+          for (const m of card.weapon_motions ?? []) motionRow(u, t, "token", m, 0, `${tag} · ${aName}`);
+          for (const m of card.weapon_shots ?? []) emit(u, t, "token", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: m }], "ability", `${tag} · ${aName}`);
+          for (const r of rows.slice(at)) if (r.sl === "special_attack") r.sl = "token";
+        }
       }
     }
   }
