@@ -540,6 +540,13 @@ export interface RowContext {
 // 3 = 敵軍ユニット (the enemy army, the owner's side: 117 of 144 texts), 4 = 殿側ユニット (the player's
 // side: 45 of 85). Code 3 never appears on a castle girl; the other codes keep their usual words.
 // 14 = 城娘 (28 of the 34 enemy abilities that use it say 城娘)
+// EnchantEffectSet.EffectAreaType codes the mined labels miss, named by every row's stratagem text:
+//   2 = 対象の射程内 (「対象の射程内の敵の被ダメージが25%上昇」, 「対象の射程内の城娘の攻撃速度が2倍」: every set row with
+//   area 2 reads 「(対象の)射程内」, 60+ stratagems)
+const SET_AREA_TEXT: Record<number, string> = { 2: "対象の射程内" };
+// FieldEffect.EffectArea (radius) -> the stratagem texts' 「範囲:…」 word (282 of 285 fields agree: 90 小, 150 中, 200 大,
+// 300 特大, 400 超特大, 500 極大)
+const FIELD_SIZE: Record<number, string> = { 90: "小", 150: "中", 200: "大", 300: "特大", 400: "超特大", 500: "極大" };
 const ENEMY_OWNER_TARGET: Record<number, string> = { 3: "enemy army units (敵軍ユニット)", 4: "castle girl side units (殿側ユニット)", 14: "castle girls (城娘)" };
 
 export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: FieldLink, base?: RawRow, ctx: RowContext = {}): Sentence {
@@ -1016,7 +1023,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
         : ft === 1 ? ["Enemies in the area", "enemy"] : ft === 4 ? ["Enemies and allies in the area", "enemy"] : ["Allies in the area", "ally"];
       const [fw, fs] = fieldWho[Number(f.TargetType)] ?? byKind ?? [factWho, factSide];
       fileBag(fw, fs, [trigger ? cap(trigger) : "", `${every}${tl}`.replace(/^, /, "")].filter(Boolean).join(", "));
-      text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tl}`);
+      // the field's size: FieldEffect.EffectArea is its radius (1 = the unit's own range, not a size)
+      const r = Number(f.EffectArea) || 0;
+      const size = r > 1 ? `, in an area of radius ${r}${FIELD_SIZE[r] ? ` (範囲:${FIELD_SIZE[r]})` : ""}` : "";
+      text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tl}${size}`);
     } else if (num("UnitEffectID") && defs.unit_effect[num("UnitEffectID")]) {
       // UnitEffect.atb dispatch: ActualEffectID is in exactly one table for these types (every row)
       const id = num("UnitEffectID");
@@ -1248,8 +1258,8 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
     const et = num("EnchantEffectType"), v = num("EffectValue"), key = `enchanttype:${et}`;
     // who: EffectAreaType (対象 = the target itself, 対象の射程内 = inside its range) + EffectTargetType
     const st = num("EffectTargetType"), sa = num("EffectAreaType");
-    const area = defs.labels[`sarea:${sa}`]?.jp;
-    if (area) word(`sarea:${sa}`, "");
+    const area = defs.labels[`sarea:${sa}`]?.jp ?? SET_AREA_TEXT[sa];
+    if (defs.labels[`sarea:${sa}`]) word(`sarea:${sa}`, "");
     const t = defs.labels[`starget:${st}`] ? word(`starget:${st}`, "") : "";
     let subject = "";
     // the receiver code, by the ability-target registry the sets share (exe); code 2 = the target itself

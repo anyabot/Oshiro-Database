@@ -64,6 +64,8 @@
   border-top: 1px solid var(--hub-border);
 }
 .hub-section__head + .ability, .hub-section__note + .ability { border-top: 0; padding-top: 4px; }
+/* a panel without a title (the tier panel under its tabs): no rule above its first block */
+:is(.hub-section, .hub-section__body) > .ability:first-child { border-top: 0; padding-top: 4px; }
 .ability--member { margin-left: 14px; padding-left: 10px; border-left: 2px solid var(--hub-accent-line); }
 .ability__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .ability__label {
@@ -146,6 +148,18 @@
   cursor: help;
 }
 .switch-line { margin: 6px 0 0; }
+/* ambush unit (伏兵) card: sprite + stats, then its effects */
+.token-card { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--hub-surface-2, rgba(255,255,255,.04)); border: 1px solid var(--hub-border, rgba(255,255,255,.08)); }
+.token-card__head { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: start; }
+.token-card__icon { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; border-radius: 8px; background: rgba(0,0,0,.25); }
+.token-card__info { min-width: 0; }
+.token-card .ability { margin-top: 8px; }
+.token-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 4px 16px; margin: 6px 0 0; }
+.token-stats dt, .token-stats dd { white-space: nowrap; }
+.token-stats > div { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 2px 0; border-bottom: 1px solid var(--hub-border, rgba(255,255,255,.06)); }
+.token-stats dt { color: var(--hub-text-muted); margin: 0; }
+.token-stats dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .token-card__head { grid-template-columns: 48px 1fr; } .token-card__icon { width: 48px; height: 48px; } }
 
 /* buff ranking (src/pages/Buffs.tsx) */
 .stack-help { margin: 0 0 12px; }

@@ -23,6 +23,7 @@ All data lives under `public/`:
 - `public/data/meta.json` — label tables (weapon types, regions, rarities, categories, traits) taken from the game's own text tables
 - `name_en` on castle girls, equipment and lord outfits comes from the English name tables (see [English names](#english-names))
 - `public/unit-icon/<id>.webp` — 120×120 face icons (~11 MB, published)
+- `public/token-icon/<card>.webp` — ambush unit (伏兵) battle sprites, one standing frame each (`tools/export_token_icons.py`, ~2 MB); the castle girl page shows them with the unit's stats and effects
 
 Card art is not exported (several GB).
 

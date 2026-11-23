@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
-  Breadcrumbs, EmptyState, LoadState, MetaChip, MetaChips, PageHeader, Panel, StatRows, TabPanel, UrlTabs, routerLinks,
+  Breadcrumbs, EmptyState, LoadState, MetaChip, MetaChips, PageHeader, Panel, TabPanel, UrlTabs, routerLinks,
 } from "@altterisk/game-hub";
 import {
   altName, categoryJp, categoryLabel, iconUrl, nameOf, possessionMatches, rarityLabel, regionLabel, terrainParts, terrainTitle, terrainWord, tierName,
@@ -177,17 +177,7 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
         : <EffectList key={i} title="FieldEffect" rows={[{ AbilityType: 21 }]} kind="ability" defs={defs} links={{ 0: { ...m, field_id: s.field!.field_id } }} />)}
       {s.placement && <EffectList title={`LocationEffect #${s.placement.location_id}`} rows={[s.placement.location]} kind="location" defs={defs} />}
       {s.placement && s.placement.effects.length > 0 && <EffectList title={`PlacementEffect #${s.placement.location.Param2}`} rows={s.placement.effects} kind="placement" defs={defs} />}
-      {s.token && (
-        <div className="nested">
-          <p className="switch-line">
-            {t("places")} <b>{nameOf(index?.find((x) => x.id === s.token!.card_id)) || s.token.name || `card #${s.token.card_id}`}</b>
-            {typeof s.token.config.DeployLimit === "number" ? t("upTo", { n: s.token.config.DeployLimit }) : ""}
-          </p>
-          {s.token.ability && <AbilityBlock label={t("placedAbility")} a={s.token.ability} defs={defs} />}
-          {s.token.general_ability && <AbilityBlock label={t("placedAbility")} a={s.token.general_ability} defs={defs} />}
-          <RawRows title={`TokenConfig #${s.token.token_id}`} rows={[s.token.config]} />
-        </div>
-      )}
+      {s.token && <TokenBlock token={s.token} name={nameOf(index?.find((x) => x.id === s.token!.card_id)) || s.token.name} defs={defs} />}
       {s.effect && <EffectList title={`EnchantEffect #${s.effect.id}`} rows={[s.effect.row]} kind="enchant" defs={defs} ctx={setCtx} />}
       {s.effect?.AllyEffectSetID && <EffectList title="ally effect set" rows={s.effect.AllyEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
       {s.effect?.OpponentEffectSetID && <EffectList title="opponent effect set" rows={s.effect.OpponentEffectSetID} kind="enchant_set" defs={defs} ctx={setCtx} />}
@@ -195,12 +185,77 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
   );
 }
 
-function SpecialAttackBlock({ sa, defs, from }: { sa: SpecialAttack; defs?: EffectDefs; from?: string }) {
+/** An ambush unit (伏兵) a stratagem places: its sprite, stats and every effect it brings. */
+function TokenBlock({ token, name, defs }: { token: NonNullable<Stratagem["token"]>; name: string; defs?: EffectDefs }) {
+  const t = useT();
+  const { data: card } = useUnit(token.card_id);
+  const cfg = token.config as RawRow;
+  const c = card?.class ?? null;
+  // TokenConfig *Rate: the stat as a % of the placing castle girl's (192 「自身の2倍の耐久と防御」 = 200)
+  const stat = (label: string, a: string, b: string, rate: string) => {
+    const r = num(cfg, rate);
+    if (r) return { label, value: t("ofOwner", { n: String(r / 100) }) };
+    const lo = num(c, a), hi = num(c, b);
+    return lo || hi ? { label, value: lo === hi || !hi ? String(lo || hi) : `${lo} → ${hi}` } : null;
+  };
+  const stats = [
+    stat(t("hp"), "InitialHealth", "MaxHealth", "HealthRate"),
+    stat(t("atk"), "InitialAttack", "MaxAttack", "AttackPowerRate"),
+    stat(t("def"), "InitialDefense", "MaxDefense", "DefenseRate"),
+    stat(t("regen"), "InitialRegeneration", "MaxRegeneration", "RegenerationRate"),
+    stat(t("range"), "AttackRange", "AttackRange", "AttackRangeRate"),
+    num(c, "MaxTarget") ? { label: t("targets"), value: String(num(c, "MaxTarget")) } : null,
+    num(c, "BlockCount") ? { label: t("block"), value: String(num(c, "BlockCount")) } : null,
+  ].filter((x): x is { label: string; value: string } => !!x);
+  // its attack's own missile, when it carries something (a slow, an ailment, extra damage)
+  const m = num(c, "MissileID");
+  const shot = m && defs && (defs.missiles[m]?.length || defs.missile_cc?.[m] || defs.missile_dde?.[m]) ? m : 0;
+  const sa = card?.forms.find((f) => f.special_attack)?.special_attack;
+  const limit = num(cfg, "DeployLimit"), life = num(cfg, "DurationSeconds");
+  return (
+    <div className="token-card">
+      <div className="token-card__head">
+        <img className="token-card__icon" src={`${import.meta.env.BASE_URL}token-icon/${token.card_id}.webp`} alt="" width={64} height={64} loading="lazy" />
+        <div className="token-card__info">
+          <div className="ability__head">
+            <span className="ability__label">{t("ambushUnit")}</span>
+            <span className="ability__name">{name || `card #${token.card_id}`}</span>
+            <span className="ability__id">#{token.card_id}</span>
+          </div>
+          <div className="ability__stats">
+            {limit > 0 && <span>{t("maxPlaced", { n: limit })}</span>}
+            {life > 0 && <span>{t("lifetime", { n: life })}</span>}
+          </div>
+          {stats.length > 0 && (
+            <dl className="token-stats">
+              {stats.map((x) => <div key={x.label}><dt>{x.label}</dt><dd>{x.value}</dd></div>)}
+            </dl>
+          )}
+        </div>
+      </div>
+      {token.ability && <AbilityBlock label={t("placedAbility")} a={token.ability} defs={defs} />}
+      {token.general_ability && <AbilityBlock label={t("placedAbility")} a={token.general_ability} defs={defs} />}
+      {card?.class_ability && !card.class_ability.missing && card.class_ability.id !== token.ability?.id && (
+        <AbilityBlock label={t("tokenClass")} a={card.class_ability} defs={defs} />
+      )}
+      {shot > 0 && (
+        <div className="ability">
+          <div className="ability__head"><span className="ability__label">{t("tokenAttack")}</span></div>
+          <EffectList title={`Class.MissileID ${shot}`} rows={[{ AbilityType: 6, AbilityTypeDetail: 2, EffectValue: shot }]} kind="ability" defs={defs} />
+        </div>
+      )}
+      {sa && !sa.missing && <SpecialAttackBlock sa={sa} defs={defs} label={t("tokenSpecial")} />}
+      <RawRows title={`TokenConfig #${token.token_id}`} rows={[token.config]} />
+    </div>
+  );
+}
+
+function SpecialAttackBlock({ sa, defs, from, label }: { sa: SpecialAttack; defs?: EffectDefs; from?: string; label?: string }) {
   const t = useT();
   return (
     <div className="ability">
       <div className="ability__head">
-        <span className="ability__label">{t("specialAttack")}</span>
+        <span className="ability__label">{label ?? t("specialAttack")}</span>
         {from && <span className="hub-badge" title={t("fromTierTitle")}>{t("fromTier", { tier: from })}</span>}
         <span className="ability__name">{sa.ability?.name || ""}</span>
         <span className="ability__id">#{sa.id}</span>
@@ -274,13 +329,13 @@ function tierViews(u: Unit): TierView[] {
   return views;
 }
 
-function FormPanel({ view, defs, general }: { view: TierView; defs?: EffectDefs; general?: Ability | null }) {
+function FormPanel({ view, defs, general, titled }: { view: TierView; defs?: EffectDefs; general?: Ability | null; titled: boolean }) {
   const sl = view.slots;
   const strat = sl.stratagems;
   const sa = sl.special_attack;
   const t = useT();
   return (
-    <Panel title={tierTitle(view)}>
+    <Panel title={titled ? tierTitle(view) : undefined}>
       {SLOT_LABELS.map(([k, label, kind]) => {
         const e = sl[k];
         const a = e?.[0][k] as Ability | undefined;
@@ -331,38 +386,6 @@ const PLACE_OF: Record<number, "melee" | "ranged" | "both"> = { 1: "melee", 100:
 function num(row: RawRow | null, k: string): number {
   const v = row?.[k];
   return typeof v === "number" ? v : 0;
-}
-
-function StatsPanel({ u }: { u: Unit }) {
-  const c = u.class;
-  const range = (a: string, b: string) => `${num(c, a)} → ${num(c, b)}`;
-  const t = useT();
-  return (
-    <Panel title={t("stats")} note={t("statsNote")}>
-      <StatRows
-        columns={2}
-        rows={[
-          { label: t("cost"), value: num(c, "Cost") },
-          { label: t("maxLevel"), value: num(c, "MaxLevel") },
-          { label: t("range"), value: num(c, "AttackRange") },
-          { label: t("hp"), value: range("InitialHealth", "MaxHealth") },
-          { label: t("atk"), value: range("InitialAttack", "MaxAttack") },
-          { label: t("def"), value: range("InitialDefense", "MaxDefense") },
-          { label: t("regen"), value: range("InitialRegeneration", "MaxRegeneration") },
-          { label: t("targets"), value: num(c, "MaxTarget") || "—" },
-          { label: t("block"), value: num(c, "BlockCount") || "—" },
-          { label: "AttackSpeed", value: num(c, "AttackSpeed") },
-          { label: "AttackWait", value: num(c, "AttackWait") },
-          { label: "KiGainInterval / KiBaseFeed", value: `${num(c, "KiGainInterval")} / ${num(c, "KiBaseFeed")}` },
-          { label: t("hpCorr"), value: `${u.corrections.hp}%` },
-          { label: t("atkCorr"), value: `${u.corrections.atk}%` },
-          { label: t("defCorr"), value: `${u.corrections.def}%` },
-          { label: t("regenCorr"), value: `${u.corrections.regen}%` },
-        ]}
-      />
-      {c && <RawRows title={`Class #${c.ClassID}`} rows={[c]} />}
-    </Panel>
-  );
 }
 
 /** Tab / panel title of a tier: "Kai 改壱" in English, "改壱" in Japanese. */
@@ -525,7 +548,7 @@ export default function UnitDetail() {
           )}
           {view && (
             <TabPanel tab={String(view.tier)} idBase="kai">
-              <FormPanel view={view} defs={defs} general={u.general_ability} />
+              <FormPanel view={view} defs={defs} general={u.general_ability} titled={views.length <= 1} />
             </TabPanel>
           )}
           {u.special_ability && <Panel title={t("specialAbility")}><SpecialAbilityBlock s={u.special_ability} defs={defs} /></Panel>}
@@ -546,17 +569,33 @@ export default function UnitDetail() {
               {u.transform_into.special_ability && <SpecialAbilityBlock s={u.transform_into.special_ability} defs={defs} />}
             </Panel>
           )}
-          {(u.general_ability || u.before_attack || u.moving_attack || u.one_time_reactive) && (
+          {(u.general_ability || u.before_attack || u.moving_attack) && (
             <Panel title={t("otherAbilities")}>
               {u.general_ability && <AbilityBlock label={t("generalAbility")} a={u.general_ability} defs={defs} />}
               {u.before_attack && <AbilityBlock label={t("beforeAttack")} a={u.before_attack} defs={defs} />}
               {u.moving_attack?.ability && <AbilityBlock label={t("movingAttack")} a={u.moving_attack.ability} defs={defs} />}
               {u.moving_attack?.raw && <RawRows title={`MovingAttack #${u.moving_attack.id}`} rows={[u.moving_attack.raw]} />}
-              {u.one_time_reactive && <RawRows title="OneTimeEffectReactive" rows={[u.one_time_reactive]} />}
             </Panel>
           )}
-          {(u.class_ability || u.potential.length > 0 || u.sub_class) && (
+          {(u.class_ability || u.potential.length > 0 || u.sub_class || u.weapon.description || u.dedicated_weapon) && (
             <Panel title={t("classTitle")}>
+              {(u.weapon.description || u.dedicated_weapon) && (
+                <div className="ability">
+                  <div className="ability__head">
+                    <span className="ability__label">{t("weapon")}</span>
+                    <span className="ability__name">{u.weapon.name ?? "—"}</span>
+                  </div>
+                  <Text>{u.weapon.description}</Text>
+                  <Text>{u.weapon.battle_description}</Text>
+                  {u.dedicated_weapon && (
+                    <p className="switch-line">
+                      {t("dedicatedWeapon")}: <Link to={`/equipment/${u.dedicated_weapon.id}`}>{u.dedicated_weapon.name}</Link>
+                      <span className="ability__id"> #{u.dedicated_weapon.id}</span>
+                    </p>
+                  )}
+                  {u.dedicated_weapon?.description && <Text>{u.dedicated_weapon.description}</Text>}
+                </div>
+              )}
               {u.class_ability && <AbilityBlock label={t("classAbility")} a={u.class_ability} defs={defs} />}
               {u.sub_class && <ClassSection label={t("switchWeaponSub")} block={u.sub_class} defs={defs} />}
               {u.potential.length > 0 && (
@@ -581,23 +620,6 @@ export default function UnitDetail() {
 
         <div className="detail-side">
           <StatSimPanel u={u} />
-          <StatsPanel u={u} />
-          {(u.weapon.description || u.dedicated_weapon) && (
-            <Panel title={t("weaponTitle", { name: u.weapon.name ?? "—" })}>
-              <Text>{u.weapon.description}</Text>
-              <Text>{u.weapon.battle_description}</Text>
-              {u.dedicated_weapon && (
-                <div className="ability">
-                  <div className="ability__head">
-                    <span className="ability__label">{t("dedicatedWeapon")}</span>
-                    <span className="ability__name"><Link to={`/equipment/${u.dedicated_weapon.id}`}>{u.dedicated_weapon.name}</Link></span>
-                    <span className="ability__id">#{u.dedicated_weapon.id}</span>
-                  </div>
-                  <Text>{u.dedicated_weapon.description}</Text>
-                </div>
-              )}
-            </Panel>
-          )}
           {u.skins.length > 0 && (
             <Panel title={t("otherVersions")}>
               <div className="skin-list">
@@ -620,8 +642,10 @@ export default function UnitDetail() {
               {u.flavor.map((f, i) => <p key={i} className="game-text quote">{f}</p>)}
             </Panel>
           )}
-          <Panel title={t("rawCard")}>
+          <Panel title={t("rawData")}>
             <RawRows title="Card.atb row" rows={[u.raw]} />
+            {u.class && <RawRows title={`Class #${u.class.ClassID}`} rows={[u.class]} />}
+            {u.one_time_reactive && <RawRows title="OneTimeEffectReactive" rows={[u.one_time_reactive]} />}
           </Panel>
         </div>
       </div>}

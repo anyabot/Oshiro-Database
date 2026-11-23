@@ -249,7 +249,7 @@ const SKIP: [RegExp, string][] = [
   [/uses special attack #\d+/, "fires a special attack (its hit effects are not resolved from the stratagem)"],
   [/^(?:[^:]*: )?(?:ATK|DEF) [+−]0\b/, "a zero change (empty row)"],
   [/\bdamage 0× /, "a zero change (empty row)"],
-  [/^Field effect: \(no decoded effect\)$/, "a field row whose missile carries no effect (a visual-only missile)"],
+  [/^Field effect: \(no decoded effect\)(, in an area of radius \d+.*)?$/, "a field row whose missile carries no effect (a visual-only missile)"],
 ];
 
 function classify(line: string): Hit[] | null {

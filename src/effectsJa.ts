@@ -268,6 +268,9 @@ function perJa(t: string): string {
 
 /** Notes and fixed phrases with their own Japanese order, applied in order before the word pass. */
 const RULES: [RegExp, string | ((...m: string[]) => string)][] = [
+  // a field's size: "in an area of radius 400 (範囲:超特大)" (before the word tables read "area")
+  [/\bin an area of radius (\d+) \(範囲:([^)]+)\)/g, "範囲:$2 (半径$1)"],
+  [/\bin an area of radius (\d+)/g, "半径$1の範囲"],
   // lines of their own
   [/^total with the "(.+)" row \((.+)\)$/, (_m, who, sum) => `「${receiverJa(who)}」の行との合計 (${sum})`],
   [/^Lasts (\S+)s$/, "$1秒間持続"],
