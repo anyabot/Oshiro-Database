@@ -84,6 +84,8 @@ const FIXED_NAMES: Record<string, string> = {
   "util:split": "Damage split among castle girls (ダメージ分散)",
   "util:move": "Can move (移動可能)",
   "util:boat": "Can be placed on boat tiles (舟マス配置可能)",
+  "util:place": "Extra placement tiles (配置可能マス追加)",
+  "heal:atk": "Heal by ATK (攻撃倍率回復)",
   "util:reversal": "Reversal (反転化)",
   "util:noheal": "Can't be healed (回復不可)",
   "util:healdmg": "Healing deals damage (回復反転)",
@@ -122,7 +124,7 @@ const secsOf = (s: string): number | undefined => {
 /** The sentence's tail conditions worth keeping beside a utility row. */
 const tailNote = (c: string) => [...c.matchAll(/\b(only at max giantification \(最大化\)|activates on giantification \(巨大化時発動\)|per giantification|re-applied every [\d.]+s|every [\d.]+s|when on [^,]+ tiles|[\d.]+% chance|except by flying enemies)\b/g)].map((m) => m[1]).join(", ");
 
-interface Hit { key: string; v: number; note?: string; enemy?: boolean; name?: string }
+interface Hit { key: string; v: number; note?: string; enemy?: boolean; enemyOnly?: boolean; name?: string }
 type Rule = (c: string, line: string) => Hit[] | null;
 
 const RULES: Rule[] = [
@@ -166,6 +168,15 @@ const RULES: Rule[] = [
     return m ? [{ key: "util:move", v: secsOf(c) ?? PERMANENT, note: `${m[1]}, move speed ${m[2]}` }] : null;
   },
   (c) => /can be deployed on boat tiles/.test(c) ? [{ key: "util:boat", v: PERMANENT }] : null,
+  (c) => { const m = /can also be placed on (.+?) tiles/.exec(c); return m ? [{ key: "util:place", v: PERMANENT, note: `${m[1]} tiles` }] : null; },
+  // heal fields: "heal ×5 ATK" (「範囲内の城娘と殿を攻撃の5倍の値で回復」), continuous heals "heal ×0.08 ATK, re-applied every 1s"
+  (c) => { const m = /\bheal ×([\d.]+) ATK/.exec(c); return m ? [{ key: "heal:atk|+|×", v: Number(m[1]) }] : null; },
+  // immunity removed on enemies (「射程内の敵に対して「氷結」が無効化されない」): the ailment lands on immune enemies too.
+  // On allies it is an immunity ending (skip list)
+  (c) => {
+    const m = /^no longer immune to (.+?)(?=, (?:for|only|re-applied|refreshes)\b|$)/.exec(c);
+    return m ? m[1].split(/, /).map((en) => ({ key: `util:pierce:${en}`, name: `Pierces ${en} immunity (${AILMENT_JP[en] ?? en}無効化されない)`, v: secsOf(c) ?? PERMANENT, enemyOnly: true })) : null;
+  },
   (c) => /^Reversal \(反転化\)/.test(c) ? [{ key: "util:reversal", v: secsOf(c) ?? PERMANENT }] : null,
   (c) => /^Can't be healed/.test(c) ? [{ key: "util:noheal", v: secsOf(c) ?? PERMANENT }] : null,
   (c) => /^Healing it deals damage instead/.test(c) ? [{ key: "util:healdmg", v: secsOf(c) ?? PERMANENT }] : null,
@@ -215,6 +226,7 @@ const SKIP: [RegExp, string][] = [
   [/^(?:[^:]*: )?transforms\b|turns into its alternate form/, "transformation: the transformed card's own effects are ranked under her slots"],
   [/missile #\d+ \(no extra effects\)/, "the attack itself (no extra effect)"],
   [/plays voice \(ボイス再生\)/, "voice playback"],
+  [/\(ability type \d+(?:\/\d+)?\)$/, "trigger not decoded (the ability type has no known trigger, so when it applies is unknown)"],
   [/attack method \(攻撃方法\)/, "attack pattern switch (single target / area), not a stat change"],
   [/activates ability #\d+/, "a class ability activating another ability: that ability's rows are ranked (unit JSON `activates`)"],
   [/stand motion|attack motion → variant|walking motion|walk-start motion|walk-end motion|visual effect #/, "animation only"],
@@ -251,7 +263,6 @@ function utilityRows(u: number, t: number, sl: string, lines: string[], name: st
   lines.forEach((line, i) => {
     const hits = classify(line);
     if (!hits) return;
-    matched.add(i);
     const head = /^([A-Z★぀-鿿][^:]*?): /.exec(line)?.[1];
     const headWho = head && !/^(Missile #|Field effect|Special attack)/.test(head) ? head : undefined;
     const known = lineWho[i];
@@ -262,6 +273,8 @@ function utilityRows(u: number, t: number, sl: string, lines: string[], name: st
       // knockback, damage) land on enemies even when the sentence names the giver ("Self: missile …")
       let who = key === "util:spot" ? "Chosen placement spot" : known?.who ?? headWho ?? "Target";
       let enemy = (sideOver ?? known?.side) === "enemy" || /^(All )?enem/i.test(who);
+      if (h.enemyOnly && !enemy) continue;
+      matched.add(i);
       if (h.enemy && !enemy) { who = /^On hit|missile #/.test(line) || known?.who === "Enemy hit" ? "Enemy hit" : "Enemies"; enemy = true; }
       const note = [h.note, extraNote].filter(Boolean).join("; ");
       rows.push({ u, t, sl, k: `${key}|${dir}|${unit}`, v: h.v, sd: enemy ? "e" : "a", w: who, ...(note ? { n: note } : {}), ...(name ? { nm: name } : {}) });
@@ -316,6 +329,11 @@ function multiHitRows(u: number, t: number, sl: string, lines: string[], name: s
 function motionRow(u: number, t: number, sl: string, motion: unknown, missile: unknown, name: string | undefined, who = "Self") {
   const m = Number(motion) > 0 ? motionHits(defs, Number(motion), Number(missile) || 0) : null;
   if (m && m.hits > 1) rows.push({ u, t, sl, k: "hits|+|hits", v: m.hits, sd: "a", w: who, n: m.text, ...(name ? { nm: name } : {}) });
+  // the motion's own shot / spread missiles (motion_shots [ratio, area, missile, spread missile]): their
+  // ailment and debuffs land on the enemy hit
+  const ids = new Set<number>();
+  for (const s of defs.motion_shots?.[Number(motion)] ?? []) for (const x of [s[2], s[3]]) if (x && x !== Number(missile)) ids.add(Number(x));
+  for (const id of ids) emit(u, t, sl, [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: id }], "ability", name);
 }
 
 function statName(key: string): string {
@@ -348,7 +366,7 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
     const s = describeRow(r, kind, defs, links?.[String(i)], bases[i], ctx);
     // a special attack's own settings while it fires (attack gap 700, attack speed 100%, targets 3): they
     // describe the attack, not a buff
-    const own = (f: BuffFact) => f.dir === "=" && f.who === "Self" && /^status:20[678]$/.test(f.key) && (sl === "special_attack" || /^Special attack/.test(f.note ?? ""));
+    const own = (f: BuffFact) => f.dir === "=" && f.who === "Self" && /^status:20[678]$/.test(f.key) && (sl === "special_attack" || /^Special attack\b/.test(f.note ?? ""));
     const facts = (s.facts as BuffFact[]).filter((f) => !own(f));
     for (const f of facts) all.push({ ...f, text: s.text[f.line] ?? "" });
     const covered = utilityRows(u, t, sl, s.text, name, undefined, s.lineWho, side);
@@ -408,11 +426,111 @@ function possessionRule(code: number): PossessionRule | null {
   return rule;
 }
 
+// Text audit: the game's own description of every ability / stratagem / special attack / token says what it
+// does. Each effect a description names must have a ranked row from that same ability (same castle girl,
+// same name), else it is listed in tools/out/buff_coverage.md. This catches data the builder never reads,
+// which the sentence coverage above cannot see.
+const AUDIT_AIL: [string, string][] = [["麻痺", "Paralysis"], ["混乱", "Confusion"], ["火傷", "Burn"], ["猛毒", "Deadly Poison"],
+  ["暗闇", "Darkness"], ["氷結", "Freeze"], ["絶望", "Despair"], ["沈黙", "Silence"], ["服従", "Submission"], ["希望", "Hope"]];
+// a stat word in a subject list ("攻撃と防御が…上昇") -> the key prefixes that rank it
+const STAT_WORDS: [RegExp, string[]][] = [
+  [/攻撃速度$/, ["status:206"]], [/(攻撃後の)?隙$/, ["status:207"]], [/攻撃対象(数)?$/, ["status:208"]],
+  [/(移動速度|移動)$/, ["status:401"]], [/(被ダメージ|被ダメ|受けるダメージ)$/, ["dmg:taken"]], [/(与ダメージ|与ダメ|与えるダメージ)$/, ["dmg:dealt", "dmg:bonus"]],
+  [/最大耐久$|^耐久$/, ["status:101", "status:102"]], [/回復$/, ["status:103"]], [/射程$/, ["status:205"]], [/足止め(数)?$/, ["status:303"]],
+  [/防御$/, ["status:301", "status:302"]], [/^(自身の|城娘の|敵の|味方の)?攻撃$/, ["status:202", "dmg:bonus"]],
+  [/計略(の)?(再使用時間|使用までの時間)$/, ["status:10104", "status:10101", "status:10102"]], [/(計略|消費)気$|計略消費気$/, ["status:10207", "status:10208"]],
+  [/再配置(までの)?(時間)?$/, ["status:106"]], [/撃破(時)?(獲得)?気$/, ["status:10206"]],
+];
+const AUDIT: [RegExp, string, string[]][] = [
+  ...AUDIT_AIL.map(([jp, en]) => [new RegExp(`「${jp}」(?:状態)?(?:に(?:する|し|させ|なる|なり)|を付与)`), `inflicts ${jp}`, [`util:inflict:${en}`]] as [RegExp, string, string[]]),
+  ...AUDIT_AIL.map(([jp, en]) => [new RegExp(`「${jp}」が無効化されない`), `${jp} immunity pierced`, [`util:pierce:${en}`]] as [RegExp, string, string[]]),
+  [/状態異常(に)?ならない|状態異常(を)?無効|」(?:状態)?(?:を)?無効(?!化されない)|」にならない/, "ailment immunity", ["util:immune:"]],
+  [/反射/, "reflect", ["counter:reflect"]],
+  [/反撃/, "counter", ["counter:own", "counter:reflect"]],
+  [/後退/, "knockback", ["util:knockback"]],
+  // 「動きを封じる」 is the game's 麻痺 (Paralysis): its rows inflict CrowdControlType 1
+  [/動きを封じ|移動速度(?:を|が)?[^、。､｡]{0,8}0に/, "can't move", ["util:stop", "status:401", "util:inflict:Paralysis"]],
+  [/狙われない/, "can't be targeted", ["util:untargetable"]],
+  [/大破しない|耐久が0にならない/, "can't be knocked out", ["util:guts", "util:undying"]],
+  [/回避/, "evasion", ["evade"]],
+  [/バリア/, "barrier", ["barrier"]],
+  [/以下のダメージを無効/, "nullify", ["nullify"]],
+  [/天候の影響を受けず|天候(の影響)?(を)?無効/, "weather immunity", ["util:weather"]],
+  [/大破数に含まれない|撤退数に含まれない|大破数にカウントされない/, "not counted as fallen", ["util:nofall"]],
+  // only where the text grants magic attacks (「術攻撃に変化」, 「攻撃が術属性」), not 「術ダメージを軽減」 or a unit's own magic attack
+  [/術攻撃(?:に|と)(?:な|変化)|攻撃が術|術属性/, "magic", ["util:prop:magic", "dmgfx:"]],
+  [/防御(を)?無視/, "DEF ignore", ["status:203"]],
+  [/倍の(?:術)?(?:防御無視)?ダメージを与え|ダメージを与える/, "damage", ["dmgfx:", "dmg:", "hits", "status:202", "util:prop:"]],
+  // heals: a heal field (heal ×ATK), regen, a healer's attack multiplier (「1.5倍の攻撃で回復」 = ATK ×1.5),
+  // lifesteal (「与ダメージの30%回復」, status 211), a gauge refill (「特殊攻撃ゲージが即時回復」, status 502)
+  [/回復(する|させる|を行)|で回復/, "heal", ["heal:", "status:103", "status:102", "status:101", "status:202", "status:211", "status:502", "status:104"]],
+];
+interface AuditSrc { u: number; name: string; desc: string }
+const auditSrc: AuditSrc[] = [];
+function collectAudit(u: number, o: unknown, key = "") {
+  if (!o || typeof o !== "object" || ["potential", "always", "quest", "transform_of", "raw", "class"].includes(key)) return;
+  if (Array.isArray(o)) { for (const x of o) collectAudit(u, x, key); return; }
+  const r = o as Record<string, unknown>;
+  if (typeof r.name === "string" && typeof r.description === "string" && r.description && ("effects" in r || "effect" in r || "field" in r || "placement" in r))
+    auditSrc.push({ u, name: r.name, desc: r.description.replace(/\s+/g, "") });
+  for (const [k, v] of Object.entries(r)) collectAudit(u, v, k);
+}
+function auditReport(): string[] {
+  const byU = new Map<number, BuffRow[]>();
+  for (const r of rows) byU.set(r.u, [...(byU.get(r.u) || []), r]);
+  const nameOf = new Map(index.map((e) => [e.id, e.name]));
+  const miss = new Map<string, string[]>();
+  const seen = new Set<string>();
+  for (const s of auditSrc) {
+    const mine = (byU.get(s.u) || []).filter((r) => r.nm && (r.nm === s.name || r.nm.endsWith(` · ${s.name}`) || r.nm.startsWith(`${s.name} → `) || r.nm.endsWith(` → ${s.name}`)));
+    // found under any of her abilities: the effect may live in another table than the text (a formation text
+    // whose rows are her general ability's, a stratagem that transforms her into a twin with its own names)
+    const all = byU.get(s.u) || [];
+    const has = (pre: string[]) => all.some((r) => pre.some((p) => r.k.startsWith(p)));
+    const want: [string, string[], string][] = [];
+    for (const [re, what, keys] of AUDIT) { const m = re.exec(s.desc); if (m) want.push([what, keys, m[0]]); }
+    // stat changes: "攻撃と防御が20%上昇", "射程内の敵の移動速度が5秒間70％低下"
+    // 「耐久が高い程与えるダメージが上昇」: a condition on a damage multiplier, not an HP change
+    if (/(?:が|の)(?:高い|低い)(?:程|ほど)/.test(s.desc)) want.push(["damage by a stat's level", ["dmg:bonus", "dmg:dealt"], /[^、。､｡]{0,12}(?:高い|低い)(?:程|ほど)[^、。､｡]{0,12}/.exec(s.desc)![0]]);
+    const desc = s.desc.replace(/[^、。､｡]{0,12}(?:が|の)(?:高い|低い)(?:程|ほど)[^、。､｡]*/g, "");
+    for (const m of desc.matchAll(/([^、。､｡()（）「」\d%％]{1,30}?)(?:が|を)(?:[^、。､｡]{0,14}?)(?:上昇|低下|増加|減少|短縮|軽減|倍に|倍(?=[、。､｡]|$))/g)) {
+      for (const part of m[1].split(/[と、､･・や]/)) {
+        const w = part.replace(/^.*の/, "");
+        const hit = STAT_WORDS.find(([re]) => re.test(w));
+        if (hit) want.push([`${w} change`, hit[1], m[0]]);
+      }
+    }
+    for (const [what, keys, snip] of want) {
+      const id = `${s.u}|${s.name}|${what}`;
+      if (seen.has(id) || has(keys)) continue;
+      seen.add(id);
+      const got = [...new Set(mine.map((r) => r.k.replace(/\|.*/, "")))].join(" ");
+      miss.set(what, [...(miss.get(what) || []), `${s.u} ${nameOf.get(s.u)} · ${s.name}: …${snip}… (${s.desc.slice(0, 90)}) [ranked: ${got || "nothing"}]`]);
+    }
+  }
+  const md = ["## Text says it, nothing ranked", "", "Each line: the game's description names an effect, but no ranked row comes from that ability.", ""];
+  for (const [what, list] of [...miss].sort((a, b) => b[1].length - a[1].length)) md.push(`- **${list.length}** ${what}`, ...list.map((x) => `  - ${x}`));
+  if (!miss.size) md.push("(none)");
+  return md;
+}
+
+/** An ambush unit's own card (its class: attack missile, class ability), when exported. */
+const tokenCards = new Map<number, UnitDetail | null>();
+function tokenCard(id: number | undefined): UnitDetail | null {
+  if (!id) return null;
+  if (!tokenCards.has(id)) {
+    const p = path.join(root, "public/data/unit", `${id}.json`);
+    tokenCards.set(id, fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : null);
+  }
+  return tokenCards.get(id)!;
+}
+
 let units = 0;
 for (const entry of index) {
   // playable cards only: no NPC / duplicate entries, and transformed states belong to their stratagem
   if (entry.npc || entry.dup_of || entry.transform_of) continue;
   const u: UnitDetail = data(`unit/${entry.id}.json`);
+  collectAudit(u.id, u);
   const tiers = Array.from({ length: Math.min(2, Number(u.max_renovation) || 0) + 1 }, (_, r) => maxGrade(growth, u.raw, r as Reno) || 5);
   grades.set(u.id, tiers);
   const before = rows.length;
@@ -424,6 +542,18 @@ for (const entry of index) {
     // f.always is the card's own stat profile (ATK/DEF/HP +8%, cost…), not a buff it gives: left out
     if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
     // special attack hits: its AttackMotionID's shots x (1 + its missile's DamageRepeatNum)
+    // the special attack's own shot (SpecialAttack.MissileID / SpreadMissileID): its ailment and debuffs on the enemy hit
+    // (ヴァヴェル城 「5秒間「火傷」状態にする」)
+    if (f.special_attack?.raw) {
+      const at = rows.length;
+      emit(u.id, f.tier, "special_attack", [f.special_attack.raw], "special_attack", f.special_attack.ability?.name);
+      // a healing special attack (戦棍 「射程内の殿と城娘全てに回復を行い10秒間防御を70上昇」): its shot hits the
+      // allies it heals, so the shot's changes are theirs. No table marks heal shots (Missile.HealEffect is unset on
+      // them), so the game's own special-attack text decides
+      if (/回復を行/.test(f.special_attack.ability?.description ?? "")) {
+        for (const r of rows.slice(at)) if (r.w === "Enemy hit") { r.w = "Castle girls healed"; r.sd = "a"; }
+      }
+    }
     if (f.special_attack?.raw) motionRow(u.id, f.tier, "special_attack", f.special_attack.raw.AttackMotionID, f.special_attack.raw.MissileID, f.special_attack.ability?.name);
     for (const s of f.stratagems ?? []) {
       // GimmickType 4: the spot it changes buffs whoever is placed there
@@ -434,6 +564,10 @@ for (const entry of index) {
         utilityRows(u.id, f.tier, "stratagem", lines, s.name, [gives && `placed unit: ${gives}`, spots && `on ${spots}`].filter(Boolean).join("; ") || undefined);
       }
       if (s.placement?.effects.length) emit(u.id, f.tier, "stratagem", s.placement.effects, "placement", s.name, "ally");
+      // GimmickType 3: a field at the chosen spot (damage + ailment + debuffs: 業火の刑 「範囲内の敵に攻撃の6倍の
+      // ダメージを与え､7秒間「火傷」にする」; heals; support). FieldEffectType 3 is the area of the stratagem's own
+      // EnchantEffect (described from s.effect below), so it is not read twice
+      if (s.field && Number(s.field.field.FieldEffectType) !== 3) emit(u.id, f.tier, "stratagem", [{ AbilityType: 21 }], "ability", s.name, undefined, { 0: s.field });
       if (!s.effect) continue;
       // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
       const ctx = stratagemContext(defs, s);
@@ -451,6 +585,13 @@ for (const entry of index) {
         const lim = Number(s.token.config?.DeployLimit) || 0;
         const tag = `${s.token.name} (伏兵) · ${lim ? `max ${lim} placed at once` : "no placement limit"} · from ${s.name}`;
         for (const a of [s.token.ability, s.token.general_ability]) if (a && !a.missing) ability(u.id, f.tier, "token", { ...a, name: `${tag} · ${a.name}` });
+        // the ambush unit's own attack: its card's class fires Class.MissileID, whose changes land on the enemy hit
+        // (オバケ missile 27 = 「攻撃した敵の移動速度が1.8秒間70%低下」), plus that card's class ability
+        const card = tokenCard(s.token.card_id);
+        const shot = Number(card?.class?.MissileID) || 0;
+        const aName = s.token.ability?.name ?? s.token.name;
+        if (shot) emit(u.id, f.tier, "token", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: shot }], "ability", `${tag} · ${aName}`);
+        if (card?.class_ability && !card.class_ability.missing) ability(u.id, f.tier, "token", { ...card.class_ability, name: `${tag} · ${card.class_ability.name}` });
       }
     }
   }
@@ -462,6 +603,12 @@ for (const entry of index) {
   ability(u.id, -1, "class", u.class_ability);
   ability(u.id, -1, "class", u.sub_class?.class_ability);
   ability(u.id, -1, "special", u.special_ability?.sub_ability);
+  // the card's own innate abilities (Card.GeneralAbilityID1 「舟マス配置、移動可能」, BeforeAttackAbilityID, the
+  // moving attack 「周囲の敵に攻撃の4倍のダメージを与え、移動速度を5秒間70％低下」 + its shot): ranked with the class ability
+  ability(u.id, -1, "class", u.general_ability);
+  ability(u.id, -1, "class", u.before_attack);
+  if (u.moving_attack?.ability) ability(u.id, -1, "class", u.moving_attack.ability);
+  if (u.moving_attack?.raw) emit(u.id, -1, "class", [u.moving_attack.raw], "special_attack", u.moving_attack.ability?.name);
   // its transformed twin (the special ability / stratagem turns it into a CardType-15 card): that card's
   // specialty per renovation tier, stratagem effects and special ability count in the matching slot, so a
   // stronger twin value only raises her best for that stat (no separate entry)
@@ -473,6 +620,9 @@ for (const entry of index) {
     } else ability(u.id, -1, "skill", tw.ability);
     ability(u.id, -1, "stratagem", tw.general_ability);
     ability(u.id, -1, "special", tw.special_ability?.sub_ability);
+    // the twin's own class (and sub class) ability: what she has while transformed
+    ability(u.id, -1, "class", tw.main_class?.class_ability);
+    ability(u.id, -1, "class", tw.sub_class?.class_ability);
   }
   if (rows.length > before) units++;
   for (const f of u.forms) {
@@ -517,6 +667,7 @@ console.log(`${possessions.length} group possession abilities -> ${path.relative
   const md: string[] = ["# Buff ranking coverage", "", `Sentences ranked: ${ranked}. Skipped: ${[...SKIPPED.values()].reduce((n, e) => n + e.n, 0)}. Uncategorized: ${[...UNCOVERED.values()].reduce((n, e) => n + e.n, 0)} (${UNCOVERED.size} shapes).`, "", "## Uncategorized", ""];
   for (const [k, e] of [...UNCOVERED].sort((a, b) => b[1].n - a[1].n)) md.push(`- **${e.n}** [${[...e.sl].join(", ")}] \`${k}\``, ...e.ex.map((x) => `  - ${x}`));
   if (!UNCOVERED.size) md.push("(none)");
+  md.push("", ...auditReport());
   md.push("", "## Skipped (on purpose)", "");
   for (const [why, e] of [...SKIPPED].sort((a, b) => b[1].n - a[1].n)) md.push(`- **${e.n}** ${why}`, ...[...e.shapes.values()].map((x) => `  - ${x}`));
   fs.writeFileSync(path.join(root, "tools/out/buff_coverage.md"), md.join("\n") + "\n");

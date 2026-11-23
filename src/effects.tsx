@@ -977,7 +977,10 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       const f = link.field, m = link.missile;
       const parts: string[] = [];
       const dmg = typeof f.Param3 === "number" ? f.Param3 : 0;
-      if (dmg) parts.push(`damage ×${fmt(dmg / 100)} ATK`);
+      // FieldEffectType 2 / 5 are heal fields: Param3 is the heal (「範囲内の城娘と殿を攻撃の5倍の値で回復」 = 500,
+      // 「攻撃の3倍で回復」 = 300; the small 5-10 values are the continuous heals 「継続的に回復する」)
+      const ft = Number(f.FieldEffectType);
+      if (dmg) parts.push(ft === 2 || ft === 5 ? `heal ×${fmt(dmg / 100)} ATK` : `damage ×${fmt(dmg / 100)} ATK`);
       // the field's missile (Param1) may carry a crowd control: CrowdControlType + DurationInMillis1
       const mcc = Number(m.CrowdControlType ?? 0);
       if (mcc) parts.push(`inflicts ${ccName(mcc)}${m.DurationInMillis1 ? ` (${forTime(Number(m.DurationInMillis1)).replace(/^for /, "")})` : ""}`);
@@ -1006,7 +1009,12 @@ export function describeRow(r0: RawRow, kind: RowKind, defs: EffectDefs, link?: 
       const fieldWho: Record<number, [string, "ally" | "enemy"]> = {
         2: ["Enemy that defeated her", "enemy"], 3: ["Enemies in the area", "enemy"], 4: ["Self", "ally"], 5: ["Allies in the area", "ally"],
       };
-      const [fw, fs] = fieldWho[Number(f.TargetType)] ?? [factWho, factSide];
+      // a stratagem's field (no TargetType, no ability target): its kind says who is in it — 1 damage fields hit
+      // enemies (「範囲内の敵に攻撃の3.5倍のダメージ」), 4 enemies and allies (「範囲内の敵、味方全てに…「絶望」」),
+      // 2 / 5 / 7 heal / support fields reach allies (「範囲内の城娘と殿を…回復」)
+      const byKind: [string, "ally" | "enemy"] | undefined = f.TargetType != null || num("AbilityTargetType") ? undefined
+        : ft === 1 ? ["Enemies in the area", "enemy"] : ft === 4 ? ["Enemies and allies in the area", "enemy"] : ["Allies in the area", "ally"];
+      const [fw, fs] = fieldWho[Number(f.TargetType)] ?? byKind ?? [factWho, factSide];
       fileBag(fw, fs, [trigger ? cap(trigger) : "", `${every}${tl}`.replace(/^, /, "")].filter(Boolean).join(", "));
       text.push(`Field effect: ${parts.join("; ") || "(no decoded effect)"}${every}${tl}`);
     } else if (num("UnitEffectID") && defs.unit_effect[num("UnitEffectID")]) {

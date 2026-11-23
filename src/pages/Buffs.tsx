@@ -28,7 +28,7 @@ function category(r: BuffRow): string {
   if (key.startsWith("dmgfx:")) return "offense";
   if (r.sd === "e") return "debuff";
   if (key.startsWith("dmg:dealt") || key === "dmg:bonus" || key === "hits") return "offense";
-  if (key.startsWith("dmg:taken") || key.startsWith("counter:") || key === "evade" || key === "barrier" || key === "nullify") return "defense";
+  if (key.startsWith("dmg:taken") || key.startsWith("counter:") || key.startsWith("heal:") || key === "evade" || key === "barrier" || key === "nullify") return "defense";
   if (key === "ki:natural" || key === "ki:periodic") return "ki";
   // inspire keys ("status:202~giver:202") rank with the status they change
   const m = /^status:(\d+)/.exec(key);
