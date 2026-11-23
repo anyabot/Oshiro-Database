@@ -9,7 +9,7 @@ import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
 import { reachParser, type ReachRule } from "../src/reach";
 import { maxGrade, type Growth, type Reno } from "../src/statSim";
-import type { Ability, PossessionRule, PossessionSource, RawRow, UnitDetail, UnitIndexEntry } from "../src/types";
+import type { Ability, PossessionRule, PossessionSource, RawRow, Stratagem, UnitDetail, UnitIndexEntry } from "../src/types";
 
 const root = path.resolve(process.argv[2] ?? ".");
 const data = (p: string) => JSON.parse(fs.readFileSync(path.join(root, "public/data", p), "utf8"));
@@ -217,7 +217,7 @@ const RULES: Rule[] = [
       out.push({ key: `dmgfx:${m[2] === "max" ? "maxhp" : "curhp"}|+|%`, v: Math.round(Number(m[1]) * 10000) / 100, enemy: true, note: kinds(m.index! + m[0].length) });
     }
     for (const m of c.matchAll(/\bdamage (\d+) \(true damage/g)) out.push({ key: "dmgfx:flat|+|", v: Number(m[1]), enemy: true });
-    return out.length ? out : null;
+    return out.filter((h) => h.v > 0).length ? out.filter((h) => h.v > 0) : null;
   },
 ];
 
@@ -248,6 +248,8 @@ const SKIP: [RegExp, string][] = [
   [/on-hit effects last [\d.]+s \(着弾効果時間\)/, "timing of the on-hit effects listed beside it"],
   [/uses special attack #\d+/, "fires a special attack (its hit effects are not resolved from the stratagem)"],
   [/^(?:[^:]*: )?(?:ATK|DEF) [+−]0\b/, "a zero change (empty row)"],
+  [/\bdamage 0× /, "a zero change (empty row)"],
+  [/^Field effect: \(no decoded effect\)$/, "a field row whose missile carries no effect (a visual-only missile)"],
 ];
 
 function classify(line: string): Hit[] | null {
@@ -399,6 +401,10 @@ function emit(u: number, t: number, sl: string, rowsIn: RawRow[] | undefined, ki
 const ability = (u: number, t: number, sl: string, a: Ability | null | undefined, kind: RowKind = "ability") => {
   if (!a || a.missing) return;
   emit(u, t, sl, a.effects, kind, a.name, undefined, a.field_links);
+  // a field's continuation rows (more missiles in the same field): the same row again with each one
+  for (const [i, fl] of Object.entries(a.field_links ?? {})) {
+    for (const m of fl.more ?? []) emit(u, t, sl, [a.effects![Number(i)]], kind, a.name, undefined, { 0: { ...m, field_id: fl.field_id } });
+  }
   // abilities its class-ability rows activate (陣貝クラス特技 -> 気還元率上昇【全城娘】・弐): what she actually gives
   for (const sub of Object.values(a.activates ?? {})) emit(u, t, sl, sub.effects, "ability", `${a.name} → ${sub.name}`, undefined, sub.field_links);
 };
@@ -434,11 +440,14 @@ const AUDIT_AIL: [string, string][] = [["麻痺", "Paralysis"], ["混乱", "Conf
   ["暗闇", "Darkness"], ["氷結", "Freeze"], ["絶望", "Despair"], ["沈黙", "Silence"], ["服従", "Submission"], ["希望", "Hope"]];
 // a stat word in a subject list ("攻撃と防御が…上昇") -> the key prefixes that rank it
 const STAT_WORDS: [RegExp, string[]][] = [
+  [/計略(の)?ダメージ$/, ["status:10106", "status:113"]], [/術ダメージ$/, ["dmg:taken~magic", "dmg:dealt~magic", "dmg:", "dmgfx:"]],
+  [/特殊攻撃(の|で与える)ダメージ$/, ["status:212", "dmg:"]],
   [/攻撃速度$/, ["status:206"]], [/(攻撃後の)?隙$/, ["status:207"]], [/攻撃対象(数)?$/, ["status:208"]],
-  [/(移動速度|移動)$/, ["status:401"]], [/(被ダメージ|被ダメ|受けるダメージ)$/, ["dmg:taken"]], [/(与ダメージ|与ダメ|与えるダメージ)$/, ["dmg:dealt", "dmg:bonus"]],
-  [/最大耐久$|^耐久$/, ["status:101", "status:102"]], [/回復$/, ["status:103"]], [/射程$/, ["status:205"]], [/足止め(数)?$/, ["status:303"]],
+  [/(移動速度|移動)$/, ["status:401", "util:stop", "util:inflict:Paralysis"]], [/(被ダメージ|被ダメ|受けるダメージ)$/, ["dmg:taken", "status:302", "status:305"]], [/(与ダメージ|与ダメ|与えるダメージ|ダメージ)$/, ["dmg:dealt", "dmg:bonus", "status:212", "status:210", "counter:reflect", "dmgfx:", "hits"]],
+  [/最大耐久$|耐久$/, ["status:101", "status:102", "util:inflict:constant HP loss", "dmgfx:curhp", "dmgfx:maxhp"]], [/回復$/, ["status:103", "heal:", "status:202"]],
+  [/優先攻撃対象$/, ["status:314"]], [/射程$/, ["status:205"]], [/足止め(数)?$/, ["status:303"]],
   [/防御$/, ["status:301", "status:302"]], [/^(自身の|城娘の|敵の|味方の)?攻撃$/, ["status:202", "dmg:bonus"]],
-  [/計略(の)?(再使用時間|使用までの時間)$/, ["status:10104", "status:10101", "status:10102"]], [/(計略|消費)気$|計略消費気$/, ["status:10207", "status:10208"]],
+  [/計略(の)?(再使用時間|使用までの時間)$/, ["status:10104", "status:10101", "status:10102", "status:10107"]], [/消費気$/, ["status:10207", "status:10208", "status:10452", "status:10501"]],
   [/再配置(までの)?(時間)?$/, ["status:106"]], [/撃破(時)?(獲得)?気$/, ["status:10206"]],
 ];
 const AUDIT: [RegExp, string, string[]][] = [
@@ -451,7 +460,8 @@ const AUDIT: [RegExp, string, string[]][] = [
   // 「動きを封じる」 is the game's 麻痺 (Paralysis): its rows inflict CrowdControlType 1
   [/動きを封じ|移動速度(?:を|が)?[^、。､｡]{0,8}0に/, "can't move", ["util:stop", "status:401", "util:inflict:Paralysis"]],
   [/狙われない/, "can't be targeted", ["util:untargetable"]],
-  [/大破しない|耐久が0にならない/, "can't be knocked out", ["util:guts", "util:undying"]],
+  // 「大破しない「希望」状態にする」: the Hope ailment
+  [/大破しない|耐久が0にならない/, "can't be knocked out", ["util:guts", "util:undying", "util:inflict:Hope"]],
   [/回避/, "evasion", ["evade"]],
   [/バリア/, "barrier", ["barrier"]],
   [/以下のダメージを無効/, "nullify", ["nullify"]],
@@ -466,6 +476,39 @@ const AUDIT: [RegExp, string, string[]][] = [
   [/回復(する|させる|を行)|で回復/, "heal", ["heal:", "status:103", "status:102", "status:101", "status:202", "status:211", "status:502", "status:104"]],
 ];
 interface AuditSrc { u: number; name: string; desc: string }
+// Checked by hand: the text names it, and why no row ranks it. [castle girl, ability name, effect, reason]
+const INHERENT_DEF_IGNORE = "her weapon type ignores DEF (WeaponType.IgnoreArmor, like every 杖 / 法術): her own attack, not a buff";
+const AUDIT_EXPLAINED: [number, string, string, string][] = [
+  [7747, "カリバーンの暴風", "DEF ignore", INHERENT_DEF_IGNORE],
+  [9013, "もう何も恐くない", "DEF ignore", INHERENT_DEF_IGNORE],
+  [9221, "大仙人", "DEF ignore", INHERENT_DEF_IGNORE],
+  [9242, "竜王の顎", "DEF ignore", INHERENT_DEF_IGNORE],
+  [9243, "ベクトル操作", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon 禁書目録変身)`],
+  [9032, "シュタルクハドロン", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon モルドレッド[アーニャ変身])`],
+  [9032, "おしまい、かくれんぼは", "DEF ignore", `${INHERENT_DEF_IGNORE} (her transformed weapon モルドレッド[アーニャ変身])`],
+  [3122, "夢双の休日", "DEF ignore", "not in the game data: ability 7536's only row plays a voice; the text describes effects no row has"],
+  [964, "ステュクスの神誓", "撃破獲得気 change", "not in the game data: the formation rows (OrganizedAbility 964) hold only HP / ATK / DEF +10%"],
+  [9221, "王国を守護せし者", "reflect", "not in the game data: the ambush unit's ability 99226 rows are only ATK +100 and DEF +100"],
+  [9191, "超高校級の軍人", "can't be targeted", "not in the game data: ability 99191 rows are an attack bonus and ATK ×2 (target 2002), no untargetable row"],
+  [9112, "鷲獅子の舞", "移動速度 change", "not in the game data: the only row is 「DEF −30% of the giver's ATK」"],
+  [9112, "50%の確率で攻撃対象増加", "確率で与えるダメージ change", "the ×1.5 is the direct-hit bonus at a 40% chance: ranked as Direct-hit bonus (40% chance)"],
+  [710, "カラアトゥ・アル・ホスン", "秒間対象が優先攻撃対象 change", "ranked: taunt (status 314) and damage taken −75%; the audit misreads the sentence"],
+  [710, "聖地への鍵", "秒間対象が優先攻撃対象 change", "ranked: taunt (status 314) and damage taken −75%; the audit misreads the sentence"],
+  [9023, "鉄壁のクルセイダー", "攻撃 change", "ranked: 「攻撃を受けた後3秒間防御30%上昇」 = DEF +30% each time attacked (the game text has a typo)"],
+  [781, "新春破魔矢", "攻撃 change", "ranked: anti-yokai ×2 (status 214); the audit misreads 「攻撃が妖怪に対して2倍」"],
+  [9076, "固有魔法：弾道安定", "耐久 change", "ranked: a damage multiplier against enemies at full HP (attack bonus); not an HP change"],
+  [3133, "ロンギヌスの一閃", "射程 change", "special-attack stock scaling (攻撃と射程がストック数で上昇): a property of the special attack, not a buff"],
+  [3133, "ロンギヌスの永傷一閃", "射程 change", "special-attack stock scaling (攻撃と射程がストック数で上昇): a property of the special attack, not a buff"],
+  [398, "湖岸浸食", "damage", "an attack-shape change (splash instead of piercing; spread missile with no extra effect)"],
+  [833, "金龍長城", "回目以降は消費気 change", "a Ki-cost property of the stratagem set: its 2nd member costs 7 Ki instead of 12 (GimmickSet members 8096 / 8097)"],
+  [833, "金龍飛天", "回目以降は消費気 change", "a Ki-cost property of the stratagem set: its 2nd member costs 7 Ki instead of 12 (GimmickSet members 8101 / 8102)"],
+  [3064, "連鎖型要塞の防壁", "回目以降は消費気 change", "a Ki-cost property of the stratagem set: its 2nd member costs 4 Ki instead of 7 (GimmickSet members 8332 / 8333)"],
+  [9053, "超高校級の文学少女", "攻撃速度 change", "the decrease over time is Reversal (反転化) of her growing buffs: ranked as Reversal"],
+  [9053, "クシャミ", "攻撃速度 change", "the decrease over time is Reversal (反転化) of her growing buffs: ranked as Reversal"],
+  [998, "復活の校章旗", "隙 change", "her special attack uses motion 99270, which is not in WeaponMotion.aar (the only attack-motion archive the client lists)"],
+  [998, "奇跡の校章旗", "隙 change", "her special attack uses motion 99281, which is not in WeaponMotion.aar (the only attack-motion archive the client lists)"],
+];
+const explainedOf = (u: number, name: string, what: string) => AUDIT_EXPLAINED.find(([eu, en, ew]) => eu === u && en === name && ew === what)?.[3];
 const auditSrc: AuditSrc[] = [];
 function collectAudit(u: number, o: unknown, key = "") {
   if (!o || typeof o !== "object" || ["potential", "always", "quest", "transform_of", "raw", "class"].includes(key)) return;
@@ -480,6 +523,7 @@ function auditReport(): string[] {
   for (const r of rows) byU.set(r.u, [...(byU.get(r.u) || []), r]);
   const nameOf = new Map(index.map((e) => [e.id, e.name]));
   const miss = new Map<string, string[]>();
+  const explained: string[] = [];
   const seen = new Set<string>();
   for (const s of auditSrc) {
     const mine = (byU.get(s.u) || []).filter((r) => r.nm && (r.nm === s.name || r.nm.endsWith(` · ${s.name}`) || r.nm.startsWith(`${s.name} → `) || r.nm.endsWith(` → ${s.name}`)));
@@ -491,12 +535,13 @@ function auditReport(): string[] {
     for (const [re, what, keys] of AUDIT) { const m = re.exec(s.desc); if (m) want.push([what, keys, m[0]]); }
     // stat changes: "攻撃と防御が20%上昇", "射程内の敵の移動速度が5秒間70％低下"
     // 「耐久が高い程与えるダメージが上昇」: a condition on a damage multiplier, not an HP change
-    if (/(?:が|の)(?:高い|低い)(?:程|ほど)/.test(s.desc)) want.push(["damage by a stat's level", ["dmg:bonus", "dmg:dealt"], /[^、。､｡]{0,12}(?:高い|低い)(?:程|ほど)[^、。､｡]{0,12}/.exec(s.desc)![0]]);
-    const desc = s.desc.replace(/[^、。､｡]{0,12}(?:が|の)(?:高い|低い)(?:程|ほど)[^、。､｡]*/g, "");
+    if (/(?<!レアリティ)(?:が|の)(?:高い|低い)(?:程|ほど)/.test(s.desc)) want.push(["damage by a stat's level", ["dmg:bonus", "dmg:dealt"], /[^、。､｡]{0,12}(?:高い|低い)(?:程|ほど)[^、。､｡]{0,12}/.exec(s.desc)![0]]);
+    // 「敵の防御を5%無視」 is DEF ignore (its own check above), not a DEF change
+    const desc = s.desc.replace(/[^、。､｡]{0,12}(?:が|の)(?:高い|低い)(?:程|ほど)[^、。､｡]*/g, "").replace(/防御を?[\d.]*%?無視/g, "");
     for (const m of desc.matchAll(/([^、。､｡()（）「」\d%％]{1,30}?)(?:が|を)(?:[^、。､｡]{0,14}?)(?:上昇|低下|増加|減少|短縮|軽減|倍に|倍(?=[、。､｡]|$))/g)) {
       for (const part of m[1].split(/[と、､･・や]/)) {
         const w = part.replace(/^.*の/, "");
-        const hit = STAT_WORDS.find(([re]) => re.test(w));
+        const hit = STAT_WORDS.find(([re]) => re.test(part.replace(/^.*?の(?=計略|特殊攻撃|術)/, ""))) ?? STAT_WORDS.find(([re]) => re.test(w));
         if (hit) want.push([`${w} change`, hit[1], m[0]]);
       }
     }
@@ -504,6 +549,8 @@ function auditReport(): string[] {
       const id = `${s.u}|${s.name}|${what}`;
       if (seen.has(id) || has(keys)) continue;
       seen.add(id);
+      const why = explainedOf(s.u, s.name, what);
+      if (why) { explained.push(`${s.u} ${nameOf.get(s.u)} · ${s.name} · ${what}: ${why}`); continue; }
       const got = [...new Set(mine.map((r) => r.k.replace(/\|.*/, "")))].join(" ");
       miss.set(what, [...(miss.get(what) || []), `${s.u} ${nameOf.get(s.u)} · ${s.name}: …${snip}… (${s.desc.slice(0, 90)}) [ranked: ${got || "nothing"}]`]);
     }
@@ -511,6 +558,7 @@ function auditReport(): string[] {
   const md = ["## Text says it, nothing ranked", "", "Each line: the game's description names an effect, but no ranked row comes from that ability.", ""];
   for (const [what, list] of [...miss].sort((a, b) => b[1].length - a[1].length)) md.push(`- **${list.length}** ${what}`, ...list.map((x) => `  - ${x}`));
   if (!miss.size) md.push("(none)");
+  md.push("", "### Checked by hand (text names it, no row ranks it, and why)", "", ...explained.map((x) => `- ${x}`));
   return md;
 }
 
@@ -524,6 +572,92 @@ function tokenCard(id: number | undefined): UnitDetail | null {
   }
   return tokenCards.get(id)!;
 }
+
+/** A special attack: its ability rows, its own shot (and the motion's shots), its hit count. */
+function specialAttackRows(u: number, t: number, sa: UnitDetail["forms"][number]["special_attack"]) {
+  if (sa?.ability) ability(u, t, "special_attack", sa.ability);
+    // special attack hits: its AttackMotionID's shots x (1 + its missile's DamageRepeatNum)
+    // the special attack's own shot (SpecialAttack.MissileID / SpreadMissileID): its ailment and debuffs on the enemy hit
+    // (ヴァヴェル城 「5秒間「火傷」状態にする」)
+    if (sa?.raw) {
+      const at = rows.length;
+      emit(u, t, "special_attack", [sa.raw], "special_attack", sa.ability?.name);
+      // a healing special attack (戦棍 「射程内の殿と城娘全てに回復を行い10秒間防御を70上昇」): its shot hits the
+      // allies it heals, so the shot's changes are theirs. No table marks heal shots (Missile.HealEffect is unset on
+      // them), so the game's own special-attack text decides
+      if (/回復を行/.test(sa.ability?.description ?? "")) {
+        // only its gains: debuffs, ailments and damage still land on enemies
+        for (const r of rows.slice(at)) {
+          const [key, dir] = r.k.split("|");
+          const harm = dir === "-" || /^(dmgfx:|util:(inflict|knockback|stop|pierce|noheal|healdmg))/.test(key);
+          if (r.w === "Enemy hit" && !harm) { r.w = "Castle girls healed"; r.sd = "a"; }
+        }
+      }
+    }
+    if (sa?.raw) motionRow(u, t, "special_attack", sa.raw.AttackMotionID, sa.raw.MissileID, sa.ability?.name);
+  // stronger grades at higher stock (continuation rows): their own shot and ability, ranked as the same special attack
+  for (const g of sa?.grades ?? []) {
+    const nm = `${sa?.ability?.name ?? "special attack"} (stock grade ${g.grade})`;
+    specialAttackRows(u, t, { id: sa!.id, raw: g.raw, ability: g.ability ? { ...g.ability, name: nm } : sa?.ability ? { ...sa.ability, effects: [], name: nm } : undefined });
+  }
+}
+
+/** Stratagems: placement spots, fields, the EnchantEffect and its sets, and the ambush units they place. */
+function stratagemRows(u: number, t: number, list: Stratagem[] | undefined) {
+    for (const s of list ?? []) {
+      // GimmickType 4: the spot it changes buffs whoever is placed there
+      if (s.placement) {
+        const gives = s.placement.effects.map((r) => describeRow(r, "placement", defs).text.join(" · ").replace(/^[^:]*: /, "")).join(", ");
+        const lines = describeRow(s.placement.location, "location", defs).text;
+        const spots = lines.find((l) => l.startsWith("Can be used on: "))?.slice("Can be used on: ".length);
+        utilityRows(u, t, "stratagem", lines, s.name, [gives && `placed unit: ${gives}`, spots && `on ${spots}`].filter(Boolean).join("; ") || undefined);
+      }
+      if (s.placement?.effects.length) emit(u, t, "stratagem", s.placement.effects, "placement", s.name, "ally");
+      // GimmickType 3: a field at the chosen spot (damage + ailment + debuffs: 業火の刑 「範囲内の敵に攻撃の6倍の
+      // ダメージを与え､7秒間「火傷」にする」; heals; support). FieldEffectType 3 is the area of the stratagem's own
+      // EnchantEffect (described from s.effect below), so it is not read twice
+      if (s.field) {
+        // the id row and its continuation rows: each fires its own missile (天一生水: 2104 移動速度0 + 2105 攻撃/防御−50%);
+        // a type-3 id row is the enchant's area (described from s.effect), its continuation rows are missile fields
+        // (やっさ祭り 2074 = 「範囲内の敵の移動速度が50%低下」)
+        const ownRow = Number(s.field.field.FieldEffectType) !== 3 ? [s.field] : [];
+        // a type-3 continuation row is another enchant over the same area: ranked like the stratagem's own
+        for (const m of s.field.more ?? []) {
+          if (m.effect) stratagemRows(u, t, [{ ...s, token: undefined, placement: undefined, effect: m.effect, field: { field_id: s.field.field_id, field: m.field, missile: {} } }]);
+        }
+        for (const fl of [...ownRow, ...(s.field.more ?? []).filter((m) => !m.effect).map((m) => ({ ...m, field_id: s.field!.field_id }))]) {
+          emit(u, t, "stratagem", [{ AbilityType: 21 }], "ability", s.name, undefined, { 0: fl });
+        }
+      }
+      if (!s.effect) continue;
+      // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
+      const ctx = stratagemContext(defs, s);
+      // EnchantEffect.AttackMotionID: the stratagem switches the attack motion (海割れ: 2連続攻撃になり)
+      motionRow(u, t, "stratagem", s.effect.row.AttackMotionID, 0, s.name, Number(s.effect.row.TargetType) === 2 ? "Self" : "Target");
+      emit(u, t, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, ctx);
+      // the special attack the stratagem fires (EnchantEffect.SpecialAttackID)
+      if (s.effect.special_attack) specialAttackRows(u, t, { ...s.effect.special_attack, ability: s.effect.special_attack.ability && { ...s.effect.special_attack.ability, name: s.name } });
+      emit(u, t, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, ctx);
+      emit(u, t, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, ctx);
+    }
+    // ambush units (伏兵) a stratagem places: their own abilities buff and debuff too
+    for (const s of list ?? []) {
+      if (s.token) {
+        // TokenConfig.DeployLimit: how many can be out at once (matches every 「(N体まで)」 text, 154 of 154;
+        // tokens without it never state a cap)
+        const lim = Number(s.token.config?.DeployLimit) || 0;
+        const tag = `${s.token.name} (伏兵) · ${lim ? `max ${lim} placed at once` : "no placement limit"} · from ${s.name}`;
+        for (const a of [s.token.ability, s.token.general_ability]) if (a && !a.missing) ability(u, t, "token", { ...a, name: `${tag} · ${a.name}` });
+        // the ambush unit's own attack: its card's class fires Class.MissileID, whose changes land on the enemy hit
+        // (オバケ missile 27 = 「攻撃した敵の移動速度が1.8秒間70%低下」), plus that card's class ability
+        const card = tokenCard(s.token.card_id);
+        const shot = Number(card?.class?.MissileID) || 0;
+        const aName = s.token.ability?.name ?? s.token.name;
+        if (shot) emit(u, t, "token", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: shot }], "ability", `${tag} · ${aName}`);
+        if (card?.class_ability && !card.class_ability.missing) ability(u, t, "token", { ...card.class_ability, name: `${tag} · ${card.class_ability.name}` });
+      }
+    }
+  }
 
 let units = 0;
 for (const entry of index) {
@@ -540,60 +674,8 @@ for (const entry of index) {
     ability(u.id, f.tier, "possession", f.possessed);
     ability(u.id, f.tier, "defeat", f.defeated);
     // f.always is the card's own stat profile (ATK/DEF/HP +8%, cost…), not a buff it gives: left out
-    if (f.special_attack?.ability) ability(u.id, f.tier, "special_attack", f.special_attack.ability);
-    // special attack hits: its AttackMotionID's shots x (1 + its missile's DamageRepeatNum)
-    // the special attack's own shot (SpecialAttack.MissileID / SpreadMissileID): its ailment and debuffs on the enemy hit
-    // (ヴァヴェル城 「5秒間「火傷」状態にする」)
-    if (f.special_attack?.raw) {
-      const at = rows.length;
-      emit(u.id, f.tier, "special_attack", [f.special_attack.raw], "special_attack", f.special_attack.ability?.name);
-      // a healing special attack (戦棍 「射程内の殿と城娘全てに回復を行い10秒間防御を70上昇」): its shot hits the
-      // allies it heals, so the shot's changes are theirs. No table marks heal shots (Missile.HealEffect is unset on
-      // them), so the game's own special-attack text decides
-      if (/回復を行/.test(f.special_attack.ability?.description ?? "")) {
-        for (const r of rows.slice(at)) if (r.w === "Enemy hit") { r.w = "Castle girls healed"; r.sd = "a"; }
-      }
-    }
-    if (f.special_attack?.raw) motionRow(u.id, f.tier, "special_attack", f.special_attack.raw.AttackMotionID, f.special_attack.raw.MissileID, f.special_attack.ability?.name);
-    for (const s of f.stratagems ?? []) {
-      // GimmickType 4: the spot it changes buffs whoever is placed there
-      if (s.placement) {
-        const gives = s.placement.effects.map((r) => describeRow(r, "placement", defs).text.join(" · ").replace(/^[^:]*: /, "")).join(", ");
-        const lines = describeRow(s.placement.location, "location", defs).text;
-        const spots = lines.find((l) => l.startsWith("Can be used on: "))?.slice("Can be used on: ".length);
-        utilityRows(u.id, f.tier, "stratagem", lines, s.name, [gives && `placed unit: ${gives}`, spots && `on ${spots}`].filter(Boolean).join("; ") || undefined);
-      }
-      if (s.placement?.effects.length) emit(u.id, f.tier, "stratagem", s.placement.effects, "placement", s.name, "ally");
-      // GimmickType 3: a field at the chosen spot (damage + ailment + debuffs: 業火の刑 「範囲内の敵に攻撃の6倍の
-      // ダメージを与え､7秒間「火傷」にする」; heals; support). FieldEffectType 3 is the area of the stratagem's own
-      // EnchantEffect (described from s.effect below), so it is not read twice
-      if (s.field && Number(s.field.field.FieldEffectType) !== 3) emit(u.id, f.tier, "stratagem", [{ AbilityType: 21 }], "ability", s.name, undefined, { 0: s.field });
-      if (!s.effect) continue;
-      // EnchantEffect.TargetType 2 = 自分のみ (its texts: 自分のみが対象)
-      const ctx = stratagemContext(defs, s);
-      // EnchantEffect.AttackMotionID: the stratagem switches the attack motion (海割れ: 2連続攻撃になり)
-      motionRow(u.id, f.tier, "stratagem", s.effect.row.AttackMotionID, 0, s.name, Number(s.effect.row.TargetType) === 2 ? "Self" : "Target");
-      emit(u.id, f.tier, "stratagem", [s.effect.row], "enchant", s.name, undefined, undefined, ctx);
-      emit(u.id, f.tier, "stratagem", s.effect.AllyEffectSetID, "enchant_set", s.name, "ally", undefined, ctx);
-      emit(u.id, f.tier, "stratagem", s.effect.OpponentEffectSetID, "enchant_set", s.name, "enemy", undefined, ctx);
-    }
-    // ambush units (伏兵) a stratagem places: their own abilities buff and debuff too
-    for (const s of f.stratagems ?? []) {
-      if (s.token) {
-        // TokenConfig.DeployLimit: how many can be out at once (matches every 「(N体まで)」 text, 154 of 154;
-        // tokens without it never state a cap)
-        const lim = Number(s.token.config?.DeployLimit) || 0;
-        const tag = `${s.token.name} (伏兵) · ${lim ? `max ${lim} placed at once` : "no placement limit"} · from ${s.name}`;
-        for (const a of [s.token.ability, s.token.general_ability]) if (a && !a.missing) ability(u.id, f.tier, "token", { ...a, name: `${tag} · ${a.name}` });
-        // the ambush unit's own attack: its card's class fires Class.MissileID, whose changes land on the enemy hit
-        // (オバケ missile 27 = 「攻撃した敵の移動速度が1.8秒間70%低下」), plus that card's class ability
-        const card = tokenCard(s.token.card_id);
-        const shot = Number(card?.class?.MissileID) || 0;
-        const aName = s.token.ability?.name ?? s.token.name;
-        if (shot) emit(u.id, f.tier, "token", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: shot }], "ability", `${tag} · ${aName}`);
-        if (card?.class_ability && !card.class_ability.missing) ability(u.id, f.tier, "token", { ...card.class_ability, name: `${tag} · ${card.class_ability.name}` });
-      }
-    }
+    specialAttackRows(u.id, f.tier, f.special_attack);
+    stratagemRows(u.id, f.tier, f.stratagems);
   }
   // the weapon's own attack: WeaponType description 「敵1体に2連続攻撃を行い」 (双剣)
   const wHits = /(\d+)連続攻撃/.exec(u.weapon?.description ?? "");
@@ -606,13 +688,29 @@ for (const entry of index) {
   // the card's own innate abilities (Card.GeneralAbilityID1 「舟マス配置、移動可能」, BeforeAttackAbilityID, the
   // moving attack 「周囲の敵に攻撃の4倍のダメージを与え、移動速度を5秒間70％低下」 + its shot): ranked with the class ability
   ability(u.id, -1, "class", u.general_ability);
+  // her weapon's attack motion: its shots' own missiles
+  for (const m of u.weapon_motions ?? []) motionRow(u.id, -1, "weapon", m, 0, u.dedicated_weapon?.name ?? u.weapon?.name ?? undefined);
+  // her weapon's own shots (Weapon.MissileID / MissileSetID: セレスティア's random shot set): on the enemy hit
+  for (const m of u.weapon_shots ?? []) emit(u.id, -1, "weapon", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: m }], "ability", u.dedicated_weapon?.name ?? u.weapon?.name ?? undefined);
   ability(u.id, -1, "class", u.before_attack);
   if (u.moving_attack?.ability) ability(u.id, -1, "class", u.moving_attack.ability);
   if (u.moving_attack?.raw) emit(u.id, -1, "class", [u.moving_attack.raw], "special_attack", u.moving_attack.ability?.name);
   // its transformed twin (the special ability / stratagem turns it into a CardType-15 card): that card's
   // specialty per renovation tier, stratagem effects and special ability count in the matching slot, so a
   // stronger twin value only raises her best for that stat (no separate entry)
+  // a healing weapon (WeaponType.Heal: 歌舞, 祓串, 医薬品[罪木蜜柑]) fires at both sides: its gains (医薬品 「回復+100」)
+  // land on the allies it heals; its debuffs, ailments and damage (祓串's slow) stay on the enemy hit
+  const healShots = (at: number, heal: boolean | null | undefined) => {
+    if (!heal) return;
+    for (const r of rows.slice(at)) {
+      const [key, dir] = r.k.split("|");
+      const harm = dir === "-" || /^(dmgfx:|util:(inflict|knockback|stop|pierce|noheal|healdmg))/.test(key);
+      if (r.sl === "weapon" && r.w === "Enemy hit" && !harm) { r.w = "Castle girls healed"; r.sd = "a"; }
+    }
+  };
+  healShots(before, u.weapon_heal);
   const tw = u.transform_into;
+  const twAt = rows.length;
   if (tw) {
     if (tw.ability_tiers?.length) {
       ability(u.id, 0, "skill", tw.ability);
@@ -623,7 +721,42 @@ for (const entry of index) {
     // the twin's own class (and sub class) ability: what she has while transformed
     ability(u.id, -1, "class", tw.main_class?.class_ability);
     ability(u.id, -1, "class", tw.sub_class?.class_ability);
+    // what the twin fires and uses while transformed (リチャード１世's twin: special attack missile 3650 = 「大きく後退」)
+    specialAttackRows(u.id, -1, tw.special_attack);
+    // the twin's weapon attack motion: its shots' own missiles (真岡城's twin: 「攻撃した敵の移動速度を1秒間0にする」)
+    for (const m of tw.weapon_motions ?? []) motionRow(u.id, -1, "weapon", m, 0, `${tw.name} (transformed)`);
+    // the twin's weapon shots: her attacks while transformed (シバルバー's 「10秒間「氷結」」, 九龍城砦's 「後退させる」)
+    for (const m of tw.weapon_shots ?? []) emit(u.id, -1, "weapon", [{ AbilityType: 6, AbilityTypeDetail: 2, AbilityAreaType: 1, AbilityTargetType: 2, EffectValue: m }], "ability", `${tw.name} (transformed)`);
+    stratagemRows(u.id, -1, tw.stratagems);
+    ability(u.id, -1, "class", tw.before_attack);
+    if (tw.moving_attack?.ability) ability(u.id, -1, "class", tw.moving_attack.ability);
+    if (tw.moving_attack?.raw) emit(u.id, -1, "class", [tw.moving_attack.raw], "special_attack", tw.moving_attack.ability?.name);
   }
+  // a class-ability 6/5 row with a card id turns her into that card ([お月見]松本城 at max giantification -> card
+  // 6935, whose skill adds 「最大化時､自身の射程が80上昇､飛行敵以外に狙われず全マス移動可能」): that card's abilities
+  // are hers while it lasts. (6/5 with value 1 is her own twin, read above.)
+  const altCards = new Set<number>();
+  const findAlt = (o: unknown): void => {
+    if (!o || typeof o !== "object") return;
+    if (Array.isArray(o)) { o.forEach(findAlt); return; }
+    const r = o as Record<string, unknown>;
+    if (r.AbilityType === 6 && r.AbilityTypeDetail === 5 && Number(r.EffectValue) > 1) altCards.add(Number(r.EffectValue));
+    for (const v of Object.values(r)) findAlt(v);
+  };
+  findAlt(u.forms);
+  findAlt(u.special_ability);
+  for (const cid of altCards) {
+    const alt = tokenCard(cid);
+    if (!alt || cid === u.id) continue;
+    const tag = (n: string | undefined) => `${n ?? alt.name} (as card #${cid})`;
+    for (const f of alt.forms) {
+      ability(u.id, -1, "skill", f.ability && { ...f.ability, name: tag(f.ability.name) });
+      specialAttackRows(u.id, -1, f.special_attack);
+    }
+    ability(u.id, -1, "class", alt.class_ability && { ...alt.class_ability, name: tag(alt.class_ability.name) });
+    ability(u.id, -1, "class", alt.general_ability && { ...alt.general_ability, name: tag(alt.general_ability.name) });
+  }
+  if (tw) healShots(twAt, tw.weapon_heal);
   if (rows.length > before) units++;
   for (const f of u.forms) {
     const p = f.possessed;

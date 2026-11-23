@@ -166,6 +166,15 @@ function StratagemBlock({ s, defs, from }: { s: Stratagem; defs?: EffectDefs; fr
       {s.guide && <p className="muted small">{s.guide}</p>}
       {s.raw && <RawRows title="Gimmick row" rows={[s.raw]} />}
       {s.field && <EffectList title="FieldEffect" rows={[{ AbilityType: 21 }]} kind="ability" defs={defs} links={{ 0: s.field }} />}
+      {/* the field's continuation rows: more missiles fired in the same field */}
+      {s.field?.more?.map((m, i) => m.effect
+        ? <div key={i}>
+            <EffectList title="EnchantEffect" rows={[m.effect.row]} kind="enchant" defs={defs}
+              ctx={defs ? stratagemContext(defs, { effect: m.effect, field: { field: m.field } }) : {}} />
+            {m.effect.AllyEffectSetID && <EffectList title="EnchantEffectSet" rows={m.effect.AllyEffectSetID} kind="enchant_set" defs={defs}
+              ctx={defs ? stratagemContext(defs, { effect: m.effect, field: { field: m.field } }) : {}} />}
+          </div>
+        : <EffectList key={i} title="FieldEffect" rows={[{ AbilityType: 21 }]} kind="ability" defs={defs} links={{ 0: { ...m, field_id: s.field!.field_id } }} />)}
       {s.placement && <EffectList title={`LocationEffect #${s.placement.location_id}`} rows={[s.placement.location]} kind="location" defs={defs} />}
       {s.placement && s.placement.effects.length > 0 && <EffectList title={`PlacementEffect #${s.placement.location.Param2}`} rows={s.placement.effects} kind="placement" defs={defs} />}
       {s.token && (

@@ -62,6 +62,8 @@ export interface FieldLink {
   field_id: number;
   field: RawRow;
   missile: RawRow;
+  /** the field's continuation rows: more missiles fired in the same field */
+  more?: { field: RawRow; missile: RawRow; effect?: EnchantEffect | null }[];
 }
 
 export interface Ability {
@@ -79,6 +81,8 @@ export interface Ability {
 export interface EnchantEffect {
   id: number;
   row: RawRow;
+  /** EnchantEffect.SpecialAttackID: the special attack the stratagem fires */
+  special_attack?: SpecialAttack;
   AllyEffectSetID?: RawRow[];
   OpponentEffectSetID?: RawRow[];
 }
@@ -110,6 +114,8 @@ export interface SpecialAttack {
   raw?: RawRow;
   ability?: Ability;
   missing?: boolean;
+  /** stronger versions at higher stock (SpecialAttack continuation rows, Grade 1 / 2) */
+  grades?: { grade: number; raw: RawRow; ability?: Ability }[];
 }
 
 export interface Form {
@@ -164,6 +170,14 @@ export interface Transformed {
   ability_tiers?: { tier: number; label: string; ability: Ability | null }[];
   general_ability?: Ability | null;
   special_ability?: SpecialAbility | null;
+  /** the twin's own special attack / stratagems / moving attack, where they differ from the base card's */
+  special_attack?: UnitDetail["forms"][number]["special_attack"];
+  stratagems?: Stratagem[];
+  before_attack?: Ability | null;
+  moving_attack?: UnitDetail["moving_attack"];
+  weapon_shots?: number[];
+  weapon_motions?: number[];
+  weapon_heal?: boolean;
 }
 
 export interface UnitDetail {
@@ -198,6 +212,12 @@ export interface UnitDetail {
   transform_into: Transformed | null;
   general_ability: Ability | null;
   before_attack: Ability | null;
+  /** missiles her own weapons fire (Weapon.MissileID / SpreadMissileID / MissileSet members) */
+  weapon_shots?: number[] | null;
+  /** her weapons' attack motions (Weapon.MotionSetID -> WeaponMotionSet.AttackMotion) */
+  weapon_motions?: number[] | null;
+  /** WeaponType.Heal: her shots heal allies */
+  weapon_heal?: boolean | null;
   moving_attack: { id: number; raw?: RawRow; ability?: Ability; missing?: boolean } | null;
   one_time_reactive: RawRow | null;
   dedicated_weapon: { id: number; name: string; description: string } | null;
