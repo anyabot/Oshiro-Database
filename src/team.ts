@@ -1,6 +1,6 @@
 // Team builder maths (pages/Team.tsx): which buffs.json rows reach a chosen castle girl from a formation,
 // how they add up per effect, and how much each candidate would add.
-import type { BuffRow } from "./buffData";
+import { layerOf, type BuffRow, type Layer } from "./buffData";
 import { groupMatches, type ReachRule, type ReachUnit } from "./reach";
 
 export type Mode = "off" | "def" | "util";
@@ -134,15 +134,19 @@ export function magnitude(k: string, v: number): number {
   return v;
 }
 
-/** Total per effect: the strongest non-stacking source, plus every one that says it stacks (× ones multiply).
- *  Within one skill, rows under different conditions add up (九龍城砦: DEF ignore 4% per giantification + 40%
- *  at max = 76%), while rows under the same one are one buff split over overlapping groups (上田城「射程内の城娘と
- *  全ての近接城娘の与ダメージが25%上昇」: +25%, not +50%). "Doesn't stack" is between skills. */
+/** Total per effect, layer by layer (buffData layerOf: skills and other abilities, equipment, possession, stratagems).
+ *  Inside a layer: the strongest non-stacking source, plus every one that says it stacks (× ones multiply). Within one
+ *  skill, rows under different conditions add up (九龍城砦: DEF ignore 4% per giantification + 40% at max = 76%),
+ *  while rows under the same one are one buff split over overlapping groups (上田城「射程内の城娘と全ての近接城娘の
+ *  与ダメージが25%上昇」: +25%, not +50%). Across layers a stat's % changes multiply (the game applies each layer to
+ *  what the previous one left: a sword's ATK +7% and Koga's stratagem ×1.8 = ×1.926); other totals add. */
 export function total(k: string, list: Contribution[]): number {
-  const mult = k.endsWith("|×");
-  let stack = mult ? 1 : 0;
-  // skill -> condition -> strongest
-  const sources = new Map<string, Map<string, number>>();
+  const [key, dir, unit] = k.split("|");
+  const mult = unit === "×";
+  // a stat's plain % (status:…|+|%): applied per layer on the running value
+  const chained = unit === "%" && key.startsWith("status:");
+  // layer -> (giver|slot|name -> condition -> strongest), stacking total
+  const layers = new Map<Layer, { sources: Map<string, Map<string, number>>; stack: number }>();
   // one row from one giver counts once (the same text may come from two tiers of a twin)
   const seen = new Set<string>();
   for (const c of list) {
@@ -150,15 +154,26 @@ export function total(k: string, list: Contribution[]): number {
     if (seen.has(id)) continue;
     seen.add(id);
     const m = magnitude(k, c.v);
-    if (c.row.st === 1) { stack = mult ? stack * (1 + m) : stack + m; continue; }
+    const layer = layers.get(layerOf(c.row.sl)) ?? { sources: new Map(), stack: mult ? 1 : 0 };
+    layers.set(layerOf(c.row.sl), layer);
+    if (c.row.st === 1) { layer.stack = mult ? layer.stack * (1 + m) : layer.stack + m; continue; }
     const src = `${c.giver}|${c.row.sl}|${c.row.nm ?? ""}`;
-    const conds = sources.get(src) ?? new Map<string, number>();
+    const conds = layer.sources.get(src) ?? new Map<string, number>();
     conds.set(c.row.n ?? "", Math.max(conds.get(c.row.n ?? "") ?? 0, m));
-    sources.set(src, conds);
+    layer.sources.set(src, conds);
   }
   const sum = (conds: Map<string, number>) => [...conds.values()].reduce((a, m) => (mult ? (1 + a) * (1 + m) - 1 : a + m), 0);
-  const best = Math.max(0, ...[...sources.values()].map(sum));
-  return mult ? (1 + best) * stack - 1 : best + stack;
+  const perLayer = [...layers.values()].map(({ sources, stack }) => {
+    const best = Math.max(0, ...[...sources.values()].map(sum));
+    return mult ? (1 + best) * stack - 1 : best + stack;
+  });
+  if (mult) return perLayer.reduce((a, v) => (1 + a) * (1 + v) - 1, 0);
+  // decreases chain as what is left (−20% then −10% = −28%), increases as growth
+  if (chained) {
+    const factor = perLayer.reduce((a, v) => a * (dir === "-" ? Math.max(0, 1 - v / 100) : 1 + v / 100), 1);
+    return dir === "-" ? (1 - factor) * 100 : (factor - 1) * 100;
+  }
+  return perLayer.reduce((a, v) => a + v, 0);
 }
 
 export function byKey(list: Contribution[]): Map<string, Contribution[]> {

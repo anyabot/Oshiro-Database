@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FallbackImage, FilterChip, FilterRow, LoadState, PageHeader, Panel, SearchBox, SegmentedButtons } from "@altterisk/game-hub";
 import { altName, iconUrl, nameOf, rarityLabel, terrainParts, tierName, useMeta, useUnits, weaponLabel } from "../data";
-import { effectLabel, effectName, fmtAmount, giantGrade, useBuffData, useReach, type BuffRow } from "../buffData";
+import { STRONGEST_KEY, effectLabel, effectName, fmtAmount, giantGrade, layerOf, useBuffData, useReach, type BuffRow } from "../buffData";
 import { collectible, useCollection } from "../collection";
 import { useUnitFilters } from "../unitFilters";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
@@ -106,7 +106,7 @@ export default function Team() {
     `${rarityLabel(meta ?? undefined, u.rarity)} · ${weaponLabel(meta ?? undefined, u.weapon)}${tierOf(u.id) > 0 ? ` · ${tierName(tierOf(u.id))}` : ""}`;
   const describe = (c: Contribution) => [
     t(SLOT_LABEL[c.row.sl] ?? "srcSkill"), c.row.nm, fx.who(c.row.w), c.row.n ? fx.note(c.row.n) : "",
-    c.row.st === 1 ? t("stacks") : c.row.st === 0 ? t("strongestOnly") : "",
+    c.row.st === 1 ? t("stacks") : c.row.st === 0 ? t(STRONGEST_KEY[layerOf(c.row.sl)]) : "",
   ].filter(Boolean).join(" · ");
 
   const picks = q ? pool.filter((u) => matchesQuery(u, q)).slice(0, 24) : [];

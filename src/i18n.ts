@@ -452,8 +452,8 @@ export const UI = {
   },
   stackHelp: { en: "How effects stack", ja: "効果の重複について" },
   stackStrongest: {
-    en: "<b>Strongest only</b>: plain % changes of one stat keep only the biggest increase and the biggest decrease (and some flat stats, like DEF ignore and Ki refund, do the same).",
-    ja: "<b>最大値のみ</b>: 同じステータスの通常の%変化は、最大の上昇と最大の低下だけが適用されます (防御無視や気の返還など一部の固定値も同様)。",
+    en: "<b>Strongest only</b>: plain % changes of one stat don't add up within one kind of source: only the biggest increase and the biggest decrease count. The kinds are applied one after another and multiply: equipment abilities, equipment stats, possession effects, giantification and stratagems, with skills and special abilities on top. So two skills' ATK +% don't add up, but a skill's and a sword's both count. Some flat stats, like DEF ignore and Ki refund, also keep only the strongest.",
+    ja: "<b>最大値のみ</b>: 同じステータスの通常の%変化は、同じ種類の効果元の中では合算されず、最大の上昇と最大の低下だけが適用されます。種類ごとに順番に適用されて掛け算になります: 装備の効果・装備のステータス・所持効果・巨大化・計略、その上に特技と特殊能力。2つの特技の攻撃+%は合算されませんが、特技と武器の効果は両方有効です。防御無視や気の返還など一部の固定値も最大値のみ。",
   },
   stackAdds: { en: "<b>Stacks</b>: flat values and the stacking % kind are added together.", ja: "<b>重複</b>: 固定値と重複する種類の%は合算されます。" },
   stackGrow: {
@@ -530,6 +530,10 @@ export const UI = {
   allAilments: { en: "All status ailments", ja: "全状態異常" },
   ailmentsN: { en: "{n} status ailments", ja: "状態異常{n}種" },
   strongestOnly: { en: "strongest only", ja: "最大値のみ" },
+  strongestAbility: { en: "strongest skill only", ja: "特技等で最大値のみ" },
+  strongestEquipment: { en: "strongest equipment only", ja: "装備で最大値のみ" },
+  strongestPossession: { en: "strongest possession only", ja: "所持効果で最大値のみ" },
+  strongestStratagem: { en: "strongest stratagem only", ja: "計略で最大値のみ" },
   showTop: { en: "Show top {n}", ja: "上位{n}件を表示" },
   showAll: { en: "Show all {n}", ja: "全{n}件を表示" },
   buffFooter: {

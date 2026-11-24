@@ -6,7 +6,7 @@ import { altName, iconUrl, nameOf, rarityLabel, tierName, useMeta, useUnits, wea
 import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
-import { HITS, PERMANENT, effectLabel, fmtAmount, isUtil, useBuffData, type BuffRow } from "../buffData";
+import { HITS, PERMANENT, STRONGEST_KEY, effectLabel, fmtAmount, isUtil, layerOf, useBuffData, type BuffRow } from "../buffData";
 import { useWeapons, weaponDotUrl, weaponIconUrl, type Weapon } from "../weapons";
 import { weaponTypeName } from "../weaponParts";
 
@@ -273,7 +273,7 @@ export default function Buffs() {
                           {r.nc && <div className="small muted">{t("noCap")}</div>}
                           {r.st != null && (
                             <div className={`buff-stack ${r.st === 1 ? "is-stack" : r.st === 0 ? "is-max" : ""}`}>
-                              {r.st === 1 ? t("stacks") : r.st === 0 ? t("strongestOnly") : r.st}
+                              {r.st === 1 ? t("stacks") : r.st === 0 ? t(STRONGEST_KEY[layerOf(r.sl)]) : r.st}
                             </div>
                           )}
                         </td>

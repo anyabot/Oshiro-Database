@@ -79,6 +79,19 @@ export function fmtAmount(k: string, v: number): string {
   if (dir === "=") return `=${fmtNum(v)}${unit === "s" ? "s" : unit}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
+/** The layer a slot's effects are applied in. The game applies each layer in turn on the stat the previous one left
+ *  (exe FUN_005472b0 groups 1-9, then the abilities), so plain % changes of one stat compete only inside a layer
+ *  (strongest increase and strongest decrease, FUN_00547bc0) and multiply across layers. Order, from in-battle
+ *  captures (tools/frida/stat_hook.js, group_hook.js): equipment abilities (group 1), equipment stats (2), possession
+ *  effects (3), giantification (7), stratagems (8); skills and special abilities are not in those groups and apply on
+ *  top of the equipment (Kagoshima: (552 x 1.07 + 77) x 5 - 250 = 3085, seen 3085). */
+export type Layer = "ability" | "equipment" | "possession" | "stratagem";
+export const layerOf = (sl: string): Layer =>
+  sl === "equipment" ? "equipment" : sl === "possession" ? "possession" : sl === "stratagem" ? "stratagem" : "ability";
+export const STRONGEST_KEY: Record<Layer, "strongestAbility" | "strongestEquipment" | "strongestPossession" | "strongestStratagem"> = {
+  ability: "strongestAbility", equipment: "strongestEquipment", possession: "strongestPossession", stratagem: "strongestStratagem",
+};
+
 /** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */
 export const PERMANENT = 1e9;
 export const isUtil = (k: string) => k.startsWith("util:");
