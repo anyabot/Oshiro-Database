@@ -79,22 +79,19 @@ export function fmtAmount(k: string, v: number): string {
   if (dir === "=") return `=${fmtNum(v)}${unit === "s" ? "s" : unit}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
-/** The group a slot's effects are applied in. The game builds a stat as: base + equipment stats (flat, merged first),
- *  then groups 1..9 in order (exe FUN_005472b0), each applied to the value the previous one left; inside a group plain %
- *  changes of one stat keep only the strongest increase and decrease (FUN_00547bc0), then flat values are added.
- *  Traced in battle (tools/frida/trace_hook.js, every ATK write per group, 2026-11-24):
- *    [雲耀]鹿児島城 453 +77 (Seven Branch Sword's ATK) = 530 | g1 x1.07 = 567 (its +7%) | g2 +100 (Koga's skill) +70 = 737
- *    | g7 +32% giantification = 972 | g8 x5 (special ability) = 4860, -250 per ally in range = 4610
- *    another unit: g1 x1.07 | g2 +100 (Koga's skill) | g3 +3% (possession) | g7 +18% | g8 x2.2 (Unbounded Edo stratagem)
- *  So: 1 equipment abilities, 2 skills, 3 possession, 7 giantification, 8 stratagems and special abilities.
- *  Not traced: formation skills, class abilities, special attacks, ambush units, on-defeat effects ("unverified"). */
-export type Layer = "equipment" | "skill" | "possession" | "stratagem" | "unverified";
+/** The group a slot's effects are applied in. A stat = base + equipment stats (flat), then groups 1..9 in order
+ *  (exe FUN_005472b0), each on the value the previous one left; inside a group plain % changes of one stat keep only
+ *  the strongest increase and decrease (FUN_00547bc0), then flat values are added. Every function that adds stat
+ *  modifiers to a set (14 in the exe) has a fixed group: 1 equipment abilities (trace: Seven Branch Sword x1.07),
+ *  2 formation skills (FUN_0044ad10 -> OrganizedAbilityID getter FUN_00ab7d90, context 2; trace: Edo +100, Kagoshima
+ *  Kyushu +70), 3 possession (PossessedAbilityID getter -> context 3), 7 giantification, 8 everything registered when a
+ *  unit acts: skills, class abilities, on-defeat, ambush units (router type-1 handler FUN_00af8580 sets 8), stratagems,
+ *  special abilities, special attacks and shot debuffs (missile builder FUN_004994c0, 8). */
+export type Layer = "equipment" | "formation" | "possession" | "main";
 export const layerOf = (sl: string): Layer =>
-  sl === "equipment" ? "equipment" : sl === "skill" ? "skill" : sl === "possession" ? "possession"
-    : sl === "stratagem" || sl === "special" ? "stratagem" : "unverified";
-export const STRONGEST_KEY: Record<Layer, "strongestSkill" | "strongestEquipment" | "strongestPossession" | "strongestStratagem" | "strongestOnly"> = {
-  skill: "strongestSkill", equipment: "strongestEquipment", possession: "strongestPossession", stratagem: "strongestStratagem",
-  unverified: "strongestOnly",
+  sl === "equipment" ? "equipment" : sl === "formation" ? "formation" : sl === "possession" ? "possession" : "main";
+export const STRONGEST_KEY: Record<Layer, "strongestMain" | "strongestEquipment" | "strongestFormation" | "strongestPossession"> = {
+  main: "strongestMain", equipment: "strongestEquipment", formation: "strongestFormation", possession: "strongestPossession",
 };
 
 /** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */

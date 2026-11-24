@@ -452,8 +452,8 @@ export const UI = {
   },
   stackHelp: { en: "How effects stack", ja: "効果の重複について" },
   stackStrongest: {
-    en: "<b>Strongest only</b>: the game builds a stat from the base plus equipment stats, then applies effects group by group, each on the value the previous group left: equipment abilities, skills, possession effects, giantification, then stratagems and special abilities. Inside a group, plain % changes of one stat don't add up (only the biggest increase and the biggest decrease count), and flat values are added after them; across groups they multiply. So two skills' ATK +% don't add up, while a sword's +7% and a stratagem's ×1.8 both count. Formation skills, class abilities, special attacks and ambush units haven't been traced yet. Some flat stats, like DEF ignore and Ki refund, also keep only the strongest.",
-    ja: "<b>最大値のみ</b>: ステータスは基礎値と装備のステータスに、効果を種類ごとに順番に適用して決まります (前の結果に対して適用): 装備の効果・特技・所持効果・巨大化・計略と特殊能力。同じ種類の中では同じステータスの通常の%変化は合算されず最大の上昇と最大の低下だけが適用され、その後に固定値が加算されます。種類が違えば掛け算です。2つの特技の攻撃+%は合算されませんが、武器の+7%と計略の×1.8は両方有効です。編成特技・クラス特技・特殊攻撃・伏兵は未検証です。防御無視や気の返還など一部の固定値も最大値のみ。",
+    en: "<b>Strongest only</b>: the game builds a stat from the base plus equipment stats, then applies effects in groups, each on the value the previous group left: equipment abilities, formation skills, possession effects, giantification, then one group for skills, stratagems, special abilities, special attacks and everything else a castle girl triggers. Inside a group, plain % changes of one stat don't add up (only the biggest increase and the biggest decrease count), and flat values are added after them; across groups they multiply. So a skill's ATK +% and a stratagem's ATK ×N don't add up, while a sword's +7% and a formation skill's +100 both count. Some flat stats, like DEF ignore and Ki refund, also keep only the strongest.",
+    ja: "<b>最大値のみ</b>: ステータスは基礎値と装備のステータスに、効果をグループごとに順番に適用して決まります (前の結果に対して適用): 装備の効果・編成特技・所持効果・巨大化、最後に特技・計略・特殊能力・特殊攻撃など城娘が発動する効果すべて。同じグループの中では同じステータスの通常の%変化は合算されず最大の上昇と最大の低下だけが適用され、その後に固定値が加算されます。グループが違えば掛け算です。特技の攻撃+%と計略の攻撃×Nは重ならず、武器の+7%と編成特技の+100は両方有効です。防御無視や気の返還など一部の固定値も最大値のみ。",
   },
   stackAdds: { en: "<b>Stacks</b>: flat values and the stacking % kind are added together.", ja: "<b>重複</b>: 固定値と重複する種類の%は合算されます。" },
   stackGrow: {
@@ -530,10 +530,10 @@ export const UI = {
   allAilments: { en: "All status ailments", ja: "全状態異常" },
   ailmentsN: { en: "{n} status ailments", ja: "状態異常{n}種" },
   strongestOnly: { en: "strongest only", ja: "最大値のみ" },
-  strongestSkill: { en: "strongest skill only", ja: "特技で最大値のみ" },
   strongestEquipment: { en: "strongest equipment only", ja: "装備で最大値のみ" },
   strongestPossession: { en: "strongest possession only", ja: "所持効果で最大値のみ" },
-  strongestStratagem: { en: "strongest stratagem or special ability only", ja: "計略・特殊能力で最大値のみ" },
+  strongestMain: { en: "strongest of skills, stratagems & special abilities only", ja: "特技・計略・特殊能力で最大値のみ" },
+  strongestFormation: { en: "strongest formation skill only", ja: "編成特技で最大値のみ" },
   showTop: { en: "Show top {n}", ja: "上位{n}件を表示" },
   showAll: { en: "Show all {n}", ja: "全{n}件を表示" },
   buffFooter: {
