@@ -7,6 +7,8 @@ import { useUnitFilters } from "../unitFilters";
 import type { UnitIndexEntry } from "../types";
 import { useFx, useHubLabels, useT, type UiKey } from "../i18n";
 import { HITS, PERMANENT, effectLabel, fmtAmount, isUtil, useBuffData, type BuffRow } from "../buffData";
+import { useWeapons, weaponDotUrl, weaponIconUrl, type Weapon } from "../weapons";
+import { weaponTypeName } from "../weaponParts";
 
 const CATEGORIES: { k: string; label: UiKey }[] = [
   { k: "offense", label: "catOffense" },
@@ -51,7 +53,11 @@ const SOURCES: { value: string; label: UiKey; note: UiKey }[] = [
   { value: "possession", label: "srcPossession", note: "notePossession" },
   { value: "defeat", label: "srcDefeat", note: "noteDefeat" },
   { value: "token", label: "srcToken", note: "noteToken" },
+  { value: "equipment", label: "srcEquipment", note: "noteEquipment" },
 ];
+const EQ = "equipment";
+/** Who gives it: a castle girl, or a piece of equipment (its own id space). */
+const giver = (r: BuffRow) => (r.sl === EQ ? `w${r.u}` : String(r.u));
 const SOURCE_BY = Object.fromEntries(SOURCES.map((s) => [s.value, s]));
 
 // who receives it, bucketed from the receiver text the effect describer writes
@@ -80,11 +86,32 @@ const lowerFirst = (k: string) => k.endsWith("|-|×") || k.startsWith("status:20
 
 const PREVIEW = 10;
 
+/** An equipment row's giver: its sprite, name, ★ and weapon type, and the castle girls a bonus ability is for. */
+function EquipmentCell({ r, w, units, typeName, label }: { r: BuffRow; w: Weapon | undefined; units: Map<number, UnitIndexEntry>;
+  typeName: (type: number) => string; label: string }) {
+  const t = useT();
+  return (
+    <td data-label={label}>
+      <Link className="buff-unit" to={`/equipment/${r.u}`}>
+        {w?.dot != null
+          ? <FallbackImage className="weapon-dot" srcs={[weaponDotUrl(w.dot)]} alt="" width={36} height={36} loading="lazy" missingClassName="buff-noicon" />
+          : w ? <img src={weaponIconUrl(w.type)} alt="" width={36} height={36} loading="lazy" /> : <span className="buff-noicon" />}
+        <span>
+          <span className="buff-unit-name" title={w && altName(w) || undefined}>{w ? nameOf(w) : `#${r.u}`}</span>
+          {w && <span className="buff-unit-meta">★{w.rarity} · {typeName(w.type)}</span>}
+          {r.sp?.length ? <span className="buff-unit-meta">{t("equipBonusFor", { names: r.sp.map((c) => { const u = units.get(c); return u ? nameOf(u) : `#${c}`; }).join(", ") })}</span> : null}
+        </span>
+      </Link>
+    </td>
+  );
+}
+
 /** Who gives the biggest X to whom: one ranked list per effect and source. */
 export default function Buffs() {
   const { data, loading, error } = useBuffData();
   const { data: index } = useUnits();
   const { data: meta } = useMeta();
+  const { data: weaponData } = useWeapons();
   const [params, setParams] = useSearchParams();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const adapter = searchParamsAdapter(params, setParams);
@@ -105,11 +132,19 @@ export default function Buffs() {
   const unitFilter = useUnitFilters(index ?? undefined, meta ?? undefined, params, setParams);
 
   const units = useMemo(() => new Map((index || []).map((u) => [u.id, u])), [index]);
+  const weapons = useMemo(() => new Map((weaponData?.weapons || []).map((w) => [w.id, w] as [number, Weapon])), [weaponData]);
+  // equipment follows only the castle girl filters' weapon type (any castle girl of that type can equip it)
+  const weaponSel = url.list("weapon");
+  const eqMatches = (r: BuffRow) => {
+    if (!weaponSel.length) return true;
+    const type = weapons.get(r.u)?.type;
+    return type != null && (weaponSel.includes(String(type)) || (weaponSel.includes("other") && type > 24));
+  };
 
   // Tier: "best" keeps, per castle girl and slot, the highest renovation that has it; "base" the
   // unrenovated card only. Tier -1 rows (class, special ability) count for every tier.
   const tiered = useMemo(() => {
-    const rows = data?.rows || [];
+    const rows = [...(data?.rows || []), ...(data?.eq || [])];
     if (base) return rows.filter((r) => r.t <= 0);
     const top = new Map<string, number>();
     for (const r of rows) {
@@ -123,10 +158,10 @@ export default function Buffs() {
     (!sources.length || sources.includes(r.sl))
     && (!reaches.length || reaches.includes(reach(r)))
     && (!stacking.length || stacking.includes(stackOf(r)))
-    && (!unitFilter.activeCount || unitFilter.matches(units.get(r.u)))),
-  [tiered, sources.join(), reaches.join(), stacking.join(), unitFilter.matches, unitFilter.activeCount, units]);
+    && (r.sl === EQ ? eqMatches(r) : !unitFilter.activeCount || unitFilter.matches(units.get(r.u)))),
+  [tiered, sources.join(), reaches.join(), stacking.join(), unitFilter.matches, unitFilter.activeCount, units, weapons, weaponSel.join()]);
 
-  const unitsIn = (list: BuffRow[]) => new Set(list.map((r) => r.u)).size;
+  const unitsIn = (list: BuffRow[]) => new Set(list.map(giver)).size;
   const byCat = useMemo(() => {
     const m = new Map<string, BuffRow[]>();
     for (const r of filtered) {
@@ -154,7 +189,7 @@ export default function Buffs() {
       const seen = new Set<string>();
       const ranked = [...m.get(s.value)!]
         .sort((a, b) => (lower ? score(a) - score(b) : score(b) - score(a)) || b.v - a.v)
-        .filter((r) => !seen.has(`${r.u}|${r.w}`) && !!seen.add(`${r.u}|${r.w}`));
+        .filter((r) => !seen.has(`${giver(r)}|${r.w}`) && !!seen.add(`${giver(r)}|${r.w}`));
       return { sl: s.value, ranked };
     });
   }, [keys, key, byValue]);
@@ -222,10 +257,10 @@ export default function Buffs() {
           return (
             <GroupCard key={sl} className="buff-group"
               title={`${effectLabel(key, names)} · ${t(SOURCE_BY[sl].label)}`}
-              count={t("nCastleGirls", { n: new Set(ranked.map((r) => r.u)).size })}
+              count={t(sl === EQ ? "nEquipment" : "nCastleGirls", { n: new Set(ranked.map((r) => r.u)).size })}
               note={t(SOURCE_BY[sl].note)}>
               <table className="hub-table hub-table--stack buff-table">
-                <thead><tr><th>#</th><th>{t("value")}</th><th>{t("castleGirl")}</th><th>{t("receiver")}</th><th>{t("conditions")}</th></tr></thead>
+                <thead><tr><th>#</th><th>{t("value")}</th><th>{t(sl === EQ ? "equipmentCol" : "castleGirl")}</th><th>{t("receiver")}</th><th>{t("conditions")}</th></tr></thead>
                 <tbody>
                   {shown.map((r, i) => {
                     const u: UnitIndexEntry | undefined = units.get(r.u);
@@ -242,7 +277,7 @@ export default function Buffs() {
                             </div>
                           )}
                         </td>
-                        <td data-label={t("castleGirl")}>
+                        {sl === EQ ? <EquipmentCell r={r} w={weapons.get(r.u)} units={units} typeName={(x) => weaponTypeName(weaponData ?? undefined, x)} label={t("equipmentCol")} /> : <td data-label={t("castleGirl")}>
                           <Link className="buff-unit" to={`/units/${r.u}${r.t > 0 ? `?kai=${r.t}` : ""}`}>
                             {u?.face != null
                               ? <FallbackImage srcs={[iconUrl(u.face)]} alt="" width={36} height={36} loading="lazy" missingClassName="buff-noicon" />
@@ -252,7 +287,7 @@ export default function Buffs() {
                               {u && <span className="buff-unit-meta">{rarityLabel(meta, u.rarity)} · {weaponLabel(meta, u.weapon)}{r.t > 0 ? ` · ${tierName(r.t)}` : ""}</span>}
                             </span>
                           </Link>
-                        </td>
+                        </td>}
                         <td data-label={t("receiver")} className="buff-target">{fx.who(r.w)}</td>
                         <td data-label={t("conditions")} className="buff-target">
                           {r.n ? <span className="small">{isUtil(r.k) || r.k === HITS ? fx.line(r.n) : fx.note(r.n)}</span> : <span className="muted small">—</span>}

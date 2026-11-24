@@ -559,6 +559,7 @@ export const UI = {
   srcPossession: { en: "Possession 所持", ja: "所持" },
   srcDefeat: { en: "On defeat 撃破時", ja: "撃破時" },
   srcToken: { en: "Ambush unit 伏兵", ja: "伏兵" },
+  srcEquipment: { en: "Equipment", ja: "装備" },
   noteSkill: { en: "The castle girl's own specialty: always on while deployed, or on its trigger.", ja: "城娘自身の特技: 配置中は常時、または条件を満たした時に発動。" },
   noteFormation: { en: "Applies to the formation from the start of the battle.", ja: "戦闘開始時から編成に適用されます。" },
   noteStratagem: { en: "Active while the stratagem lasts.", ja: "計略の効果時間中に有効。" },
@@ -569,6 +570,11 @@ export const UI = {
   notePossession: { en: "Applies while the castle girl is owned / in the formation.", ja: "所持中・編成中に適用されます。" },
   noteDefeat: { en: "When the castle girl is defeated.", ja: "城娘の撃破時。" },
   noteToken: { en: "Abilities of the ambush unit (伏兵) her stratagem places.", ja: "計略で配置する伏兵の特技。" },
+  noteEquipment: { en: "Equipment abilities: any castle girl of the weapon type gets them by equipping it. Of the castle girl filters, only the weapon type applies here.",
+    ja: "装備の効果: その武器種の城娘なら装備するだけで得られる。城娘の絞り込みは武器種のみ適用。" },
+  equipmentCol: { en: "Equipment", ja: "装備" },
+  nEquipment: { en: "{n} equipment", ja: "装備 {n}種" },
+  equipBonusFor: { en: "Bonus only for {names}", ja: "{names}専用ボーナス" },
 
   // stages
   stagesTitle: { en: "Stages", ja: "ステージ" },

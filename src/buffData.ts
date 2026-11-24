@@ -24,12 +24,16 @@ export interface BuffRow {
   nm?: string;
   /** per giantification: mx = v × the giver's highest grade at this tier */
   pg?: 1;
+  /** equipment rows (u = weapon id): the castle girls its bonus ability is for */
+  sp?: number[];
 }
 export interface BuffData {
   keys: Record<string, string>;
   rows: BuffRow[];
   /** highest giantification grade per renovation tier, for castle girls where it isn't 5 */
   gm?: Record<string, number[]>;
+  /** equipment abilities (sl "equipment", u = weapon id), apart from the castle girls' rows */
+  eq?: BuffRow[];
 }
 /** A castle girl's highest giantification grade at a renovation tier. */
 export const giantGrade = (d: BuffData | undefined, u: number, tier: number) => {

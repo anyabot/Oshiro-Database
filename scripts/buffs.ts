@@ -9,6 +9,7 @@ import { combinedFacts, type Fact } from "../src/combine";
 import { JP_EN } from "../src/labels";
 import { reachParser, type ReachRule } from "../src/reach";
 import { maxGrade, type Growth, type Reno } from "../src/statSim";
+import { weaponAbilityRows, type WeaponData } from "../src/weapons";
 import type { Ability, PossessionRule, PossessionSource, RawRow, Stratagem, UnitDetail, UnitIndexEntry } from "../src/types";
 
 const root = path.resolve(process.argv[2] ?? ".");
@@ -43,6 +44,8 @@ export interface BuffRow {
   nm?: string;
   /** per giantification (EachGrowUp): mx is v × her highest grade at this tier */
   pg?: 1;
+  /** equipment rows: the castle girls a weapon's bonus ability is for */
+  sp?: number[];
 }
 
 const rows: BuffRow[] = [];
@@ -784,6 +787,34 @@ for (const entry of index) {
   }
 }
 
+// Equipment (weapons.json, Weapon.Type 0: what any castle girl of the weapon type can equip): its ability rows,
+// read like a castle girl's ability. Kept apart (buffs.json "eq", u = weapon id): the team builder and the castle
+// girl counts read only the castle girls' rows. A castle-girl bonus (Weapon special: only on the castles it names)
+// is ranked too, with those castles in sp.
+const eqRows: BuffRow[] = [];
+for (const w of (data("weapons.json") as WeaponData).weapons) {
+  if (w.kind !== 0) continue;
+  for (const [list, sp] of [[w.ability, undefined], [w.special?.ability ?? [], w.special?.castles]] as const) {
+    if (!list.length) continue;
+    // UnitEffect type 2 (「攻撃した敵の防御が3秒間8%低下」): worded "Self: on the unit it hits: …", so its
+    // changes land on the enemy hit, not on the wielder
+    const conv = weaponAbilityRows(list, defs);
+    const onHit = (r: RawRow) => defs.unit_effect[String(r.UnitEffectID)]?.[0] === 2;
+    for (const [part, hit] of [[conv.filter((r) => !onHit(r)), false], [conv.filter(onHit), true]] as const) {
+      if (!part.length) continue;
+      const at = rows.length;
+      emit(w.id, -1, "equipment", part, "ability", w.name);
+      for (const r of rows.splice(at)) {
+        delete r.nm;
+        if (hit && r.w === "Self") { r.w = "Enemy hit"; r.sd = "e"; }
+        eqRows.push(sp?.length ? { ...r, sp: [...sp] } : r);
+      }
+    }
+  }
+}
+const seenEq = new Set<string>();
+const eq = eqRows.filter((r) => { const j = JSON.stringify(r); return !seenEq.has(j) && !!seenEq.add(j); });
+
 // the same change listed twice (e.g. a skill repeated in a later form) counts once
 const seenRow = new Set<string>();
 const unique = rows.filter((r) => { const j = JSON.stringify(r); return !seenRow.has(j) && !!seenRow.add(j); });
@@ -792,7 +823,7 @@ rows.push(...unique);
 const keys = Object.fromEntries([...keyNames.entries()].sort());
 const out = path.join(root, "public/data/buffs.json");
 const gm = Object.fromEntries([...grades].filter(([, g]) => g.some((x) => x !== 5)));
-fs.writeFileSync(out, JSON.stringify({ keys, rows, gm }));
+fs.writeFileSync(out, JSON.stringify({ keys, rows, gm, eq }));
 // who each receiver text reaches, for the team builder (src/reach.ts): "a|<text>" / "e|<text>" -> rule
 const parseReach = reachParser(data("meta.json"));
 const reach: Record<string, ReachRule> = {};
@@ -819,4 +850,5 @@ console.log(`${possessions.length} group possession abilities -> ${path.relative
   fs.writeFileSync(path.join(root, "tools/out/buff_coverage.md"), md.join("\n") + "\n");
   console.log(`coverage: ${ranked} sentences ranked, ${UNCOVERED.size} uncategorized shapes -> tools/out/buff_coverage.md`);
 }
+console.log(`${eq.length} equipment rows from ${new Set(eq.map((r) => r.u)).size} weapons`);
 console.log(`${rows.length} buff rows from ${units} castle girls, ${keyNames.size} stats -> ${path.relative(root, out)} (${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);

@@ -29,6 +29,8 @@ export const RELEASES: Release[] = [
       feature("This update list, with a short note of what's new after each update.", "更新履歴ページと、更新後に一度だけ出る新着情報。"),
       feature("Castle girl page: her ambush units with their sprites, stats and effects.", "城娘ページ: 伏兵ユニットのドット絵・ステータス・効果。"),
       feature("Buff ranking now covers special attacks, stratagem special attacks, ambush units and weapons.", "バフランキングに特殊攻撃・計略の特殊攻撃・伏兵・武器の効果を追加。"),
+      feature("Buff ranking: equipment abilities (enemy debuffs such as range or ATK down, and the wielder's own buffs) as their own source.",
+        "バフランキング: 装備の効果 (敵の射程・攻撃低下などの弱体と、装備した城娘自身の強化) を出典「装備」で追加。"),
     ],
   },
   {
