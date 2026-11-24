@@ -79,17 +79,22 @@ export function fmtAmount(k: string, v: number): string {
   if (dir === "=") return `=${fmtNum(v)}${unit === "s" ? "s" : unit}`;
   return `${dir === "+" ? "+" : "−"}${fmtNum(v)}${unit === "s" ? "s" : unit}`;
 }
-/** The layer a slot's effects are applied in. The game applies each layer in turn on the stat the previous one left
- *  (exe FUN_005472b0 groups 1-9, then the abilities), so plain % changes of one stat compete only inside a layer
- *  (strongest increase and strongest decrease, FUN_00547bc0) and multiply across layers. Order, from in-battle
- *  captures (tools/frida/stat_hook.js, group_hook.js): equipment abilities (group 1), equipment stats (2), possession
- *  effects (3), giantification (7), stratagems (8); skills and special abilities are not in those groups and apply on
- *  top of the equipment (Kagoshima: (552 x 1.07 + 77) x 5 - 250 = 3085, seen 3085). */
-export type Layer = "ability" | "equipment" | "possession" | "stratagem";
+/** The group a slot's effects are applied in. The game builds a stat as: base + equipment stats (flat, merged first),
+ *  then groups 1..9 in order (exe FUN_005472b0), each applied to the value the previous one left; inside a group plain %
+ *  changes of one stat keep only the strongest increase and decrease (FUN_00547bc0), then flat values are added.
+ *  Traced in battle (tools/frida/trace_hook.js, every ATK write per group, 2026-11-24):
+ *    [雲耀]鹿児島城 453 +77 (Seven Branch Sword's ATK) = 530 | g1 x1.07 = 567 (its +7%) | g2 +100 (Koga's skill) +70 = 737
+ *    | g7 +32% giantification = 972 | g8 x5 (special ability) = 4860, -250 per ally in range = 4610
+ *    another unit: g1 x1.07 | g2 +100 (Koga's skill) | g3 +3% (possession) | g7 +18% | g8 x2.2 (Unbounded Edo stratagem)
+ *  So: 1 equipment abilities, 2 skills, 3 possession, 7 giantification, 8 stratagems and special abilities.
+ *  Not traced: formation skills, class abilities, special attacks, ambush units, on-defeat effects ("unverified"). */
+export type Layer = "equipment" | "skill" | "possession" | "stratagem" | "unverified";
 export const layerOf = (sl: string): Layer =>
-  sl === "equipment" ? "equipment" : sl === "possession" ? "possession" : sl === "stratagem" ? "stratagem" : "ability";
-export const STRONGEST_KEY: Record<Layer, "strongestAbility" | "strongestEquipment" | "strongestPossession" | "strongestStratagem"> = {
-  ability: "strongestAbility", equipment: "strongestEquipment", possession: "strongestPossession", stratagem: "strongestStratagem",
+  sl === "equipment" ? "equipment" : sl === "skill" ? "skill" : sl === "possession" ? "possession"
+    : sl === "stratagem" || sl === "special" ? "stratagem" : "unverified";
+export const STRONGEST_KEY: Record<Layer, "strongestSkill" | "strongestEquipment" | "strongestPossession" | "strongestStratagem" | "strongestOnly"> = {
+  skill: "strongestSkill", equipment: "strongestEquipment", possession: "strongestPossession", stratagem: "strongestStratagem",
+  unverified: "strongestOnly",
 };
 
 /** Utility effects (scripts/buffs.ts UTILITY): the value is how long they last; PERMANENT = no end. */

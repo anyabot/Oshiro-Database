@@ -134,7 +134,8 @@ export function magnitude(k: string, v: number): number {
   return v;
 }
 
-/** Total per effect, layer by layer (buffData layerOf: skills and other abilities, equipment, possession, stratagems).
+/** Total per effect, group by group (buffData layerOf: equipment abilities, skills, possession, stratagems and special
+ *  abilities; slots whose group isn't traced are counted with the skills - an assumption, see layerOf).
  *  Inside a layer: the strongest non-stacking source, plus every one that says it stacks (× ones multiply). Within one
  *  skill, rows under different conditions add up (九龍城砦: DEF ignore 4% per giantification + 40% at max = 76%),
  *  while rows under the same one are one buff split over overlapping groups (上田城「射程内の城娘と全ての近接城娘の
@@ -154,8 +155,9 @@ export function total(k: string, list: Contribution[]): number {
     if (seen.has(id)) continue;
     seen.add(id);
     const m = magnitude(k, c.v);
-    const layer = layers.get(layerOf(c.row.sl)) ?? { sources: new Map(), stack: mult ? 1 : 0 };
-    layers.set(layerOf(c.row.sl), layer);
+    const g = layerOf(c.row.sl) === "unverified" ? "skill" : layerOf(c.row.sl);
+    const layer = layers.get(g) ?? { sources: new Map(), stack: mult ? 1 : 0 };
+    layers.set(g, layer);
     if (c.row.st === 1) { layer.stack = mult ? layer.stack * (1 + m) : layer.stack + m; continue; }
     const src = `${c.giver}|${c.row.sl}|${c.row.nm ?? ""}`;
     const conds = layer.sources.get(src) ?? new Map<string, number>();
