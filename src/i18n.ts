@@ -228,6 +228,12 @@ export const UI = {
     ja: "テキストはゲームの日本語です。ブラウザの翻訳機能が使えます。",
   },
   navLords: { en: "Lord", ja: "殿" },
+  navChangelog: { en: "Updates", ja: "更新履歴" },
+  changeWhatsNew: { en: "What's new", ja: "新着情報" },
+  changeSeeAll: { en: "All updates", ja: "すべての更新履歴" },
+  changeClose: { en: "Close", ja: "閉じる" },
+  changeKindUnit: { en: "New castle girl", ja: "新城娘" },
+  changeKindFeature: { en: "Feature", ja: "機能" },
   lordsTitle: { en: "Lord Outfits", ja: "殿の装束" },
   lordsSubtitle: {
     en: "What each outfit changes on the lord at the base camp: stats, range, attack and its effect. The table compares them at the chosen level; the small numbers are the change from the plain lord (装束なし).",
@@ -372,10 +378,6 @@ export const UI = {
   activatedAbility: { en: "Ability it activates", ja: "発動する特技" },
   potential: { en: "Potential 潜在", ja: "潜在" },
   stats: { en: "Stats", ja: "ステータス" },
-  statsNote: {
-    en: "Class base values (initial → max level). Card corrections are percentages the game applies on top; the final-stat formula is not decoded yet.",
-    ja: "クラスの基礎値 (初期 → 最大レベル)。カード補正はその上にかかる割合です。最終ステータスの計算式は未解析です。",
-  },
   cost: { en: "Cost", ja: "コスト" },
   maxLevel: { en: "Max level", ja: "最大レベル" },
   range: { en: "Range", ja: "射程" },
@@ -491,10 +493,6 @@ export const UI = {
   },
   mapPaths: { en: "Enemy paths with route abilities", ja: "経路効果のある敵の経路" },
   mapPathNone: { en: "None", ja: "表示しない" },
-  mapPathNote: {
-    en: "Numbers are waypoints in the order the enemy walks them (as in “On its path”); a coloured stretch is where that route ability holds, with the seconds it waits there.",
-    ja: "数字は敵が通る経由点の順番 (「経路上」と同じ)。色の区間はその経路効果が有効な範囲、秒数はそこでの待機時間。",
-  },
   generalAbilityNote: {
     en: "No text of its own: these are the effects the texts above describe (e.g. a special attack's “+5% per enemy defeated”). Active in every tier.",
     ja: "固有のテキストなし: 上のテキストが説明している効果 (例: 特殊攻撃の「撃破数に応じて5%ずつ上昇」)。全段階で有効。",
@@ -516,18 +514,6 @@ export const UI = {
   routeTitle: {
     en: "Given by points on the route this enemy walks (map route events → RouteEventAbility). Not part of its own ability, so it isn't in its effect list.",
     ja: "この敵が通る経路の地点で付与される効果 (経路イベント → RouteEventAbility)。敵自身の特技ではないため効果一覧には出ません。",
-  },
-  routeAbility: { en: "Route ability:", ja: "経路効果:" },
-  routeAbilityWho: { en: "given by points on the paths of {n} spawns ({names}); see “On its path” on each enemy for where it holds", ja: "{n}体の経路上で付与 ({names})。どこで有効かは各敵の「経路上」を参照" },
-  dmgTakenTitle: { en: "Why enemies here take less damage", ja: "この合戦で敵が受けるダメージが減る理由" },
-  dmgTakenAll: { en: "each one alive cuts damage again; all {n} alive at once: ×{x}", ja: "生存している数だけ重ねて軽減。{n}体すべて生存時: ×{x}" },
-  dmgTakenYokai: {
-    en: "妖怪 ({n} here) take only 50% of the damage from attacks without 妖怪特攻 (anti-yokai): the game's default, applied to the attack before DEF.",
-    ja: "妖怪 (この合戦に{n}体) は妖怪特攻のない攻撃のダメージが50%になる (ゲームの既定値)。防御より前に攻撃側で適用。",
-  },
-  dmgTakenRule: {
-    en: "Damage-taken cuts multiply one after another (each cut, each copy); it is not “only the strongest”. Attacks that ignore damage-taken effects (被ダメ効果無視) skip all of them.",
-    ja: "被ダメージ軽減は1つずつ掛け合わされます (効果ごと・敵ごと)。「最大値のみ」ではありません。被ダメ効果無視の攻撃はこれらをすべて無視します。",
   },
   fromHp: { en: "{pct}% of current HP", ja: "現在耐久の{pct}%" },
   fromHpTitle: {
@@ -610,8 +596,8 @@ export const UI = {
   mapN: { en: "map {n}", ja: "マップ {n}" },
   mapAlt: { en: "{name} map", ja: "{name} のマップ" },
   recovered: {
-    en: "This stage is from a past event and no longer in the game's quest list: it was rebuilt from the map still in the client cache, so its own name, stage multipliers and Ki aren't in the data.",
-    ja: "過去のイベントのステージで、現在のクエスト一覧にはありません。クライアントのキャッシュに残るマップから復元したため、名前・補正値・気はデータにありません。",
+    en: "Past event stage rebuilt from its map: name, multipliers and Ki unknown.",
+    ja: "過去のイベントのステージ (マップから復元): 名前・補正値・気は不明。",
   },
   recoveredEst: { en: " The multipliers below are estimated from the live Bushin of the same rank.", ja: " 下の補正値は同じランクの現行の武神から推定しています。" },
   recoveredBase: { en: " Enemy stats below are their base values.", ja: " 下の敵ステータスは基礎値です。" },
@@ -629,10 +615,6 @@ export const UI = {
   estFrom: { en: " — estimated: the live Bushin of this rank ({from}) use {values} (ATK/HP/DEF); {n} of {of} use these", ja: " — 推定: このランクの現行の武神 ({from}) は {values} (攻撃/耐久/防御)。{of}件中{n}件がこの値" },
   or: { en: " or ", ja: " または " },
   waveEffects: { en: "Map effects by wave", ja: "波ごとのマップ効果" },
-  waveEffectsNote: {
-    en: "Switched on and off by the spawn script. An effect stays until the script turns it off, so effects add to each other and to the stage's own map effects.",
-    ja: "出撃スクリプトで切り替わるマップ効果。解除されるまで残るため、他の効果やステージ自体のマップ効果に加算されます。",
-  },
   waveN: { en: "Wave {n}", ja: "第{n}波" },
   waveOn: { en: "on: map effect #{id}", ja: "発動: マップ効果 #{id}" },
   waveOff: { en: "off: map effect #{id} ends", ja: "解除: マップ効果 #{id}" },
@@ -658,7 +640,6 @@ export const UI = {
   simAlways: { en: "Includes the always ability (常時能力) stat bonus.", ja: "常時能力のステータス補正を含みます。" },
   simAlwaysNone: { en: "Its always ability (常時能力) changes no base stat.", ja: "常時能力は基礎ステータスを変えません。" },
   mapTitle: { en: "Deployment map 配置マップ", ja: "配置マップ" },
-  mapNote: { en: "Spots and markers from the game's map data. Labels are numbered by the game's spot ID; share them with Copy image or Download PNG.", ja: "マス・マーカーはゲームのマップデータから。番号はゲーム内のマスID順です。画像のコピー・PNG保存で共有できます。" },
   mapK4: { en: "Melee 近接 (red)", ja: "近接 (赤)" },
   mapK5: { en: "Ranged 遠隔 (blue)", ja: "遠隔 (青)" },
   mapK1: { en: "Either 赤/青 (any castle girl)", ja: "赤/青 (どの城娘も配置可)" },

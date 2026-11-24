@@ -567,3 +567,7 @@ span.chg-innate, span.chg-singi { border-left: 0; padding-left: 0; }
 .team-pick.is-own { border-color: var(--hub-accent-line, var(--hub-accent)); }
 .team-member__t { margin-top: 3px; font-size: 10px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--hub-border-strong); background: var(--hub-surface-raised); color: var(--hub-text-muted); cursor: pointer; }
 .team-member__t:hover { color: var(--hub-accent); border-color: var(--hub-accent); }
+
+/* list tile badges: a long trait name (「Dazaifu & Ancient Mountain Castles」) wraps inside the tile instead of overflowing */
+.hub-tile__badges { min-width: 0; max-width: 100%; }
+.hub-tile__badges .hub-badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; }

@@ -366,8 +366,8 @@ export function tabLabel(tab: number, n: number, lang: "en" | "ja"): string | nu
   switch (tab) {
     case 1: return ["始動編", "征伐編", "魔王編", "覚醒編", "戦闘編", "継承編", "天下編"][n - 1] ?? `${n}`;
     case 16: return n === 7 ? "EX" : ja ? `第${n}章` : `Ch. ${n}`;
-    // TabNumber 6 is 異伝 (the game's tab art 6149 reads 「異伝 6章」)
-    case 18: return n === 7 ? "EX" : n === 6 ? (ja ? "異伝 第六章" : "Side story ch. 6") : ja ? `第${KANJI[n]}章` : `Ch. ${n}`;
+    // 異伝 on the tab art (「異伝 6章」) is the series' own name (AnotherLegends), not a side story
+    case 18: return n === 7 ? "EX" : ja ? `第${KANJI[n]}章` : `Ch. ${n}`;
     case 11: case 12: case 13: return ja ? `${KANJI[n]}層` : `Floor ${n}`;
     case 23: case 24: return ja ? `${KANJI[n]}` : `${n}`;
     case 2: return ["要石の巻", "贈物の巻", "金策の巻", "武器の巻", "神娘の巻"][n - 1] ?? `${n}`;

@@ -184,8 +184,6 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
           )}
           <Panel title={t("enemies")} note={<>{t("enemiesNote", { then: active.length ? t("thenDelib") : "" })}{" "}
             <span className="chg-innate">{t("ownAbility")}</span> <span className="chg-singi">{t("fromDelib")}</span></>}>
-            <DamageTakenSummary ids={order.map((o) => o.id)} counts={stage.counts} data={data} defs={defs}
-              routes={stage.routeEvents} routeAb={stage.routeAbilities} />
             <table className="hub-table hub-table--stack enemy-table">
               <thead><tr><th>{t("enemy")}</th><th>#</th><th>{t("thHp")}</th><th>{t("thAtk")}</th><th>{t("thDef")}</th><th>{t("thMdef")}</th><th>{t("thRange")}</th><th>{t("thMove")}</th><th>{t("thAbilities")}</th></tr></thead>
               <tbody>
@@ -219,7 +217,7 @@ function StageView({ stage, data, defs }: { stage: Stage; data: EnemyData; defs:
             </Panel>
           )}
           {stage.waveEffects && stage.waveEffects.length > 0 && (
-            <Panel title={t("waveEffects")} note={t("waveEffectsNote")}>
+            <Panel title={t("waveEffects")}>
               {stage.waveEffects.map((w, i) => (
                 <div key={i} className="wave-fx">
                   <span className="small">
@@ -469,77 +467,6 @@ function hasDot(e: Enemy, defs: EffectDefs): string {
 function missileText(m: MissileInfo, defs: EffectDefs): string {
   // class-ability row shape 6/2: EffectValue is a Missile.atb id (worded by the shared missile describer)
   return describeRow({ AbilityType: 6, AbilityTypeDetail: 2, EffectValue: m.id }, "ability", defs).text.join(" · ").replace(/^:\s*/, "");
-}
-
-/** Why enemies here take so little damage: every damage-taken cut other enemies spread (with how many spawn and
- *  what all of them together do), and the yokai rule. Read from the game's damage code:
- *  - FUN_00569640 runs once per damage-taken entry on the unit hit and overwrites the running damage with
- *    FUN_00aee900 (type 6: × (100 − v)%) / FUN_00aee8c0 (type 7: × (100 + v)%): every entry multiplies, and
- *    copies from different enemies are separate entries (status sets are keyed by source, FUN_00546780).
- *  - FUN_004cd680: a 妖怪 target hit by an attack without 妖怪特攻 (flag 128) takes status 214 % of it, else
- *    BattleSystemConfig PropertyID 12 = 50%. */
-function DamageTakenSummary({ ids, counts, data, defs, routes, routeAb }: {
-  ids: number[]; counts: Record<string, number>; data: EnemyData; defs: EffectDefs;
-  routes?: Record<string, RoutePath[]>; routeAb?: Record<string, RawRow[]>;
-}) {
-  const t = useT();
-  const fx = useFx();
-  const { auras, yokai } = useMemo(() => {
-    const auras: { name: string; n: number; who: string; pct: number; text: string }[] = [];
-    let yokai = 0;
-    for (const id of [...new Set(ids)]) {
-      const e = data.enemies[id];
-      if (!e) continue;
-      const n = counts[id] ?? 0;
-      if (e.types.includes(2) && n > 0) yokai += n;
-      const rows = enemyAbilityRows(e.ability?.rows ?? []);
-      const bases = rowBases(rows);
-      for (const line of rows.flatMap((r, i) => describeRow(r, "ability", defs, undefined, bases[i], { enemyOwner: true }).text)) {
-        for (const piece of line.split(" · ")) {
-          const m = /^(.+?): damage taken −(\d+(?:\.\d+)?)%(.*)$/.exec(piece);
-          if (!m || /^Self$/i.test(m[1])) continue;
-          auras.push({ name: e.name, n, who: m[1], pct: Number(m[2]), text: piece });
-        }
-      }
-    }
-    return { auras, yokai };
-  }, [ids, counts, data, defs]);
-  // route abilities: which enemies get each one from their paths, and how many of them spawn
-  const routeUse = useMemo(() => {
-    const m = new Map<number, { names: Set<string>; n: number }>();
-    for (const [eid, ps] of Object.entries(routes ?? {})) {
-      const e = data.enemies[Number(eid)];
-      for (const aid of new Set(ps.flatMap((p) => routeSpans(p).map((s) => s.aid)))) {
-        const u = m.get(aid) ?? { names: new Set<string>(), n: 0 };
-        if (e) u.names.add(e.name);
-        u.n += counts[eid] ?? 0;
-        m.set(aid, u);
-      }
-    }
-    return [...m].map(([aid, u]) => ({ aid, text: routeAbilityText(routeAb?.[aid], defs), names: [...u.names], n: u.n }));
-  }, [routes, routeAb, data, counts, defs]);
-  if (!auras.length && !yokai && !routeUse.length) return null;
-  const fmtX = (x: number) => (x >= 0.01 ? x.toFixed(x >= 0.1 ? 2 : 3) : x.toPrecision(2));
-  return (
-    <div className="fx-stack dmg-summary">
-      <span className="fx-stack__label">{t("dmgTakenTitle")}</span>
-      <ul>
-        {auras.map((a, i) => (
-          <li key={i}>
-            <b>{a.name}</b>{a.n > 1 ? ` ×${a.n}` : ""}: {fx.line(a.text)}
-            {a.n > 1 && <> — {t("dmgTakenAll", { n: a.n, x: fmtX(Math.pow(1 - a.pct / 100, a.n)) })}</>}
-          </li>
-        ))}
-        {routeUse.map((u) => (
-          <li key={`ra${u.aid}`}>
-            <b>{t("routeAbility")}</b> {fx.line(u.text)} — {t("routeAbilityWho", { n: u.n, names: u.names.slice(0, 6).join(", ") + (u.names.length > 6 ? ", …" : "") })}
-          </li>
-        ))}
-        {yokai > 0 && <li>{t("dmgTakenYokai", { n: yokai })}</li>}
-        <li>{t("dmgTakenRule")}</li>
-      </ul>
-    </div>
-  );
 }
 
 /** What the enemy ignores (its own immunities, debuffs first) and the buffs it cancels on castle girls. */

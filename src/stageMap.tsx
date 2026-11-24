@@ -425,7 +425,6 @@ export function StageMap({ info, mapNo, questId, name, hard, removers, rowList, 
                 : t("routeSpan", { a: x.from + 1, b: x.to + 1, n: path.xy.length })).join("; ")})</span>
             </li>
           ))}
-          <li className="muted">{t("mapPathNote")}</li>
         </ul>
       )}
       {removers.map((r) => {
@@ -474,7 +473,6 @@ export function StageMap({ info, mapNo, questId, name, hard, removers, rowList, 
           </div>
         ) : null;
       })}
-      <p className="muted small">{t("mapNote")}</p>
     </div>
   );
 }

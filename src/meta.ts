@@ -40,6 +40,10 @@ export const LIST_META: Record<string, PageMeta> = {
     description:
       "Every Shiro Project:RE weapon: stats, abilities, castle-girl bonuses and how to get it (dedicated weapon, stage drop, 戦功, exchange, pack, summon bonus, login bonus, upgrade).",
   },
+  "/changelog": {
+    title: "Updates",
+    description: "What's new on Oshiro Database: new castle girls and site features, update by update.",
+  },
   "/lord": {
     title: "Lord Outfits",
     description:

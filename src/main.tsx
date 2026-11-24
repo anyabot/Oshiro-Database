@@ -14,6 +14,7 @@ import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
 import Lords from "./pages/Lords";
 import Story from "./pages/Story";
+import Changelog from "./pages/Changelog";
 import NotFoundPage from "./pages/NotFound";
 import "@altterisk/game-hub/hub.css";
 import "@altterisk/game-hub/base.css";
@@ -38,6 +39,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="lord" element={<Lords />} />
           <Route path="story" element={<Story />} />
           <Route path="story/:kind/:id" element={<Story />} />
+          <Route path="changelog" element={<Changelog />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

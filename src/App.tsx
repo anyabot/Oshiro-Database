@@ -3,6 +3,7 @@ import { SegmentedButtons, SiteShell, homeLink } from "@altterisk/game-hub";
 import { LIST_META } from "./meta";
 import { usePageMeta } from "./usePageMeta";
 import { LANGS, hubLabels, setLang, useLang, useT, type Lang } from "./i18n";
+import { ChangelogDialog } from "./pages/Changelog";
 
 function LanguagePicker() {
   const t = useT();
@@ -25,7 +26,7 @@ export default function App() {
       game="oshiro"
       logo={<img src="/logo.png" alt="" />}
       renderHomeLink={homeLink(Link, "to")}
-      nav={<><NavLink to="/" end>{t("navHome")}</NavLink><NavLink to="/units">{t("navUnits")}</NavLink><NavLink to="/buffs">{t("navBuffs")}</NavLink><NavLink to="/team">{t("navTeam")}</NavLink><NavLink to="/collection">{t("navCollection")}</NavLink><NavLink to="/equipment">{t("navEquipment")}</NavLink><NavLink to="/stages">{t("navStages")}</NavLink><NavLink to="/story">{t("navStory")}</NavLink><NavLink to="/lord">{t("navLords")}</NavLink></>}
+      nav={<><NavLink to="/" end>{t("navHome")}</NavLink><NavLink to="/units">{t("navUnits")}</NavLink><NavLink to="/buffs">{t("navBuffs")}</NavLink><NavLink to="/team">{t("navTeam")}</NavLink><NavLink to="/collection">{t("navCollection")}</NavLink><NavLink to="/equipment">{t("navEquipment")}</NavLink><NavLink to="/stages">{t("navStages")}</NavLink><NavLink to="/story">{t("navStory")}</NavLink><NavLink to="/lord">{t("navLords")}</NavLink><NavLink to="/changelog">{t("navChangelog")}</NavLink></>}
       actions={<LanguagePicker />}
       barLabels={hub.bar}
       errorLabels={hub.error}
@@ -43,6 +44,7 @@ export default function App() {
     >
       {/* keyed by language: pages and their memoised option lists rebuild in the new language */}
       <Outlet key={lang} />
+      <ChangelogDialog />
     </SiteShell>
   );
 }
